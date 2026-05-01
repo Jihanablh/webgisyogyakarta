@@ -1,0 +1,63 @@
+{
+  "kebutuhan": {
+    "label": "Kebutuhan",
+    "subcategories": {
+      "Supermarket": 125,
+      "Toko": 1149,
+      "Pasar": 282
+    }
+  },
+  "atm_bank": {
+    "label": "ATM & Bank",
+    "subcategories": {
+      "ATM": 180,
+      "Bank": 201
+    }
+  },
+  "tempat_tinggal": {
+    "label": "Tempat Tinggal",
+    "subcategories": {
+      "Hotel": 580,
+      "Guest House": 388,
+      "Rumah/Kos": 8
+    }
+  },
+  "sosial_tugas": {
+    "label": "Sosial & Tugas",
+    "subcategories": {
+      "Restoran": 1510,
+      "Kafe": 335,
+      "Fast Food": 169,
+      "Bar/Pub": 31,
+      "Perpustakaan": 38
+    }
+  },
+  "akademik": {
+    "label": "Pusat Akademik",
+    "subcategories": {
+      "Universitas": 104,
+      "Kolese": 64,
+      "Sekolah": 2
+    }
+  },
+  "kesehatan_darurat": {
+    "label": "Kesehatan & Darurat",
+    "subcategories": {
+      "Klinik": 369,
+      "Rumah Sakit": 121,
+      "Apotek": 122,
+      "Dokter": 34,
+      "Polisi": 93,
+      "Pemadam": 5
+    }
+  },
+  "mobilitas": {
+    "label": "Mobilitas",
+    "subcategories": {
+      "Halte Bus": 622,
+      "Stasiun": 17,
+      "Parkir": 549,
+      "SPBU": 1
+    }
+  }
+}
