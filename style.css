@@ -290,19 +290,8 @@ a:hover { color: #7dd3fc; }
 .stat-label { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* --- Sidebar Footer --- */
-.sidebar-footer {
-    margin-top: 15px; /* Memberi jarak dari angka statistik */
-    padding: 10px 0;
-    border-top: 1px solid var(--border-glass); /* Garis tipis pembatas */
-    flex-shrink: 0;
-}
-
-.sidebar-footer p {
-    font-size: 10px;
-    color: var(--text-muted);
-    line-height: 1.4;
-    margin-bottom: 2px;
-}
+.sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border-glass); flex-shrink: 0; }
+.sidebar-footer p { font-size: 10.5px; color: var(--text-muted); line-height: 1.6; }
 
 /* --- Sidebar Toggle --- */
 .sidebar-toggle {
