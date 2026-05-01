@@ -162,8 +162,12 @@ a:hover { color: #7dd3fc; }
 .search-result-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
 
 /* --- Category Accordion --- */
-.category-section { padding: 4px 20px 16px; flex: 1; min-height: 0; }
-.section-title {
+.category-section { 
+    padding: 4px 20px 16px; 
+    flex: 1; 
+    overflow-y: auto; /* Tambahkan ini agar kategori bisa di-scroll jika penuh */
+    min-height: 0; 
+}.section-title {
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px;
     color: var(--text-muted); margin-bottom: 12px; padding-top: 12px;
     border-top: 1px solid var(--border-glass);
@@ -262,8 +266,16 @@ a:hover { color: #7dd3fc; }
 }
 
 /* --- Stats --- */
-.stats-section { padding: 4px 20px 16px; flex-shrink: 0; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+/* --- Stats --- */
+.stats-section { 
+    padding: 16px 20px; /* Tambah padding atas agar lebih lega */
+    flex-shrink: 0; 
+    position: relative; /* Pastikan ini relative, BUKAN absolute */
+    order: 2; /* Memastikan dia muncul setelah kategori jika perlu */
+    background: var(--bg-card); /* Tambah background solid agar tidak transparan tembus ke belakang */
+    border-top: 1px solid var(--border-glass);
+    margin-top: 10px;
+}.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .stat-card {
     background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass);
     border-radius: var(--radius-md); padding: 12px; text-align: center;
