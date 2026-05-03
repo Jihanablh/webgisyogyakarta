@@ -268,13 +268,11 @@ a:hover { color: #7dd3fc; }
 /* --- Stats --- */
 /* --- Stats --- */
 .stats-section { 
-    padding: 16px 20px; /* Tambah padding atas agar lebih lega */
+    padding: 16px 20px;
     flex-shrink: 0; 
-    position: relative; /* Pastikan ini relative, BUKAN absolute */
-    order: 2; /* Memastikan dia muncul setelah kategori jika perlu */
-    background: var(--bg-card); /* Tambah background solid agar tidak transparan tembus ke belakang */
+    position: relative;
+    background: transparent;
     border-top: 1px solid var(--border-glass);
-    margin-top: 10px;
 }.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .stat-card {
     background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass);
@@ -290,7 +288,7 @@ a:hover { color: #7dd3fc; }
 .stat-label { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* --- Sidebar Footer --- */
-.sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border-glass); flex-shrink: 0; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-glass); flex-shrink: 0; margin-top: auto; }
 .sidebar-footer p { font-size: 10.5px; color: var(--text-muted); line-height: 1.6; }
 
 /* --- Sidebar Toggle --- */
