@@ -135,6 +135,7 @@ const categoryMeta = {};        // { catKey: { label, subcategories: {name: coun
 const activeSubcats = {};       // { catKey: Set<subcatName> }
 let allFeatures = [];           // flat search index
 let searchHighlightMarker = null;
+let activeCategory = null;
 
 const FACILITY_MAP = {
     parkir: { icon: '🅿️', label: 'Parkir' },
@@ -211,7 +212,6 @@ async function loadAllData() {
                 });
                 activeSubcats[key] = subcats;
 
-                addCategoryLayer(key, data);
                 return { key, count: data.features.length };
             } catch (err) {
                 console.warn(`Failed to load ${cat.file}:`, err);
@@ -224,8 +224,7 @@ async function loadAllData() {
         const results = await Promise.all(loadPromises);
         buildSearchIndex();
         buildHeatmap();
-        renderAccordion(results);
-        renderStats(results);
+        updateWelcomeStats(results);
 
         loadingOverlay.classList.add('hidden');
         setTimeout(() => loadingOverlay.remove(), 600);
@@ -291,34 +290,142 @@ function addCategoryLayer(categoryKey, data) {
 
             layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                if (categoryKey === 'pariwisata') {
-                    showTourismPanel(feature);
-                } else {
-                    showInfoCard(feature, categoryKey);
-                }
+                showTourismPanel(feature, categoryKey);
             });
         }
     });
 
     clusterGroup.addLayer(geoLayer);
-    clusterGroup.addTo(map);
     categoryLayers[categoryKey] = { cluster: clusterGroup, geoLayer };
 }
 
 function rebuildCategoryLayer(categoryKey) {
     const layerInfo = categoryLayers[categoryKey];
     if (!layerInfo) return;
-
-    // Remove old
+    const wasOnMap = map.hasLayer(layerInfo.cluster);
     map.removeLayer(layerInfo.cluster);
-
-    // Rebuild with new filter
     addCategoryLayer(categoryKey, categoryData[categoryKey]);
+    if (wasOnMap) categoryLayers[categoryKey].cluster.addTo(map);
 }
 
 // =====================================================
-// ACCORDION UI
+// WELCOME SCREEN
 // =====================================================
+function initWelcome() {
+    document.getElementById('welcome-btn').addEventListener('click', dismissWelcome);
+}
+
+function updateWelcomeStats(results) {
+    const total = results.reduce((s, r) => s + r.count, 0);
+    const cats = results.filter(r => r.count > 0).length;
+    let sc = 0;
+    for (const m of Object.values(categoryMeta)) sc += Object.keys(m.subcategories || {}).length;
+    animateCount('ws-total', total);
+    animateCount('ws-cats', cats);
+    animateCount('ws-subcats', sc);
+}
+
+function animateCount(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let cur = 0;
+    const step = Math.ceil(target / 40);
+    const t = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        el.textContent = cur.toLocaleString();
+        if (cur >= target) clearInterval(t);
+    }, 30);
+}
+
+function dismissWelcome() {
+    const o = document.getElementById('welcome-overlay');
+    o.classList.add('hidden');
+    setTimeout(() => { try { o.remove(); } catch(e){} }, 700);
+    document.getElementById('sidebar').classList.remove('sidebar--hidden');
+    renderCategoryTabs();
+    document.getElementById('category-tabs').classList.remove('hidden');
+    activateCategory(Object.keys(CATEGORIES)[0]);
+    const results = Object.entries(categoryData).map(([k, d]) => ({ key: k, count: d.features.length }));
+    renderStats(results);
+}
+
+// =====================================================
+// CATEGORY TABS
+// =====================================================
+function renderCategoryTabs() {
+    const c = document.getElementById('category-tabs');
+    c.innerHTML = Object.entries(CATEGORIES).map(([k, cat]) => {
+        const n = categoryData[k] ? categoryData[k].features.length : 0;
+        return `<button class="cat-tab" data-category="${k}" style="--tab-color:${cat.color}">
+            <span class="cat-tab-icon">${cat.icon}</span>
+            <span class="cat-tab-label">${cat.label}</span>
+            <span class="cat-tab-count">${n}</span>
+        </button>`;
+    }).join('');
+    c.querySelectorAll('.cat-tab').forEach(t => {
+        t.addEventListener('click', () => activateCategory(t.dataset.category));
+    });
+}
+
+function activateCategory(key) {
+    activeCategory = key;
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.dataset.category === key));
+    for (const [k, li] of Object.entries(categoryLayers)) {
+        if (li && li.cluster && map.hasLayer(li.cluster)) map.removeLayer(li.cluster);
+    }
+    if (!categoryLayers[key] && categoryData[key]) addCategoryLayer(key, categoryData[key]);
+    if (categoryLayers[key]) categoryLayers[key].cluster.addTo(map);
+    renderSubcatDetail(key);
+}
+
+// =====================================================
+// SUBCATEGORY DETAIL (sidebar)
+// =====================================================
+function renderSubcatDetail(key) {
+    const container = document.getElementById('category-detail');
+    if (!container) return;
+    const cat = CATEGORIES[key];
+    const meta = categoryMeta[key];
+    const subcats = meta ? meta.subcategories : {};
+    const count = categoryData[key] ? categoryData[key].features.length : 0;
+
+    container.innerHTML = `
+        <div class="cd-header" style="--cat-color:${cat.color}">
+            <div class="cd-icon">${cat.icon}</div>
+            <div class="cd-info">
+                <div class="cd-label">${cat.label}</div>
+                <div class="cd-count">${count.toLocaleString()} tempat</div>
+            </div>
+        </div>
+        <div class="cd-subcats">
+            <h3 class="section-title">Sub-Kategori</h3>
+            <div class="cd-subcat-list">
+                ${Object.entries(subcats).map(([scName, scCount]) => `
+                    <div class="cd-subcat-item" data-category="${key}" data-subcat="${scName}">
+                        <div class="cd-subcat-check checked" style="--check-color:${cat.color}"></div>
+                        <span class="cd-subcat-name">${scName}</span>
+                        <span class="cd-subcat-badge">${scCount}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    container.querySelectorAll('.cd-subcat-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const ck = item.dataset.category, sc = item.dataset.subcat;
+            const ch = item.querySelector('.cd-subcat-check');
+            if (ch.classList.contains('checked')) {
+                ch.classList.remove('checked'); activeSubcats[ck].delete(sc);
+            } else {
+                ch.classList.add('checked'); activeSubcats[ck].add(sc);
+            }
+            rebuildCategoryLayer(ck);
+        });
+    });
+}
+
+// Legacy compat
 function renderAccordion(results) {
     const container = document.getElementById('accordion-container');
     const countMap = {};
@@ -570,11 +677,7 @@ function handleSearchSelect(feature, categoryKey, lat, lon) {
     // Click handler on highlight marker
     searchHighlightMarker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
-        if (categoryKey === 'pariwisata') {
-            showTourismPanel(feature);
-        } else {
-            showInfoCard(feature, categoryKey);
-        }
+        showTourismPanel(feature, categoryKey);
     });
 
     // Open popup after fly animation
@@ -582,12 +685,8 @@ function handleSearchSelect(feature, categoryKey, lat, lon) {
         if (searchHighlightMarker) searchHighlightMarker.openPopup();
     }, 1400);
 
-    // 4. Show appropriate panel
-    if (categoryKey === 'pariwisata') {
-        showTourismPanel(feature);
-    } else {
-        showInfoCard(feature, categoryKey);
-    }
+    // 4. Show detail panel
+    showTourismPanel(feature, categoryKey);
 }
 
 function removeSearchHighlight() {
@@ -676,97 +775,132 @@ function initSidebar() {
 // =====================================================
 // TOURISM PANEL
 // =====================================================
-function showTourismPanel(feature) {
+function showTourismPanel(feature, categoryKey) {
     const panel = document.getElementById('tourism-panel');
     const props = feature.properties;
     const coords = feature.geometry.coordinates;
+    const catKey = categoryKey || props.category || 'pariwisata';
+    const cat = CATEGORIES[catKey] || CATEGORIES.pariwisata;
 
-    // Close info card if open
     closeInfoCard();
 
-    // Header photo
+    // Header photo with dynamic category color fallback
     const header = document.getElementById('tp-header');
     if (props.foto) {
         header.style.backgroundImage = `url('${props.foto}')`;
     } else {
-        header.style.backgroundImage = 'linear-gradient(135deg, #e11d48, #be123c)';
+        header.style.backgroundImage = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
     }
 
-    // Name & category
+    // Category badge color
+    const badgeEl = document.getElementById('tp-category-badge');
+    badgeEl.textContent = props.subcategory || props.type || cat.label;
+    badgeEl.style.background = `${cat.color}cc`;
+
     document.getElementById('tp-name').textContent = props.name || 'Unnamed';
-    document.getElementById('tp-category-badge').textContent = props.subcategory || props.type || '';
 
-    // Rating stars
+    // Rating (hide row if no rating)
     const rating = props.rating || 0;
-    const starsEl = document.getElementById('tp-stars');
-    let starsHtml = '';
-    for (let i = 1; i <= 5; i++) {
-        if (i <= Math.floor(rating)) {
-            starsHtml += '<span class="star filled">★</span>';
-        } else if (i - 0.5 <= rating) {
-            starsHtml += '<span class="star half">★</span>';
-        } else {
-            starsHtml += '<span class="star">★</span>';
+    const statsRow = document.querySelector('.tp-stats-row');
+    if (rating > 0) {
+        statsRow.style.display = 'flex';
+        const starsEl = document.getElementById('tp-stars');
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(rating)) starsHtml += '<span class="star filled">★</span>';
+            else if (i - 0.5 <= rating) starsHtml += '<span class="star half">★</span>';
+            else starsHtml += '<span class="star">★</span>';
         }
-    }
-    starsEl.innerHTML = starsHtml;
-    document.getElementById('tp-rating').textContent = rating.toFixed(1);
-    document.getElementById('tp-reviews').textContent = `· ${(props.reviews || 0).toLocaleString()} ulasan`;
-
-    // Visitors
-    document.getElementById('tp-visitors').textContent = `~${(props.visitors_per_day || 0).toLocaleString()} / hari`;
-
-    // Hours & ticket
-    document.getElementById('tp-hours').textContent = props.opening_hours || '-';
-    document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
-
-    // Crowd badge
-    const hourlyData = props.hourly_crowd || new Array(24).fill(0);
-    const currentHour = new Date().getHours();
-    const crowdLevel = hourlyData[currentHour] || 0;
-    const badge = document.getElementById('tp-crowd-badge');
-    if (crowdLevel >= 60) {
-        badge.textContent = '🔴 Keramaian tinggi saat ini';
-        badge.className = 'tp-crowd-badge crowd-high';
-    } else if (crowdLevel >= 30) {
-        badge.textContent = '🟡 Keramaian sedang saat ini';
-        badge.className = 'tp-crowd-badge crowd-medium';
+        starsEl.innerHTML = starsHtml;
+        document.getElementById('tp-rating').textContent = rating.toFixed(1);
+        document.getElementById('tp-reviews').textContent = props.reviews ? `· ${props.reviews.toLocaleString()} ulasan` : '';
+        document.getElementById('tp-visitors').textContent = props.visitors_per_day ? `~${props.visitors_per_day.toLocaleString()} / hari` : '';
     } else {
-        badge.textContent = '🟢 Keramaian rendah saat ini';
-        badge.className = 'tp-crowd-badge crowd-low';
+        statsRow.style.display = 'none';
+    }
+
+    // Hours & ticket (show/hide)
+    const pillsRow = document.querySelector('.tp-info-pills');
+    if (props.opening_hours || props.ticket_price) {
+        pillsRow.style.display = 'flex';
+        document.getElementById('tp-hours').textContent = props.opening_hours || '-';
+        document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
+    } else {
+        pillsRow.style.display = 'none';
+    }
+
+    // Crowd chart (only for pariwisata or data with hourly_crowd)
+    const chartSection = document.querySelector('.tp-chart-section');
+    const hourlyData = props.hourly_crowd;
+    if (hourlyData && hourlyData.length === 24) {
+        chartSection.style.display = 'block';
+        const currentHour = new Date().getHours();
+        const crowdLevel = hourlyData[currentHour] || 0;
+        const badge = document.getElementById('tp-crowd-badge');
+        if (crowdLevel >= 60) { badge.textContent = '🔴 Keramaian tinggi'; badge.className = 'tp-crowd-badge crowd-high'; }
+        else if (crowdLevel >= 30) { badge.textContent = '🟡 Keramaian sedang'; badge.className = 'tp-crowd-badge crowd-medium'; }
+        else { badge.textContent = '🟢 Keramaian rendah'; badge.className = 'tp-crowd-badge crowd-low'; }
+    } else {
+        chartSection.style.display = 'none';
     }
 
     // Facilities
-    const facilitiesEl = document.getElementById('tp-facilities');
+    const facilitiesSection = document.querySelector('.tp-facilities-section');
     const facilities = props.facilities || [];
-    facilitiesEl.innerHTML = facilities.map(f => {
-        const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
-        return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
-    }).join('');
+    if (facilities.length > 0) {
+        facilitiesSection.style.display = 'flex';
+        document.getElementById('tp-facilities').innerHTML = facilities.map(f => {
+            const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
+            return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
+        }).join('');
+    } else {
+        facilitiesSection.style.display = 'none';
+    }
 
     // Description
-    document.getElementById('tp-description').textContent = props.description || '';
+    const descEl = document.getElementById('tp-description');
+    descEl.textContent = props.description || '';
+    descEl.style.display = props.description ? 'block' : 'none';
+
+    // Address
+    const addrRow = document.getElementById('tp-address-row');
+    if (props.address) {
+        addrRow.style.display = 'flex';
+        document.getElementById('tp-address').textContent = props.address;
+    } else {
+        addrRow.style.display = 'none';
+    }
+
+    // Tips
+    const tipsRow = document.getElementById('tp-tips-row');
+    if (props.tips) {
+        tipsRow.style.display = 'block';
+        document.getElementById('tp-tips').textContent = props.tips;
+    } else {
+        tipsRow.style.display = 'none';
+    }
 
     // Action buttons
-    document.getElementById('tp-btn-fly').onclick = () => {
-        map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
-    };
-    document.getElementById('tp-btn-gmaps').onclick = () => {
-        window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
-    };
+    document.getElementById('tp-btn-fly').onclick = () => map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
+    document.getElementById('tp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
 
-    // Show panel FIRST so canvas gets dimensions
+    // Button color
+    const primaryBtn = document.getElementById('tp-btn-fly');
+    primaryBtn.style.background = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
+    primaryBtn.style.boxShadow = `0 4px 15px ${cat.color}4d`;
+
     panel.classList.remove('hidden');
     panel.style.animation = 'none';
     panel.offsetHeight;
     panel.style.animation = '';
 
-    // Render chart AFTER panel is visible
-    requestAnimationFrame(() => {
-        try {
-            renderMiniBarChart(document.getElementById('tp-chart'), hourlyData);
-        } catch (e) { console.warn('Chart render error:', e); }
-    });
+    // Render chart if visible
+    if (hourlyData && hourlyData.length === 24) {
+        requestAnimationFrame(() => {
+            try { renderMiniBarChart(document.getElementById('tp-chart'), hourlyData); }
+            catch (e) { console.warn('Chart render error:', e); }
+        });
+    }
 }
 
 function closeTourismPanel() {
@@ -854,5 +988,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initMap();
     initSidebar();
     initSearch();
+    initWelcome();
     loadAllData();
 });

@@ -17,8 +17,47 @@
 </head>
 <body>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar">
+    <!-- ============ WELCOME OVERLAY ============ -->
+    <div id="welcome-overlay" class="welcome-overlay">
+        <div class="welcome-particles">
+            <div class="particle p1"></div>
+            <div class="particle p2"></div>
+            <div class="particle p3"></div>
+            <div class="particle p4"></div>
+            <div class="particle p5"></div>
+        </div>
+        <div class="welcome-content">
+            <div class="welcome-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                WebGIS Yogyakarta
+            </div>
+            <h1 class="welcome-title">Discover<br><span>Yogyakarta</span></h1>
+            <p class="welcome-desc">Jelajahi ribuan lokasi wisata, layanan publik, dan fasilitas di Daerah Istimewa Yogyakarta dalam satu peta interaktif.</p>
+            <button id="welcome-btn" class="welcome-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                Mulai Eksplorasi
+            </button>
+            <div class="welcome-stats" id="welcome-stats">
+                <div class="welcome-stat">
+                    <span class="ws-num" id="ws-total">—</span>
+                    <span class="ws-label">Lokasi</span>
+                </div>
+                <div class="welcome-stat-divider"></div>
+                <div class="welcome-stat">
+                    <span class="ws-num" id="ws-cats">—</span>
+                    <span class="ws-label">Kategori</span>
+                </div>
+                <div class="welcome-stat-divider"></div>
+                <div class="welcome-stat">
+                    <span class="ws-num" id="ws-subcats">—</span>
+                    <span class="ws-label">Sub-Kategori</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside id="sidebar" class="sidebar sidebar--hidden">
         <div class="sidebar-header">
             <div class="logo-area">
                 <div class="logo-icon">
@@ -44,12 +83,9 @@
             <div id="search-results" class="search-results hidden"></div>
         </div>
 
-        <!-- Category Accordion Filters -->
-        <div class="category-section">
-            <h2 class="section-title">Filter Kategori</h2>
-            <div class="accordion-container" id="accordion-container">
-                <!-- Filled by JS -->
-            </div>
+        <!-- Active Category Detail -->
+        <div class="category-detail-section" id="category-detail">
+            <!-- Filled by JS when a tab is selected -->
         </div>
 
         <!-- Stats -->
@@ -69,6 +105,11 @@
     <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
+
+    <!-- ============ CATEGORY TABS ============ -->
+    <div id="category-tabs" class="category-tabs hidden" role="tablist">
+        <!-- Filled by JS -->
+    </div>
 
     <!-- Map -->
     <div id="map"></div>
@@ -165,6 +206,14 @@
                 <div class="tp-facilities-grid" id="tp-facilities"></div>
             </div>
             <p class="tp-description" id="tp-description"></p>
+            <div class="tp-address" id="tp-address-row" style="display:none">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="tp-address"></span>
+            </div>
+            <div class="tp-tips" id="tp-tips-row" style="display:none">
+                <div class="tp-tips-header">💡 Tips Berkunjung</div>
+                <p id="tp-tips"></p>
+            </div>
             <div class="tp-actions">
                 <button id="tp-btn-fly" class="tp-btn tp-btn-primary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>

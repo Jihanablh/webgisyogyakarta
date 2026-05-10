@@ -179,8 +179,47 @@ SPOTS = [
      "crowd":[0,0,0,0,0,0,0,0,0,5,12,20,30,25,20,22,35,50,65,70,60,40,15,3]},
 ]
 
+EXTRA = {
+    "Malioboro": {"address": "Jl. Malioboro, Sosromenduran, Gedongtengen, Kota Yogyakarta", "tips": "Datang sore hari untuk suasana terbaik. Tawar harga batik hingga 50%."},
+    "Candi Prambanan": {"address": "Jl. Raya Solo-Yogya No.16, Prambanan, Sleman", "tips": "Datang pagi untuk menghindari panas. Sewa guide untuk sejarah lengkap."},
+    "Candi Borobudur": {"address": "Jl. Badrawati, Borobudur, Magelang, Jawa Tengah", "tips": "Sunrise tour mulai jam 4 pagi. Bawa jaket tipis karena dingin."},
+    "Keraton Yogyakarta": {"address": "Jl. Rotowijayan Blok No.1, Panembahan, Kraton, Kota Yogyakarta", "tips": "Kunjungi saat ada latihan tari di pendopo. Pakai baju sopan."},
+    "Taman Sari": {"address": "Jl. Taman, Kraton, Kota Yogyakarta", "tips": "Sewa guide lokal di pintu masuk untuk cerita sejarah menarik."},
+    "Pantai Parangtritis": {"address": "Parangtritis, Kretek, Bantul", "tips": "Jangan berenang, ombak sangat kuat. Coba naik delman pantai."},
+    "Pantai Indrayanti": {"address": "Tepus, Gunungkidul", "tips": "Bawa kacamata hitam. Restoran di pantai cukup terjangkau."},
+    "Goa Jomblang": {"address": "Semanu, Gunungkidul", "tips": "Wajib booking jauh hari, kuota terbatas. Bawa baju ganti."},
+    "Gunung Merapi": {"address": "Cangkringan, Sleman", "tips": "Jeep Lava Tour pagi hari lebih sejuk. Bawa masker debu."},
+    "Hutan Pinus Mangunan": {"address": "Mangunan, Dlingo, Bantul", "tips": "Pagi hari untuk kabut terbaik. Weekday lebih sepi."},
+    "Tebing Breksi": {"address": "Sambirejo, Prambanan, Sleman", "tips": "Sore hari terbaik untuk sunset. Bawa air minum sendiri."},
+    "Masjid Gedhe Kauman": {"address": "Jl. Kauman No.2, Ngupasan, Gondomanan, Kota Yogyakarta", "tips": "Waktu dzuhur dan ashar paling tenang untuk berkunjung."},
+    "Gereja Ayam": {"address": "Bukit Rhema, Magelang, Jawa Tengah", "tips": "Datang pagi untuk foto tanpa kerumunan. View terbaik dari atas."},
+    "Museum Ullen Sentalu": {"address": "Kaliurang, Hargobinangun, Pakem, Sleman", "tips": "Tur berpemandu wajib ikut. Tidak boleh foto di dalam museum."},
+    "Museum Affandi": {"address": "Jl. Laksda Adisucipto No.167, Caturtunggal, Depok, Sleman", "tips": "Lihat galeri lukisan asli di lantai 2. Ada toko suvenir unik."},
+    "Tugu Yogyakarta": {"address": "Jl. Jend. Sudirman, Gowongan, Jetis, Kota Yogyakarta", "tips": "Foto malam hari saat tugu menyala. Hati-hati lalu lintas."},
+    "Alun-Alun Kidul": {"address": "Jl. Alun-Alun Selatan, Patehan, Kraton, Kota Yogyakarta", "tips": "Coba masangin malam hari. Sewa becak hias lampu LED."},
+    "Kebun Binatang Gembira Loka": {"address": "Jl. Kebun Raya No.2, Rejowinangun, Kotagede, Kota Yogyakarta", "tips": "Datang pagi saat hewan aktif. Bawa topi dan sunscreen."},
+    "Jogja Bay Waterpark": {"address": "Jl. Stadion Maguwoharjo, Ngemplak, Sleman", "tips": "Weekday lebih murah. Bawa baju ganti dan loker tersedia."},
+    "Pasar Beringharjo": {"address": "Jl. Pabringan No.1, Ngupasan, Gondomanan, Kota Yogyakarta", "tips": "Lantai 1 batik, lantai 2 rempah. Datang pagi untuk pilihan terbaik."},
+    "Jalan Prawirotaman": {"address": "Jl. Prawirotaman, Brontokusuman, Mergangsan, Kota Yogyakarta", "tips": "Banyak kafe dan galeri seni. Malam hari paling hidup."},
+    "Gudeg Yu Djum": {"address": "Jl. Kaliurang Km 4.5, Sinduadi, Mlati, Sleman", "tips": "Coba gudeg kering untuk oleh-oleh. Bisa beli kemasan vakum."},
+    "Bukit Bintang": {"address": "Patuk, Gunungkidul", "tips": "Datang setelah magrib untuk view city light terbaik."},
+    "Goa Pindul": {"address": "Bejiharjo, Karangmojo, Gunungkidul", "tips": "Bawa sandal anti slip. Durasi cave tubing sekitar 45 menit."},
+    "Museum Sonobudoyo": {"address": "Jl. Trikora No.6, Ngupasan, Gondomanan, Kota Yogyakarta", "tips": "Nonton wayang kulit malam Sabtu. Koleksi keris terlengkap."},
+    "Ratu Boko": {"address": "Prambanan, Sleman", "tips": "Beli tiket terusan Prambanan+Ratu Boko lebih hemat. Sunset spot terbaik."},
+    "Puncak Kosakora": {"address": "Tepus, Gunungkidul", "tips": "Bawa bekal sendiri. Trekking ringan sekitar 15 menit."},
+    "Museum Dirgantara": {"address": "Jl. Janti, Caturtunggal, Depok, Sleman", "tips": "Cocok untuk anak-anak. Bisa foto di kokpit pesawat."},
+    "Pantai Timang": {"address": "Purwodadi, Tepus, Gunungkidul", "tips": "Gondola tradisional sangat mendebarkan. Bukan untuk yang takut ketinggian."},
+    "Kalibiru": {"address": "Hargowilis, Kokap, Kulon Progo", "tips": "Antrian spot foto bisa panjang. Datang pagi weekday."},
+    "Sindu Kusuma Edupark": {"address": "Jl. Jambon No.1, Sinduadi, Mlati, Sleman", "tips": "Beli tiket all-in lebih hemat. Bianglala saat malam sangat cantik."},
+    "Benteng Vredeburg": {"address": "Jl. Margo Mulyo No.6, Ngupasan, Gondomanan, Kota Yogyakarta", "tips": "Museum diorama di dalamnya sangat informatif. Ada WiFi gratis."},
+    "Desa Wisata Pentingsari": {"address": "Pentingsari, Umbulharjo, Cangkringan, Sleman", "tips": "Booking terlebih dahulu untuk paket wisata edukasi kelompok."},
+    "Pantai Ngobaran": {"address": "Kanigoro, Saptosari, Gunungkidul", "tips": "Unik karena multi-religi. Sunset sangat indah dari tebing."},
+    "Spot Riyadi Jogja": {"address": "Jl. C. Simanjuntak, Terban, Gondokusuman, Kota Yogyakarta", "tips": "Banyak pilihan kuliner murah. Weekend lebih ramai."},
+}
+
 features = []
 for s in SPOTS:
+    extra = EXTRA.get(s["name"], {})
     features.append({
         "type": "Feature",
         "geometry": {"type": "Point", "coordinates": [s["lon"], s["lat"]]},
@@ -198,6 +237,8 @@ for s in SPOTS:
             "foto": s["foto"],
             "facilities": s["facilities"],
             "hourly_crowd": s["crowd"],
+            "address": extra.get("address", "Yogyakarta, DIY"),
+            "tips": extra.get("tips", ""),
         }
     })
 
