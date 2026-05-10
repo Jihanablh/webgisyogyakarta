@@ -26,6 +26,8 @@ const CATEGORIES = {
     akademik:           { label: 'Pusat Akademik',      icon: '🎓', color: '#3b82f6', file: 'data/akademik.geojson' },
     kesehatan_darurat:  { label: 'Kesehatan & Darurat', icon: '🏥', color: '#ef4444', file: 'data/kesehatan_darurat.geojson' },
     mobilitas:          { label: 'Mobilitas',           icon: '🚌', color: '#06b6d4', file: 'data/mobilitas.geojson' },
+    kebencanaan:        { label: 'Kebencanaan',         icon: '🌋', color: '#dc2626', file: 'data/kebencanaan.geojson' },
+    lingkungan:         { label: 'Lingkungan',          icon: '🌿', color: '#16a34a', file: 'data/lingkungan.geojson' },
 };
 
 // =====================================================
@@ -48,6 +50,10 @@ const MARKER_ICONS = {
     kesehatan_darurat: `<path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="white" stroke-width="2.5" stroke-linecap="round"/><rect x="7" y="7" width="10" height="10" rx="1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="12" x2="15" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
     // Bus – Mobilitas
     mobilitas: `<path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H6C4.9 6 3.9 6.8 3.6 7.8l-1.4 5c-.1.4-.2.8-.2 1.2 0 .4.1.8.2 1.2.3 1.1.8 2.8.8 2.8h3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="18" r="2" fill="none" stroke="white" stroke-width="2"/><circle cx="17" cy="18" r="2" fill="none" stroke="white" stroke-width="2"/>`,
+    // Volcano – Kebencanaan
+    kebencanaan: `<path d="M12 2L8 10h8L12 2z" fill="white" stroke="white" stroke-width="1.5"/><path d="M4 22l4-12h8l4 12H4z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/><path d="M9 14c1-1 2 0 3-1s2 0 3 1" stroke="white" stroke-width="1.5" fill="none"/><circle cx="12" cy="6" r="1" fill="white"/>`,
+    // Leaf – Lingkungan
+    lingkungan: `<path d="M17 8c0 8-6 13-9 13-.5 0-1-.2-1-.5C7 18 7 14 9 10c2-4 6-6 8-6 .5 0 1 .2 1 .5 0 0 0 1.5-1 3.5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8 21s1-4 4-8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
 };
 
 /**
@@ -129,13 +135,16 @@ let map;
 let boundaryLayer;
 let heatmapLayer = null;
 let heatmapVisible = false;
-const categoryLayers = {};      // { catKey: L.markerClusterGroup }
+const categoryLayers = {};      // { catKey: L.markerClusterGroup or L.layerGroup }
 const categoryData = {};        // { catKey: geojsonData }
 const categoryMeta = {};        // { catKey: { label, subcategories: {name: count} } }
 const activeSubcats = {};       // { catKey: Set<subcatName> }
 let allFeatures = [];           // flat search index
 let searchHighlightMarker = null;
 let activeCategory = null;
+let activeDisasterSubTab = 'all'; // for disaster sub-tab filtering
+let currentReportFeature = null;  // feature currently shown in report modal
+const DISASTER_CATEGORIES = ['kebencanaan', 'lingkungan'];
 
 const FACILITY_MAP = {
     parkir: { icon: '🅿️', label: 'Parkir' },
@@ -170,6 +179,7 @@ function initMap() {
     map.on('click', () => {
         closeInfoCard();
         closeTourismPanel();
+        closeDisasterPanel();
         removeSearchHighlight();
     });
 }
@@ -247,56 +257,99 @@ function addBoundaryLayer(data) {
 // =====================================================
 // CATEGORY LAYERS
 // =====================================================
+function getDisasterStyle(feature) {
+    const p = feature.properties;
+    const gType = feature.geometry.type;
+    if (gType === 'LineString' || gType === 'MultiLineString') {
+        return { color: '#22c55e', weight: 4, opacity: 0.85, dashArray: '12, 8', lineCap: 'round' };
+    }
+    if (p.type_layer === 'rawan_banjir') return { color: '#3b82f6', weight: 2, opacity: 0.8, fillColor: '#3b82f6', fillOpacity: 0.3 };
+    if (p.subcategory === 'Rawan Longsor') return { color: '#78350f', weight: 2, opacity: 0.8, fillColor: '#78350f', fillOpacity: 0.3 };
+    const lr = p.level_risiko;
+    if (lr === 'Tinggi') return { color: '#dc2626', weight: 2.5, opacity: 0.9, fillColor: '#dc2626', fillOpacity: 0.35 };
+    if (lr === 'Sedang') return { color: '#ea580c', weight: 2, opacity: 0.8, fillColor: '#ea580c', fillOpacity: 0.25 };
+    if (lr === 'Rendah') return { color: '#ca8a04', weight: 2, opacity: 0.7, fillColor: '#ca8a04', fillOpacity: 0.2 };
+    return { color: '#6b7280', weight: 2, opacity: 0.6, fillColor: '#6b7280', fillOpacity: 0.15 };
+}
+
+function getEnvironmentStyle(feature) {
+    const p = feature.properties;
+    if (p.subcategory === 'Kerentanan Drainase Kota') return { color: '#0ea5e9', weight: 2, opacity: 0.7, fillColor: '#0ea5e9', fillOpacity: 0.25 };
+    return { color: '#16a34a', weight: 2, opacity: 0.6, fillColor: '#16a34a', fillOpacity: 0.2 };
+}
+
+function createShelterIcon() {
+    return L.divIcon({
+        className: 'shelter-marker',
+        html: `<div class="shelter-marker-inner"><div class="shelter-pulse"></div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 18v-6l9-6 9 6v6"/><path d="M9 18v-4h6v4"/></svg></div>`,
+        iconSize: [36, 36], iconAnchor: [18, 18]
+    });
+}
+
 function addCategoryLayer(categoryKey, data) {
     const cat = CATEGORIES[categoryKey];
+    const isDisaster = DISASTER_CATEGORIES.includes(categoryKey);
 
-    const clusterGroup = L.markerClusterGroup({
-        maxClusterRadius: 50, spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false, zoomToBoundsOnClick: true,
-        iconCreateFunction: (cluster) => {
-            const count = cluster.getChildCount();
-            let size = count > 50 ? 'large' : count > 20 ? 'medium' : 'small';
-            return L.divIcon({
-                html: `<div style="background:${cat.color}cc;color:white;">${count}</div>`,
-                className: `marker-cluster marker-cluster-${size}`,
-                iconSize: L.point(40, 40)
-            });
-        }
-    });
-
-    const geoLayer = L.geoJSON(data, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: createCustomIcon(categoryKey)
-            });
-        },
-        filter: (feature) => {
-            // Filter by active subcategories
-            const sc = feature.properties.subcategory;
-            return activeSubcats[categoryKey] && activeSubcats[categoryKey].has(sc);
-        },
-        onEachFeature: (feature, layer) => {
-            const props = feature.properties;
-            const name = props.name || 'Unnamed';
-            layer.bindPopup(`
-                <div class="popup-content">
-                    <div class="popup-name">${escapeHtml(name)}</div>
-                    <div class="popup-type">
-                        <span class="popup-dot" style="background:${cat.color}"></span>
-                        ${escapeHtml(props.subcategory || props.type || '')} · ${cat.label}
-                    </div>
-                </div>
-            `, { closeButton: true, maxWidth: 250 });
-
-            layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                showTourismPanel(feature, categoryKey);
-            });
-        }
-    });
-
-    clusterGroup.addLayer(geoLayer);
-    categoryLayers[categoryKey] = { cluster: clusterGroup, geoLayer };
+    if (isDisaster) {
+        const layerGroup = L.layerGroup();
+        const geoLayer = L.geoJSON(data, {
+            filter: (feature) => {
+                const sc = feature.properties.subcategory;
+                if (!activeSubcats[categoryKey] || !activeSubcats[categoryKey].has(sc)) return false;
+                if (categoryKey === 'kebencanaan' && activeDisasterSubTab !== 'all') {
+                    return sc === activeDisasterSubTab;
+                }
+                return true;
+            },
+            style: (feature) => categoryKey === 'kebencanaan' ? getDisasterStyle(feature) : getEnvironmentStyle(feature),
+            pointToLayer: (feature, latlng) => {
+                if (feature.properties.type_layer === 'titik_pengungsian') {
+                    return L.marker(latlng, { icon: createShelterIcon() });
+                }
+                return L.marker(latlng, { icon: createCustomIcon(categoryKey) });
+            },
+            onEachFeature: (feature, layer) => {
+                const props = feature.properties;
+                layer.on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    showDisasterPanel(feature, categoryKey);
+                });
+                const badge = props.level_risiko && props.level_risiko !== 'Info'
+                    ? `<span class="popup-risk popup-risk-${props.level_risiko.toLowerCase()}">${props.level_risiko}</span>` : '';
+                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name||'')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory||'')} ${badge}</div></div>`, {closeButton:true, maxWidth:280});
+            }
+        });
+        layerGroup.addLayer(geoLayer);
+        categoryLayers[categoryKey] = { cluster: layerGroup, geoLayer };
+    } else {
+        const clusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 50, spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false, zoomToBoundsOnClick: true,
+            iconCreateFunction: (cluster) => {
+                const count = cluster.getChildCount();
+                let size = count > 50 ? 'large' : count > 20 ? 'medium' : 'small';
+                return L.divIcon({
+                    html: `<div style="background:${cat.color}cc;color:white;">${count}</div>`,
+                    className: `marker-cluster marker-cluster-${size}`,
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        const geoLayer = L.geoJSON(data, {
+            pointToLayer: (feature, latlng) => L.marker(latlng, { icon: createCustomIcon(categoryKey) }),
+            filter: (feature) => {
+                const sc = feature.properties.subcategory;
+                return activeSubcats[categoryKey] && activeSubcats[categoryKey].has(sc);
+            },
+            onEachFeature: (feature, layer) => {
+                const props = feature.properties;
+                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name||'Unnamed')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory||props.type||'')} · ${cat.label}</div></div>`, {closeButton:true, maxWidth:250});
+                layer.on('click', (e) => { L.DomEvent.stopPropagation(e); showTourismPanel(feature, categoryKey); });
+            }
+        });
+        clusterGroup.addLayer(geoLayer);
+        categoryLayers[categoryKey] = { cluster: clusterGroup, geoLayer };
+    }
 }
 
 function rebuildCategoryLayer(categoryKey) {
@@ -347,6 +400,7 @@ function dismissWelcome() {
     activateCategory(Object.keys(CATEGORIES)[0]);
     const results = Object.entries(categoryData).map(([k, d]) => ({ key: k, count: d.features.length }));
     renderStats(results);
+    renderRecentEvents();
 }
 
 // =====================================================
@@ -369,6 +423,7 @@ function renderCategoryTabs() {
 
 function activateCategory(key) {
     activeCategory = key;
+    activeDisasterSubTab = 'all';
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.dataset.category === key));
     for (const [k, li] of Object.entries(categoryLayers)) {
         if (li && li.cluster && map.hasLayer(li.cluster)) map.removeLayer(li.cluster);
@@ -376,6 +431,21 @@ function activateCategory(key) {
     if (!categoryLayers[key] && categoryData[key]) addCategoryLayer(key, categoryData[key]);
     if (categoryLayers[key]) categoryLayers[key].cluster.addTo(map);
     renderSubcatDetail(key);
+    // Show/hide disaster sub-tabs
+    const dstEl = document.getElementById('disaster-sub-tabs');
+    if (key === 'kebencanaan') {
+        renderDisasterSubTabs();
+        dstEl.classList.remove('hidden');
+    } else {
+        dstEl.classList.add('hidden');
+    }
+    // Show/hide recent events
+    const rewEl = document.getElementById('recent-events-widget');
+    if (DISASTER_CATEGORIES.includes(key)) {
+        rewEl.style.display = 'block';
+    } else {
+        rewEl.style.display = 'none';
+    }
 }
 
 // =====================================================
@@ -724,6 +794,12 @@ function showInfoCard(feature, categoryKey) {
 
     // Distance
     const center = map.getCenter();
+    const g = feature.geometry;
+    let cLat, cLon;
+    if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
+    else if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); cLat = b.lat; cLon = b.lng; }
+    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length/2)]; cLon = c[0]; cLat = c[1]; }
+    else { cLon = 110.3695; cLat = -7.7956; }
     const dist = haversineDistance(center.lat, center.lng, coords[1], coords[0]);
     document.getElementById('info-distance-text').textContent = formatDistance(dist);
 
@@ -769,6 +845,10 @@ function initSidebar() {
     document.getElementById('tp-close').addEventListener('click', (e) => {
         e.stopPropagation();
         closeTourismPanel();
+    });
+    document.getElementById('dp-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeDisasterPanel();
     });
 }
 
@@ -982,6 +1062,245 @@ function escapeHtml(str) {
 }
 
 // =====================================================
+// DISASTER SUB-TABS
+// =====================================================
+function renderDisasterSubTabs() {
+    const container = document.getElementById('disaster-sub-tabs');
+    const subcats = categoryMeta.kebencanaan ? Object.keys(categoryMeta.kebencanaan.subcategories || {}) : [];
+    const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ','').replace('Rawan ','') }))];
+    container.innerHTML = tabs.map(t =>
+        `<button class="dst-tab ${t.key === activeDisasterSubTab ? 'active' : ''}" data-subtab="${t.key}">${t.label}</button>`
+    ).join('');
+    container.querySelectorAll('.dst-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeDisasterSubTab = btn.dataset.subtab;
+            container.querySelectorAll('.dst-tab').forEach(b => b.classList.toggle('active', b === btn));
+            rebuildCategoryLayer('kebencanaan');
+        });
+    });
+}
+
+// =====================================================
+// DISASTER DETAIL PANEL
+// =====================================================
+function getFeatureCenter(feature) {
+    const g = feature.geometry;
+    if (g.type === 'Point') return [g.coordinates[1], g.coordinates[0]];
+    if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); return [b.lat, b.lng]; }
+    if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; return [c[1], c[0]]; }
+    return [-7.7956, 110.3695];
+}
+
+function showDisasterPanel(feature, categoryKey) {
+    const panel = document.getElementById('disaster-panel');
+    const props = feature.properties;
+    closeTourismPanel();
+    closeInfoCard();
+    currentReportFeature = { feature, categoryKey };
+
+    // Header photo
+    const header = document.getElementById('dp-header');
+    header.style.backgroundImage = props.foto ? `url('${props.foto}')` : `linear-gradient(135deg, #dc2626, #991b1b)`;
+
+    // Risk badge
+    const badgeEl = document.getElementById('dp-risk-badge');
+    const lr = props.level_risiko || 'Info';
+    const zona = props.zona ? ` · ${props.zona}` : '';
+    const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : lr === 'Rendah' ? 'risk-low' : 'risk-info';
+    badgeEl.className = `dp-risk-badge ${riskClass}`;
+    badgeEl.textContent = `${lr === 'Tinggi' ? '🔴' : lr === 'Sedang' ? '🟠' : lr === 'Rendah' ? '🟡' : 'ℹ️'} RISIKO ${lr.toUpperCase()}${zona}`;
+
+    document.getElementById('dp-name').textContent = props.name || 'Unnamed';
+
+    // Meta line
+    const metaItems = [];
+    if (props.radius_km) metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
+    if (props.sumber_data) metaItems.push(`📊 Sumber: ${props.sumber_data}`);
+    if (props.last_updated) metaItems.push(`Diperbarui: ${props.last_updated}`);
+    document.getElementById('dp-meta').innerHTML = metaItems.join(' · ');
+
+    document.getElementById('dp-description').textContent = props.deskripsi || '';
+
+    // Facilities
+    const facSection = document.getElementById('dp-facilities-section');
+    const facilities = props.facilities || [];
+    if (facilities.length > 0) {
+        facSection.style.display = 'block';
+        document.getElementById('dp-facilities').innerHTML = facilities.map(f =>
+            `<span class="dp-facility-chip">${f}</span>`
+        ).join('');
+    } else { facSection.style.display = 'none'; }
+
+    // Evacuation
+    const evacBox = document.getElementById('dp-evac-box');
+    if (props.instruksi_evakuasi) {
+        evacBox.style.display = 'block';
+        document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi;
+    } else { evacBox.style.display = 'none'; }
+
+    // History
+    const histSection = document.getElementById('dp-history-section');
+    const history = props.riwayat_bencana || [];
+    if (history.length > 0) {
+        histSection.style.display = 'block';
+        document.getElementById('dp-history-list').innerHTML = history.slice(0, 3).map(h => `
+            <div class="dp-history-item">
+                <div class="dp-history-date">🗓️ ${h.tanggal}</div>
+                <div class="dp-history-detail">${h.jenis} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
+                <div class="dp-history-sub">${(h.pengungsi||0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
+            </div>
+        `).join('');
+    } else { histSection.style.display = 'none'; }
+
+    // Contact
+    const contactEl = document.getElementById('dp-contact');
+    if (props.kontak_darurat) {
+        contactEl.style.display = 'flex';
+        const phone = props.kontak_darurat.replace(/[^+\d]/g, '').slice(0, 16);
+        document.getElementById('dp-contact-phone').textContent = props.kontak_darurat;
+        document.getElementById('dp-contact-phone').href = `tel:${phone}`;
+    } else { contactEl.style.display = 'none'; }
+
+    // Actions
+    const center = getFeatureCenter(feature);
+    document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${center[0]},${center[1]}`, '_blank');
+    document.getElementById('dp-btn-report').onclick = () => openReportModal(feature, categoryKey);
+
+    panel.classList.remove('hidden');
+}
+
+function closeDisasterPanel() {
+    document.getElementById('disaster-panel').classList.add('hidden');
+}
+
+// =====================================================
+// REPORT MODAL
+// =====================================================
+function openReportModal(feature, categoryKey) {
+    const modal = document.getElementById('report-modal');
+    currentReportFeature = { feature, categoryKey };
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    renderReportTab('ringkasan');
+    // Tab clicks
+    modal.querySelectorAll('.rm-tab').forEach(t => {
+        t.onclick = () => {
+            modal.querySelectorAll('.rm-tab').forEach(b => b.classList.remove('active'));
+            t.classList.add('active');
+            renderReportTab(t.dataset.tab);
+        };
+    });
+    document.getElementById('rm-close').onclick = () => closeReportModal();
+}
+
+function closeReportModal() {
+    document.getElementById('report-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function renderReportTab(tab) {
+    const content = document.getElementById('rm-content');
+    const { feature } = currentReportFeature || {};
+    if (!feature) return;
+    const p = feature.properties;
+
+    if (tab === 'ringkasan') {
+        const lr = p.level_risiko || 'Info';
+        const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : 'risk-low';
+        content.innerHTML = `
+            <div class="rm-summary">
+                <h2 class="rm-title">${escapeHtml(p.name||'')}</h2>
+                <span class="rm-risk-badge ${riskClass}">${lr.toUpperCase()}</span>
+                <div class="rm-stat-grid">
+                    <div class="rm-stat-card"><div class="rm-stat-num">${p.radius_km ? p.radius_km+' km' : '-'}</div><div class="rm-stat-label">Luas Terdampak</div></div>
+                    <div class="rm-stat-card"><div class="rm-stat-num">${p.kapasitas ? p.kapasitas.toLocaleString() : '-'}</div><div class="rm-stat-label">Kapasitas Pengungsian</div></div>
+                    <div class="rm-stat-card"><div class="rm-stat-num">${(p.riwayat_bencana||[]).length}</div><div class="rm-stat-label">Kejadian Tercatat</div></div>
+                    <div class="rm-stat-card"><div class="rm-stat-num">${p.zona||'-'}</div><div class="rm-stat-label">Zona</div></div>
+                </div>
+                <p class="rm-desc">${escapeHtml(p.deskripsi||'')}</p>
+                <div class="rm-source">📊 Sumber: ${escapeHtml(p.sumber_data||'-')} · Diperbarui: ${p.last_updated||'-'}</div>
+            </div>`;
+    } else if (tab === 'riwayat') {
+        const hist = p.riwayat_bencana || [];
+        const totalKorban = hist.reduce((s, h) => s + (h.korban_jiwa || 0), 0);
+        const totalPengungsi = hist.reduce((s, h) => s + (h.pengungsi || 0), 0);
+        content.innerHTML = `
+            <div class="rm-history">
+                <div class="rm-hist-stats">
+                    <div class="rm-stat-card"><div class="rm-stat-num">${hist.length}</div><div class="rm-stat-label">Total Kejadian</div></div>
+                    <div class="rm-stat-card"><div class="rm-stat-num">${totalKorban.toLocaleString()}</div><div class="rm-stat-label">Total Korban</div></div>
+                    <div class="rm-stat-card"><div class="rm-stat-num">${totalPengungsi.toLocaleString()}</div><div class="rm-stat-label">Total Pengungsi</div></div>
+                </div>
+                <div class="rm-timeline">
+                    ${hist.length === 0 ? '<p class="rm-empty">Belum ada riwayat bencana tercatat.</p>' :
+                    hist.map(h => {
+                        const scaleClass = (h.skala||'').includes('4') || (h.skala||'').includes('6') || h.skala === 'Besar' ? 'scale-high' : (h.skala||'').includes('2') || h.skala === 'Sedang' ? 'scale-med' : 'scale-low';
+                        return `<div class="rm-tl-item">
+                            <div class="rm-tl-dot ${scaleClass}"></div>
+                            <div class="rm-tl-content">
+                                <div class="rm-tl-date">${h.tanggal}</div>
+                                <div class="rm-tl-title">${h.jenis} <span class="rm-tl-scale ${scaleClass}">${h.skala}</span></div>
+                                <div class="rm-tl-detail">${(h.korban_jiwa||0).toLocaleString()} korban · ${(h.pengungsi||0).toLocaleString()} pengungsi · ${h.kerugian_material||'-'}</div>
+                                <p class="rm-tl-desc">${escapeHtml(h.deskripsi||'')}</p>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+    } else if (tab === 'evakuasi') {
+        const fac = p.facilities || [];
+        content.innerHTML = `
+            <div class="rm-evac">
+                <h3 class="rm-section-title">Instruksi Evakuasi</h3>
+                <div class="rm-evac-box">${escapeHtml(p.instruksi_evakuasi || 'Tidak ada instruksi.')}</div>
+                ${fac.length > 0 ? `<h3 class="rm-section-title">Fasilitas Pengungsian</h3><div class="rm-fac-grid">${fac.map(f => `<span class="rm-fac-chip">${f}</span>`).join('')}</div>` : ''}
+                <h3 class="rm-section-title">Nomor Darurat</h3>
+                <div class="rm-contact-grid">
+                    <div class="rm-contact-card"><span class="rm-cc-icon">🚨</span><span class="rm-cc-name">BPBD DIY</span><span class="rm-cc-phone">+62274-515059</span></div>
+                    <div class="rm-contact-card"><span class="rm-cc-icon">🔍</span><span class="rm-cc-name">Basarnas</span><span class="rm-cc-phone">115</span></div>
+                    <div class="rm-contact-card"><span class="rm-cc-icon">🏥</span><span class="rm-cc-name">PMI DIY</span><span class="rm-cc-phone">+62274-561669</span></div>
+                    <div class="rm-contact-card"><span class="rm-cc-icon">⚡</span><span class="rm-cc-name">PLN</span><span class="rm-cc-phone">123</span></div>
+                    <div class="rm-contact-card"><span class="rm-cc-icon">💧</span><span class="rm-cc-name">PDAM</span><span class="rm-cc-phone">+62274-512345</span></div>
+                </div>
+            </div>`;
+    } else if (tab === 'kontak') {
+        content.innerHTML = `
+            <div class="rm-contacts">
+                <h3 class="rm-section-title">Kontak Instansi Terkait</h3>
+                <div class="rm-contact-grid rm-contact-grid-lg">
+                    <div class="rm-inst-card"><div class="rm-inst-icon">🚨</div><div class="rm-inst-name">BPBD DIY</div><div class="rm-inst-desc">Badan Penanggulangan Bencana Daerah</div><a class="rm-inst-phone" href="tel:+62274515059">📞 +62274-515059</a><a class="rm-inst-link" href="https://bpbd.jogjaprov.go.id" target="_blank">🌐 Website</a></div>
+                    <div class="rm-inst-card"><div class="rm-inst-icon">🌋</div><div class="rm-inst-name">BPPTKG</div><div class="rm-inst-desc">Balai Penyelidikan dan Pengembangan Teknologi Kebencanaan Geologi</div><a class="rm-inst-phone" href="tel:+62274514192">📞 +62274-514192</a><a class="rm-inst-link" href="https://merapi.bgl.esdm.go.id" target="_blank">🌐 Website</a></div>
+                    <div class="rm-inst-card"><div class="rm-inst-icon">🌤️</div><div class="rm-inst-name">BMKG Yogyakarta</div><div class="rm-inst-desc">Badan Meteorologi, Klimatologi, dan Geofisika</div><a class="rm-inst-phone" href="tel:+62274512346">📞 +62274-512346</a><a class="rm-inst-link" href="https://bmkg.go.id" target="_blank">🌐 Website</a></div>
+                    <div class="rm-inst-card"><div class="rm-inst-icon">🇮🇩</div><div class="rm-inst-name">BNPB</div><div class="rm-inst-desc">Badan Nasional Penanggulangan Bencana</div><a class="rm-inst-phone" href="tel:117">📞 117</a><a class="rm-inst-link" href="https://bnpb.go.id" target="_blank">🌐 Website</a></div>
+                </div>
+            </div>`;
+    }
+}
+
+// =====================================================
+// RECENT EVENTS WIDGET
+// =====================================================
+function renderRecentEvents() {
+    const widget = document.getElementById('recent-events-widget');
+    const list = document.getElementById('rew-list');
+    const events = [
+        { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
+        { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
+        { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
+    ];
+    list.innerHTML = events.map(e => `
+        <div class="rew-item">
+            <span class="rew-icon">${e.icon}</span>
+            <div class="rew-info">
+                <div class="rew-event-title">${e.title} <span class="rew-status ${e.statusClass}">→ ${e.status}</span></div>
+                <div class="rew-time">Terakhir: ${e.time}</div>
+            </div>
+        </div>
+    `).join('');
+    widget.style.display = 'none'; // shown only when disaster category active
+}
+
+// =====================================================
 // INIT
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -990,4 +1309,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initWelcome();
     loadAllData();
+    // Report modal ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeReportModal();
+    });
 });

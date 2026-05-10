@@ -70,5 +70,25 @@
       "Edukasi": 5,
       "Hiburan": 4
     }
+  },
+  "kebencanaan": {
+    "label": "Kebencanaan",
+    "subcategories": {
+      "Risiko Erupsi Merapi": 9,
+      "Rawan Banjir": 2,
+      "Rawan Gempa": 1,
+      "Rawan Longsor": 1,
+      "Rawan Kekeringan": 1
+    }
+  },
+  "lingkungan": {
+    "label": "Lingkungan",
+    "subcategories": {
+      "Kerentanan Drainase Kota": 1,
+      "Tutupan Lahan & RTH": 5,
+      "Kualitas Udara": 3,
+      "Sumber Air Bersih": 4,
+      "Persebaran Sampah & TPA": 5
+    }
   }
 }

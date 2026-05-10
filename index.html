@@ -94,6 +94,17 @@
             <div class="stats-grid" id="stats-grid"></div>
         </div>
 
+        <!-- Recent Events Widget -->
+        <div class="recent-events-widget" id="recent-events-widget" style="display:none">
+            <div class="rew-header">
+                <span class="rew-title">⚡ KEJADIAN TERKINI</span>
+            </div>
+            <div class="rew-list" id="rew-list">
+                <!-- Filled by JS -->
+            </div>
+            <button class="rew-see-all" id="rew-see-all">🔔 Lihat Semua Kejadian →</button>
+        </div>
+
         <div class="sidebar-footer">
             <p>Data: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> via HOTOSM</p>
             <p>Boundary: GADM v4.1 • Hanya wilayah DIY</p>
@@ -109,6 +120,11 @@
     <!-- ============ CATEGORY TABS ============ -->
     <div id="category-tabs" class="category-tabs hidden" role="tablist">
         <!-- Filled by JS -->
+    </div>
+
+    <!-- ============ DISASTER SUBCATEGORY TABS ============ -->
+    <div id="disaster-sub-tabs" class="disaster-sub-tabs hidden">
+        <!-- Filled by JS when kebencanaan is active -->
     </div>
 
     <!-- Map -->
@@ -223,6 +239,74 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     Google Maps
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ DISASTER DETAIL PANEL ============ -->
+    <div id="disaster-panel" class="disaster-panel hidden">
+        <button id="dp-close" class="dp-close" aria-label="Tutup panel bencana">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <div class="dp-header" id="dp-header">
+            <div class="dp-header-overlay">
+                <div class="dp-risk-badge" id="dp-risk-badge"></div>
+                <h2 class="dp-name" id="dp-name"></h2>
+                <div class="dp-meta" id="dp-meta"></div>
+            </div>
+        </div>
+        <div class="dp-body" id="dp-body">
+            <!-- Description -->
+            <p class="dp-description" id="dp-description"></p>
+
+            <!-- Facilities chips -->
+            <div class="dp-facilities-section" id="dp-facilities-section" style="display:none">
+                <span class="dp-section-label">🏕️ FASILITAS PENGUNGSIAN</span>
+                <div class="dp-facilities-grid" id="dp-facilities"></div>
+            </div>
+
+            <!-- Evacuation Instructions -->
+            <div class="dp-evac-box" id="dp-evac-box" style="display:none">
+                <div class="dp-evac-header">💡 Instruksi Evakuasi</div>
+                <p id="dp-evac-text"></p>
+            </div>
+
+            <!-- Disaster History -->
+            <div class="dp-history-section" id="dp-history-section" style="display:none">
+                <div class="dp-history-header">📋 RIWAYAT BENCANA TERAKHIR</div>
+                <div class="dp-history-list" id="dp-history-list"></div>
+            </div>
+
+            <!-- Emergency contact -->
+            <div class="dp-contact" id="dp-contact" style="display:none">
+                <span>📞 Kontak Darurat BPBD: </span>
+                <a id="dp-contact-phone" href="tel:"></a>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="dp-actions">
+                <button id="dp-btn-report" class="dp-btn dp-btn-report">
+                    📄 Buka Laporan Lengkap
+                </button>
+                <button id="dp-btn-gmaps" class="dp-btn dp-btn-gmaps">
+                    🗺️ Lihat di Google Maps
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ FULLSCREEN REPORT MODAL ============ -->
+    <div id="report-modal" class="report-modal hidden">
+        <div class="rm-container">
+            <button id="rm-close" class="rm-close" aria-label="Tutup laporan">✕</button>
+            <div class="rm-tabs" id="rm-tabs">
+                <button class="rm-tab active" data-tab="ringkasan">Ringkasan</button>
+                <button class="rm-tab" data-tab="riwayat">Riwayat Bencana</button>
+                <button class="rm-tab" data-tab="evakuasi">Evakuasi</button>
+                <button class="rm-tab" data-tab="kontak">Kontak</button>
+            </div>
+            <div class="rm-content" id="rm-content">
+                <!-- Filled by JS -->
             </div>
         </div>
     </div>
