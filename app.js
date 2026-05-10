@@ -18,6 +18,7 @@ const CONFIG = {
 };
 
 const CATEGORIES = {
+    pariwisata:         { label: 'Pariwisata & Keramaian', icon: '🏛️', color: '#e11d48', file: 'data/pariwisata.geojson' },
     kebutuhan:          { label: 'Kebutuhan',           icon: '🛒', color: '#f59e0b', file: 'data/kebutuhan.geojson' },
     atm_bank:           { label: 'ATM & Bank',          icon: '🏦', color: '#10b981', file: 'data/atm_bank.geojson' },
     tempat_tinggal:     { label: 'Tempat Tinggal',      icon: '🏠', color: '#8b5cf6', file: 'data/tempat_tinggal.geojson' },
@@ -31,6 +32,8 @@ const CATEGORIES = {
 // CUSTOM MARKER ICONS (Lucide-style SVG paths)
 // =====================================================
 const MARKER_ICONS = {
+    // Landmark – Pariwisata & Keramaian
+    pariwisata: `<path d="M3 22h18M6 18v4M10 14v8M14 10v12M18 6v16" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M12 2l-4 4h8l-4-4z" fill="white" stroke="white" stroke-width="1.5"/>`,
     // Shopping cart – Kebutuhan
     kebutuhan: `<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="3" y1="6" x2="21" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M16 10a4 4 0 0 1-8 0" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
     // Credit card – ATM & Bank
@@ -124,12 +127,24 @@ function createCustomIcon(categoryKey, opts = {}) {
 // =====================================================
 let map;
 let boundaryLayer;
+let heatmapLayer = null;
+let heatmapVisible = false;
 const categoryLayers = {};      // { catKey: L.markerClusterGroup }
 const categoryData = {};        // { catKey: geojsonData }
 const categoryMeta = {};        // { catKey: { label, subcategories: {name: count} } }
 const activeSubcats = {};       // { catKey: Set<subcatName> }
 let allFeatures = [];           // flat search index
 let searchHighlightMarker = null;
+
+const FACILITY_MAP = {
+    parkir: { icon: '🅿️', label: 'Parkir' },
+    restoran: { icon: '🍽️', label: 'Restoran' },
+    toilet: { icon: '🚻', label: 'Toilet' },
+    mushola: { icon: '🕌', label: 'Mushola' },
+    atm: { icon: '🏧', label: 'ATM' },
+    toko_suvenir: { icon: '🛍️', label: 'Suvenir' },
+    guide: { icon: '🧭', label: 'Guide' },
+};
 
 // =====================================================
 // MAP
@@ -153,6 +168,7 @@ function initMap() {
 
     map.on('click', () => {
         closeInfoCard();
+        closeTourismPanel();
         removeSearchHighlight();
     });
 }
@@ -207,6 +223,7 @@ async function loadAllData() {
 
         const results = await Promise.all(loadPromises);
         buildSearchIndex();
+        buildHeatmap();
         renderAccordion(results);
         renderStats(results);
 
@@ -274,7 +291,11 @@ function addCategoryLayer(categoryKey, data) {
 
             layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                showInfoCard(feature, categoryKey);
+                if (categoryKey === 'pariwisata') {
+                    showTourismPanel(feature);
+                } else {
+                    showInfoCard(feature, categoryKey);
+                }
             });
         }
     });
@@ -546,13 +567,27 @@ function handleSearchSelect(feature, categoryKey, lat, lon) {
         </div>
     `, { closeButton: true, maxWidth: 250 });
 
+    // Click handler on highlight marker
+    searchHighlightMarker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        if (categoryKey === 'pariwisata') {
+            showTourismPanel(feature);
+        } else {
+            showInfoCard(feature, categoryKey);
+        }
+    });
+
     // Open popup after fly animation
     setTimeout(() => {
         if (searchHighlightMarker) searchHighlightMarker.openPopup();
     }, 1400);
 
-    // 4. Show info card
-    showInfoCard(feature, categoryKey);
+    // 4. Show appropriate panel
+    if (categoryKey === 'pariwisata') {
+        showTourismPanel(feature);
+    } else {
+        showInfoCard(feature, categoryKey);
+    }
 }
 
 function removeSearchHighlight() {
@@ -631,6 +666,165 @@ function initSidebar() {
     document.getElementById('info-card-close').addEventListener('click', (e) => {
         e.stopPropagation();
         closeInfoCard();
+    });
+    document.getElementById('tp-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeTourismPanel();
+    });
+}
+
+// =====================================================
+// TOURISM PANEL
+// =====================================================
+function showTourismPanel(feature) {
+    const panel = document.getElementById('tourism-panel');
+    const props = feature.properties;
+    const coords = feature.geometry.coordinates;
+
+    // Close info card if open
+    closeInfoCard();
+
+    // Header photo
+    const header = document.getElementById('tp-header');
+    if (props.foto) {
+        header.style.backgroundImage = `url('${props.foto}')`;
+    } else {
+        header.style.backgroundImage = 'linear-gradient(135deg, #e11d48, #be123c)';
+    }
+
+    // Name & category
+    document.getElementById('tp-name').textContent = props.name || 'Unnamed';
+    document.getElementById('tp-category-badge').textContent = props.subcategory || props.type || '';
+
+    // Rating stars
+    const rating = props.rating || 0;
+    const starsEl = document.getElementById('tp-stars');
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= Math.floor(rating)) {
+            starsHtml += '<span class="star filled">★</span>';
+        } else if (i - 0.5 <= rating) {
+            starsHtml += '<span class="star half">★</span>';
+        } else {
+            starsHtml += '<span class="star">★</span>';
+        }
+    }
+    starsEl.innerHTML = starsHtml;
+    document.getElementById('tp-rating').textContent = rating.toFixed(1);
+    document.getElementById('tp-reviews').textContent = `· ${(props.reviews || 0).toLocaleString()} ulasan`;
+
+    // Visitors
+    document.getElementById('tp-visitors').textContent = `~${(props.visitors_per_day || 0).toLocaleString()} / hari`;
+
+    // Hours & ticket
+    document.getElementById('tp-hours').textContent = props.opening_hours || '-';
+    document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
+
+    // Crowd badge
+    const hourlyData = props.hourly_crowd || new Array(24).fill(0);
+    const currentHour = new Date().getHours();
+    const crowdLevel = hourlyData[currentHour] || 0;
+    const badge = document.getElementById('tp-crowd-badge');
+    if (crowdLevel >= 60) {
+        badge.textContent = '🔴 Keramaian tinggi saat ini';
+        badge.className = 'tp-crowd-badge crowd-high';
+    } else if (crowdLevel >= 30) {
+        badge.textContent = '🟡 Keramaian sedang saat ini';
+        badge.className = 'tp-crowd-badge crowd-medium';
+    } else {
+        badge.textContent = '🟢 Keramaian rendah saat ini';
+        badge.className = 'tp-crowd-badge crowd-low';
+    }
+
+    // Facilities
+    const facilitiesEl = document.getElementById('tp-facilities');
+    const facilities = props.facilities || [];
+    facilitiesEl.innerHTML = facilities.map(f => {
+        const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
+        return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
+    }).join('');
+
+    // Description
+    document.getElementById('tp-description').textContent = props.description || '';
+
+    // Action buttons
+    document.getElementById('tp-btn-fly').onclick = () => {
+        map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
+    };
+    document.getElementById('tp-btn-gmaps').onclick = () => {
+        window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
+    };
+
+    // Show panel FIRST so canvas gets dimensions
+    panel.classList.remove('hidden');
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+
+    // Render chart AFTER panel is visible
+    requestAnimationFrame(() => {
+        try {
+            renderMiniBarChart(document.getElementById('tp-chart'), hourlyData);
+        } catch (e) { console.warn('Chart render error:', e); }
+    });
+}
+
+function closeTourismPanel() {
+    document.getElementById('tourism-panel').classList.add('hidden');
+}
+
+function renderMiniBarChart(canvas, data) {
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const max = Math.max(...data, 1);
+    const barW = (w - 2) / 24;
+    const gap = 1;
+    const currentHour = new Date().getHours();
+
+    for (let i = 0; i < 24; i++) {
+        const val = data[i] / max;
+        const barH = val * (h - 8);
+        const x = i * barW + 1;
+        const y = h - barH - 2;
+
+        // Color based on value
+        let color;
+        if (data[i] >= 60) color = '#ef4444';
+        else if (data[i] >= 30) color = '#f59e0b';
+        else color = '#10b981';
+
+        // Highlight current hour
+        if (i === currentHour) {
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 8;
+        }
+
+        ctx.fillStyle = i === currentHour ? '#ffffff' : color;
+        ctx.fillRect(x, y, barW - gap, Math.max(barH, 1));
+        ctx.shadowBlur = 0;
+    }
+}
+
+// =====================================================
+// HEATMAP
+// =====================================================
+function buildHeatmap() {
+    if (!categoryData.pariwisata) return;
+    const heatPoints = categoryData.pariwisata.features.map(f => {
+        const coords = f.geometry.coordinates;
+        const intensity = (f.properties.visitors_per_day || 1000) / 5000;
+        return [coords[1], coords[0], Math.min(intensity, 1)];
+    });
+    heatmapLayer = L.heatLayer(heatPoints, {
+        radius: 35, blur: 25, maxZoom: 15,
+        gradient: { 0.2: '#06b6d4', 0.4: '#10b981', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#e11d48' }
     });
 }
 

@@ -59,5 +59,16 @@
       "Parkir": 549,
       "SPBU": 1
     }
+  },
+  "pariwisata": {
+    "label": "Pariwisata & Keramaian",
+    "subcategories": {
+      "Belanja & Kuliner": 5,
+      "Budaya & Sejarah": 7,
+      "Alam & Petualangan": 11,
+      "Religi": 3,
+      "Edukasi": 5,
+      "Hiburan": 4
+    }
   }
 }
