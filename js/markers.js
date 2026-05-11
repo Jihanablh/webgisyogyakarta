@@ -49,8 +49,8 @@ export function createMarker(feature, latlng, categoryKey) {
     const cx = size / 2;    // 16
     const cy = r;           // 16  (center of circle)
 
-    // Clean teardrop pin: tip at bottom center, circle on top
-    const pinPath = `M ${cx} ${pinH} L ${size} ${cy} A ${r} ${r} 0 1 0 0 ${cy} Z`;
+    // Clean teardrop pin: rounded tip at bottom, circle on top
+    const pinPath = `M ${cx - 2} ${pinH - 2} Q ${cx} ${pinH} ${cx + 2} ${pinH - 2} L ${size} ${cy} A ${r} ${r} 0 1 0 0 ${cy} Z`;
 
     const iconHtml = MARKER_ICONS[baseCat] || '';
     // Icon is 24x24 SVG content; scale to ~15px inside the 32px circle

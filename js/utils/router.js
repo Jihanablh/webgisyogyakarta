@@ -16,8 +16,15 @@ export class Router {
         const mapEl = document.getElementById('map');
         if (mapEl) mapEl.classList.add('hidden');
 
-        // Sidebar visibility: show on map, hide on other pages (optional, remove if unwanted)
-        // const sidebar = document.getElementById('sidebar');
+        // Sidebar visibility
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+            if (to === 'map') {
+                sidebar.style.display = '';
+            } else {
+                sidebar.style.display = 'none';
+            }
+        }
 
         if (from && this.routes[from]?.onLeave) this.routes[from].onLeave();
         if (this.routes[to]?.onEnter) this.routes[to].onEnter();

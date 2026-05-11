@@ -10,9 +10,9 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     // --- Sidebar open/close ---
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    const closeBtn  = document.getElementById('sidebar-toggle-close');
+    const closeBtn = document.getElementById('sidebar-toggle-close');
     if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
-    if (closeBtn)  closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+    if (closeBtn) closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
 
     // --- Panel close buttons ---
     const icClose = document.getElementById('info-card-close');
@@ -161,7 +161,7 @@ function _attachAccordionListeners(container) {
     container.querySelectorAll('.subcat-item').forEach(item => {
         item.addEventListener('click', () => {
             const key = item.dataset.category;
-            const sc  = item.dataset.subcat;
+            const sc = item.dataset.subcat;
             const check = item.querySelector('.subcat-check');
             if (check.classList.contains('checked')) {
                 check.classList.remove('checked');
@@ -183,16 +183,16 @@ function _attachAccordionListeners(container) {
 
 // ── Stats ────────────────────────────────────────────────────────────────────
 function updateWelcomeStats() {
-    const total  = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
-    const cats   = Object.keys(State.categoryData).length;
-    const subcats= Object.values(State.categoryMeta).reduce((s, m) => s + Object.keys(m?.subcategories || {}).length, 0);
+    const total = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
+    const cats = Object.keys(State.categoryData).length;
+    const subcats = Object.values(State.categoryMeta).reduce((s, m) => s + Object.keys(m?.subcategories || {}).length, 0);
 
     const wsTotal = document.getElementById('ws-total');
-    const wsCats  = document.getElementById('ws-cats');
-    const wsSub   = document.getElementById('ws-subcats');
+    const wsCats = document.getElementById('ws-cats');
+    const wsSub = document.getElementById('ws-subcats');
     if (wsTotal) wsTotal.textContent = total.toLocaleString();
-    if (wsCats)  wsCats.textContent  = cats;
-    if (wsSub)   wsSub.textContent   = subcats;
+    if (wsCats) wsCats.textContent = cats;
+    if (wsSub) wsSub.textContent = subcats;
 
     // Also update sidebar stats grid
     const grid = document.getElementById('stats-grid');
@@ -214,7 +214,7 @@ function buildSearchIndex() {
 }
 
 function initSearch() {
-    const input      = document.getElementById('search-input');
+    const input = document.getElementById('search-input');
     const resultsDiv = document.getElementById('search-results');
     if (!input || !resultsDiv) return;
 
@@ -240,7 +240,7 @@ function performSearch(query, resultsDiv) {
         .filter(f => {
             const name = (f.properties.name || '').toLowerCase();
             const type = (f.properties.type || '').toLowerCase();
-            const sc   = (f.properties.subcategory || '').toLowerCase();
+            const sc = (f.properties.subcategory || '').toLowerCase();
             return name.includes(query) || type.includes(query) || sc.includes(query);
         })
         .slice(0, 20);
@@ -250,7 +250,7 @@ function performSearch(query, resultsDiv) {
     } else {
         resultsDiv.innerHTML = matches.map((f, i) => {
             const cat = CATEGORIES[f._categoryKey];
-            const sc  = f.properties.subcategory || f.properties.type || '';
+            const sc = f.properties.subcategory || f.properties.type || '';
             const coords = f.geometry.coordinates;
             return `<div class="search-result-item" data-idx="${i}" data-lon="${coords[0]}" data-lat="${coords[1]}" data-cat="${f._categoryKey}">
                 <span class="search-result-dot" style="background:${cat.color}"></span>

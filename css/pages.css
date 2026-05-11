@@ -1,0 +1,238 @@
+/* Base SPA Page styling */
+.spa-page {
+    position: absolute;
+    top: 60px; /* Header height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-primary); /* Use primary background color instead of undefined bg-dark */
+    z-index: 100; /* Above everything (map, sidebar, panels) */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 30px;
+}
+
+.spa-page.hidden {
+    display: none !important;
+}
+
+.page-enter {
+    animation: slideUpFade 0.35s ease-out forwards;
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tentang (About) Page Styling */
+.tentang-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+}
+
+/* Hero Section */
+.ta-hero {
+    position: relative;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+    border-radius: 20px;
+    border: 1px solid var(--border-glass);
+    overflow: hidden;
+    margin-bottom: 40px;
+    text-align: center;
+}
+.ta-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(59,130,246,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+.ta-hero-inner {
+    position: relative;
+    z-index: 1;
+}
+.ta-version-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(59,130,246,0.2);
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+}
+.ta-title {
+    font-size: 48px;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 12px 0;
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.ta-subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 32px 0;
+}
+.ta-author {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.ta-author-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.ta-author-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Sections */
+.ta-section {
+    margin-bottom: 40px;
+}
+.ta-section-alt {
+    padding: 40px;
+    background: rgba(15,23,42,0.4);
+    border-radius: 20px;
+    border: 1px solid var(--border-glass);
+}
+.ta-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ta-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-glass);
+}
+
+/* Pillars */
+.ta-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.ta-pillar-card {
+    background: rgba(30,41,59,0.3);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+.ta-pillar-card:hover {
+    transform: translateY(-4px);
+    background: rgba(30,41,59,0.6);
+}
+.ta-pillar-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.ta-pillar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+}
+.ta-pillar-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Data Sources Grid */
+.ta-sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+.ta-source-card {
+    background: rgba(30,41,59,0.5);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 16px;
+}
+.ta-source-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.ta-source-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Tech Stack */
+.ta-tech-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.ta-tech-badge {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Stats */
+.ta-stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.ta-stat-card {
+    background: #0f172a;
+    border: 1px solid var(--border-glass);
+    border-left-width: 4px;
+    border-radius: 12px;
+    padding: 20px;
+}
+.ta-stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.ta-stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+/* Footer */
+.ta-footer {
+    text-align: center;
+    padding-top: 40px;
+    margin-top: 60px;
+    border-top: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    font-size: 13px;
+}
