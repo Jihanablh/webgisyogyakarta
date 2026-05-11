@@ -124,7 +124,7 @@ function createCustomIcon(categoryKey, opts = {}) {
         html: html,
         iconSize: [size, pinH],
         iconAnchor: [size / 2, pinH],
-        popupAnchor: [0, -pinH + 4]
+        popupAnchor: [0, -(pinH + 6)]
     });
 }
 
@@ -282,7 +282,9 @@ function createShelterIcon() {
     return L.divIcon({
         className: 'shelter-marker',
         html: `<div class="shelter-marker-inner"><div class="shelter-pulse"></div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 18v-6l9-6 9 6v6"/><path d="M9 18v-4h6v4"/></svg></div>`,
-        iconSize: [36, 36], iconAnchor: [18, 18]
+        iconSize: [36, 36], 
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
     });
 }
 
@@ -850,6 +852,12 @@ function initSidebar() {
         e.stopPropagation();
         closeDisasterPanel();
     });
+    document.getElementById('btn-open-stats').addEventListener('click', () => {
+        openStatsModal();
+    });
+    document.getElementById('sm-close').addEventListener('click', () => {
+        closeStatsModal();
+    });
 }
 
 // =====================================================
@@ -1171,6 +1179,54 @@ function showDisasterPanel(feature, categoryKey) {
 
 function closeDisasterPanel() {
     document.getElementById('disaster-panel').classList.add('hidden');
+}
+
+// =====================================================
+// STATS MODAL
+// =====================================================
+function openStatsModal() {
+    const modal = document.getElementById('stats-modal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Calculate stats
+    const total = allFeatures.length;
+    const results = Object.entries(categoryData).map(([k, data]) => ({
+        key: k,
+        count: data.features ? data.features.length : 0,
+        color: CATEGORIES[k].color,
+        label: CATEGORIES[k].label
+    })).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
+
+    const container = document.getElementById('stats-bars-container');
+    container.innerHTML = results.map(r => {
+        const percent = total > 0 ? ((r.count / total) * 100).toFixed(1) : 0;
+        return `
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 140px; font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${r.label}
+                </div>
+                <div style="flex: 1; height: 12px; background: rgba(30,41,59,0.5); border-radius: 6px; overflow: hidden;">
+                    <div style="height: 100%; border-radius: 6px; width: 0%; background: ${r.color}; box-shadow: 0 0 10px ${r.color}66; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);" data-target-width="${percent}%"></div>
+                </div>
+                <div style="width: 90px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text-primary);">
+                    ${r.count.toLocaleString()} <span style="font-size: 10px; color: var(--text-muted); font-weight: 500; margin-left: 4px;">(${percent}%)</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Trigger animation
+    setTimeout(() => {
+        container.querySelectorAll('[data-target-width]').forEach(bar => {
+            bar.style.width = bar.getAttribute('data-target-width');
+        });
+    }, 100);
+}
+
+function closeStatsModal() {
+    document.getElementById('stats-modal').classList.add('hidden');
+    document.body.style.overflow = '';
 }
 
 // =====================================================

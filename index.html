@@ -90,8 +90,26 @@
 
         <!-- Stats -->
         <div class="stats-section">
-            <h2 class="section-title">Statistik</h2>
+            <h2 class="section-title">Ringkasan Wilayah</h2>
             <div class="stats-grid" id="stats-grid"></div>
+            
+            <div class="status-grid" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="status-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
+                    <div class="status-icon" style="font-size: 20px;">🌋</div>
+                    <div class="status-info">
+                        <div class="status-label" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Status Merapi</div>
+                        <div class="status-value" style="font-size: 11px; font-weight: 700; color: #fbbf24; margin-top: 2px;">Siaga (Lv III)</div>
+                    </div>
+                </div>
+                <div class="status-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
+                    <div class="status-icon" style="font-size: 20px;">🌤️</div>
+                    <div class="status-info">
+                        <div class="status-label" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Cuaca DIY</div>
+                        <div class="status-value" style="font-size: 11px; font-weight: 700; color: #34d399; margin-top: 2px;">Cerah Berawan</div>
+                    </div>
+                </div>
+            </div>
+            <button id="btn-open-stats" class="rew-see-all" style="margin-top: 12px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">📊 Buka Dashboard Statistik →</button>
         </div>
 
         <!-- Recent Events Widget -->
@@ -307,6 +325,19 @@
             </div>
             <div class="rm-content" id="rm-content">
                 <!-- Filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ FULLSCREEN STATS MODAL ============ -->
+    <div id="stats-modal" class="report-modal hidden">
+        <div class="rm-container" style="max-width: 600px;">
+            <button id="sm-close" class="rm-close" aria-label="Tutup statistik">✕</button>
+            <div class="rm-content" style="padding: 32px;">
+                <h2 class="rm-title" style="margin-bottom: 24px; text-align: center;">Dashboard Statistik</h2>
+                <div id="stats-bars-container" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Filled by JS -->
+                </div>
             </div>
         </div>
     </div>
