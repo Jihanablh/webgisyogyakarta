@@ -18,16 +18,16 @@ const CONFIG = {
 };
 
 const CATEGORIES = {
+    kebencanaan:        { label: 'Kebencanaan',         icon: '🌋', color: '#dc2626', file: 'data/kebencanaan.geojson' },
+    lingkungan:         { label: 'Lingkungan',          icon: '🌿', color: '#16a34a', file: 'data/lingkungan.geojson' },
     pariwisata:         { label: 'Pariwisata & Keramaian', icon: '🏛️', color: '#e11d48', file: 'data/pariwisata.geojson' },
+    tempat_tinggal:     { label: 'Tempat Tinggal',      icon: '🏠', color: '#8b5cf6', file: 'data/tempat_tinggal.geojson' },
     kebutuhan:          { label: 'Kebutuhan',           icon: '🛒', color: '#f59e0b', file: 'data/kebutuhan.geojson' },
     atm_bank:           { label: 'ATM & Bank',          icon: '🏦', color: '#10b981', file: 'data/atm_bank.geojson' },
-    tempat_tinggal:     { label: 'Tempat Tinggal',      icon: '🏠', color: '#8b5cf6', file: 'data/tempat_tinggal.geojson' },
     sosial_tugas:       { label: 'Sosial & Tugas',      icon: '🍽️', color: '#f43f5e', file: 'data/sosial_tugas.geojson' },
     akademik:           { label: 'Pusat Akademik',      icon: '🎓', color: '#3b82f6', file: 'data/akademik.geojson' },
     kesehatan_darurat:  { label: 'Kesehatan & Darurat', icon: '🏥', color: '#ef4444', file: 'data/kesehatan_darurat.geojson' },
     mobilitas:          { label: 'Mobilitas',           icon: '🚌', color: '#06b6d4', file: 'data/mobilitas.geojson' },
-    kebencanaan:        { label: 'Kebencanaan',         icon: '🌋', color: '#dc2626', file: 'data/kebencanaan.geojson' },
-    lingkungan:         { label: 'Lingkungan',          icon: '🌿', color: '#16a34a', file: 'data/lingkungan.geojson' },
 };
 
 // =====================================================
@@ -154,6 +154,24 @@ const FACILITY_MAP = {
     atm: { icon: '🏧', label: 'ATM' },
     toko_suvenir: { icon: '🛍️', label: 'Suvenir' },
     guide: { icon: '🧭', label: 'Guide' },
+};
+
+const DISASTER_HISTORY = {
+    erupsi: [
+        { "tanggal": "2021-01-27", "jenis": "Erupsi Eksplosif", "skala": "VEI 2", "korban_jiwa": 0, "pengungsi": 4500, "kerugian_material": "Rp 12 Miliar", "deskripsi": "Erupsi eksplosif menghasilkan awan panas sejauh 3 km ke arah barat daya. Ribuan warga lereng Merapi mengungsi secara mandiri.", "sumber": "BPPTKG Yogyakarta" },
+        { "tanggal": "2023-04-11", "jenis": "Awan Panas Guguran", "skala": "VEI 1-2", "korban_jiwa": 0, "pengungsi": 2800, "kerugian_material": "Rp 8 Miliar", "deskripsi": "Guguran lava dan awan panas intensitas tinggi selama 3 hari berturut-turut. Status Siaga (Level III) dipertahankan.", "sumber": "BPPTKG Yogyakarta" },
+        { "tanggal": "2010-10-26", "jenis": "Erupsi Besar", "skala": "VEI 4", "korban_jiwa": 353, "pengungsi": 350000, "kerugian_material": "Rp 4,23 Triliun", "deskripsi": "Erupsi terbesar Merapi dalam 100 tahun terakhir. Wedhus gembel (awan panas) mencapai permukiman warga. Mbah Maridjan, juru kunci Merapi, menjadi korban.", "sumber": "BNPB / BPBD DIY" },
+        { "tanggal": "2006-05-27", "jenis": "Erupsi + Gempa", "skala": "VEI 2 + M6.3", "korban_jiwa": 5782, "pengungsi": 200000, "kerugian_material": "Rp 29,1 Triliun", "deskripsi": "Kombinasi erupsi Merapi dan gempa bumi M6.3 yang mengguncang Bantul. Ribuan rumah hancur di Klaten, Bantul, dan Sleman.", "sumber": "BNPB" }
+    ],
+    banjir: [
+        { "tanggal": "2024-03-17", "jenis": "Banjir & Longsor", "wilayah": "Kulonprogo & Gunungkidul", "korban_jiwa": 4, "rumah_terdampak": 1240, "kerugian_material": "Rp 45 Miliar", "deskripsi": "Hujan ekstrem 3 hari menyebabkan banjir bandang di Kulonprogo dan longsor di Gunungkidul. Jalan provinsi terputus di 7 titik.", "sumber": "BPBD DIY 2024" },
+        { "tanggal": "2022-12-06", "jenis": "Banjir Perkotaan", "wilayah": "Kota Yogyakarta & Bantul", "korban_jiwa": 0, "rumah_terdampak": 3200, "kerugian_material": "Rp 18 Miliar", "deskripsi": "Sungai Winongo dan Code meluap akibat curah hujan 180mm/hari. Kawasan Pathuk, Keparakan, dan Kotagede terendam hingga 1,5 meter.", "sumber": "BPBD Kota Yogyakarta" }
+    ],
+    gempa: [
+        { "tanggal": "2023-07-06", "jenis": "Gempa Tektonik", "skala": "M5.4", "korban_jiwa": 1, "luka_luka": 23, "bangunan_rusak": 467, "deskripsi": "Gempa berpusat di Bantul kedalaman 10 km. Kerusakan ringan hingga sedang tersebar di Bantul, Gunungkidul, dan Kota Yogyakarta.", "sumber": "BMKG" },
+        { "tanggal": "2006-05-27", "jenis": "Gempa Destruktif", "skala": "M6.3", "korban_jiwa": 5782, "luka_luka": 37000, "bangunan_rusak": 156000, "deskripsi": "Gempa paling mematikan dalam sejarah modern DIY. Pusat gempa di Bantul, 10 km kedalaman. Kecamatan Jetis, Pleret, dan Pundong paling parah.", "sumber": "BNPB / USGS" }
+    ],
+    longsor: []
 };
 
 // =====================================================
@@ -397,12 +415,15 @@ function dismissWelcome() {
     o.classList.add('hidden');
     setTimeout(() => { try { o.remove(); } catch(e){} }, 700);
     document.getElementById('sidebar').classList.remove('sidebar--hidden');
+    document.getElementById('top-nav').style.display = 'flex';
     renderCategoryTabs();
     document.getElementById('category-tabs').classList.remove('hidden');
-    activateCategory(Object.keys(CATEGORIES)[0]);
-    const results = Object.entries(categoryData).map(([k, d]) => ({ key: k, count: d.features.length }));
+    // Default active to kebencanaan
+    activateCategory('kebencanaan');
+    const results = Object.entries(categoryData).map(([k, d]) => ({ key: k, count: d.features ? d.features.length : 0 }));
     renderStats(results);
     renderRecentEvents();
+    showToast('🌋 Status Merapi: SIAGA (Level III) · Terakhir diperbarui: hari ini');
 }
 
 // =====================================================
@@ -853,12 +874,9 @@ function initSidebar() {
         closeDisasterPanel();
     });
     document.getElementById('btn-open-stats').addEventListener('click', () => {
-        openStatsModal();
+        const statTab = document.querySelector('.top-nav-tab[data-page="statistik"]');
+        if (statTab) statTab.click();
     });
-    document.getElementById('sm-close').addEventListener('click', () => {
-        closeStatsModal();
-    });
-}
 
 // =====================================================
 // TOURISM PANEL
@@ -1172,7 +1190,10 @@ function showDisasterPanel(feature, categoryKey) {
     // Actions
     const center = getFeatureCenter(feature);
     document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${center[0]},${center[1]}`, '_blank');
-    document.getElementById('dp-btn-report').onclick = () => openReportModal(feature, categoryKey);
+    document.getElementById('dp-btn-report').onclick = () => {
+        const lapTab = document.querySelector('.top-nav-tab[data-page="laporan"]');
+        if (lapTab) lapTab.click();
+    };
 
     panel.classList.remove('hidden');
 }
@@ -1181,157 +1202,7 @@ function closeDisasterPanel() {
     document.getElementById('disaster-panel').classList.add('hidden');
 }
 
-// =====================================================
-// STATS MODAL
-// =====================================================
-function openStatsModal() {
-    const modal = document.getElementById('stats-modal');
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    
-    // Calculate stats
-    const total = allFeatures.length;
-    const results = Object.entries(categoryData).map(([k, data]) => ({
-        key: k,
-        count: data.features ? data.features.length : 0,
-        color: CATEGORIES[k].color,
-        label: CATEGORIES[k].label
-    })).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
 
-    const container = document.getElementById('stats-bars-container');
-    container.innerHTML = results.map(r => {
-        const percent = total > 0 ? ((r.count / total) * 100).toFixed(1) : 0;
-        return `
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <div style="width: 140px; font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${r.label}
-                </div>
-                <div style="flex: 1; height: 12px; background: rgba(30,41,59,0.5); border-radius: 6px; overflow: hidden;">
-                    <div style="height: 100%; border-radius: 6px; width: 0%; background: ${r.color}; box-shadow: 0 0 10px ${r.color}66; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);" data-target-width="${percent}%"></div>
-                </div>
-                <div style="width: 90px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text-primary);">
-                    ${r.count.toLocaleString()} <span style="font-size: 10px; color: var(--text-muted); font-weight: 500; margin-left: 4px;">(${percent}%)</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    // Trigger animation
-    setTimeout(() => {
-        container.querySelectorAll('[data-target-width]').forEach(bar => {
-            bar.style.width = bar.getAttribute('data-target-width');
-        });
-    }, 100);
-}
-
-function closeStatsModal() {
-    document.getElementById('stats-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-// =====================================================
-// REPORT MODAL
-// =====================================================
-function openReportModal(feature, categoryKey) {
-    const modal = document.getElementById('report-modal');
-    currentReportFeature = { feature, categoryKey };
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    renderReportTab('ringkasan');
-    // Tab clicks
-    modal.querySelectorAll('.rm-tab').forEach(t => {
-        t.onclick = () => {
-            modal.querySelectorAll('.rm-tab').forEach(b => b.classList.remove('active'));
-            t.classList.add('active');
-            renderReportTab(t.dataset.tab);
-        };
-    });
-    document.getElementById('rm-close').onclick = () => closeReportModal();
-}
-
-function closeReportModal() {
-    document.getElementById('report-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function renderReportTab(tab) {
-    const content = document.getElementById('rm-content');
-    const { feature } = currentReportFeature || {};
-    if (!feature) return;
-    const p = feature.properties;
-
-    if (tab === 'ringkasan') {
-        const lr = p.level_risiko || 'Info';
-        const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : 'risk-low';
-        content.innerHTML = `
-            <div class="rm-summary">
-                <h2 class="rm-title">${escapeHtml(p.name||'')}</h2>
-                <span class="rm-risk-badge ${riskClass}">${lr.toUpperCase()}</span>
-                <div class="rm-stat-grid">
-                    <div class="rm-stat-card"><div class="rm-stat-num">${p.radius_km ? p.radius_km+' km' : '-'}</div><div class="rm-stat-label">Luas Terdampak</div></div>
-                    <div class="rm-stat-card"><div class="rm-stat-num">${p.kapasitas ? p.kapasitas.toLocaleString() : '-'}</div><div class="rm-stat-label">Kapasitas Pengungsian</div></div>
-                    <div class="rm-stat-card"><div class="rm-stat-num">${(p.riwayat_bencana||[]).length}</div><div class="rm-stat-label">Kejadian Tercatat</div></div>
-                    <div class="rm-stat-card"><div class="rm-stat-num">${p.zona||'-'}</div><div class="rm-stat-label">Zona</div></div>
-                </div>
-                <p class="rm-desc">${escapeHtml(p.deskripsi||'')}</p>
-                <div class="rm-source">📊 Sumber: ${escapeHtml(p.sumber_data||'-')} · Diperbarui: ${p.last_updated||'-'}</div>
-            </div>`;
-    } else if (tab === 'riwayat') {
-        const hist = p.riwayat_bencana || [];
-        const totalKorban = hist.reduce((s, h) => s + (h.korban_jiwa || 0), 0);
-        const totalPengungsi = hist.reduce((s, h) => s + (h.pengungsi || 0), 0);
-        content.innerHTML = `
-            <div class="rm-history">
-                <div class="rm-hist-stats">
-                    <div class="rm-stat-card"><div class="rm-stat-num">${hist.length}</div><div class="rm-stat-label">Total Kejadian</div></div>
-                    <div class="rm-stat-card"><div class="rm-stat-num">${totalKorban.toLocaleString()}</div><div class="rm-stat-label">Total Korban</div></div>
-                    <div class="rm-stat-card"><div class="rm-stat-num">${totalPengungsi.toLocaleString()}</div><div class="rm-stat-label">Total Pengungsi</div></div>
-                </div>
-                <div class="rm-timeline">
-                    ${hist.length === 0 ? '<p class="rm-empty">Belum ada riwayat bencana tercatat.</p>' :
-                    hist.map(h => {
-                        const scaleClass = (h.skala||'').includes('4') || (h.skala||'').includes('6') || h.skala === 'Besar' ? 'scale-high' : (h.skala||'').includes('2') || h.skala === 'Sedang' ? 'scale-med' : 'scale-low';
-                        return `<div class="rm-tl-item">
-                            <div class="rm-tl-dot ${scaleClass}"></div>
-                            <div class="rm-tl-content">
-                                <div class="rm-tl-date">${h.tanggal}</div>
-                                <div class="rm-tl-title">${h.jenis} <span class="rm-tl-scale ${scaleClass}">${h.skala}</span></div>
-                                <div class="rm-tl-detail">${(h.korban_jiwa||0).toLocaleString()} korban · ${(h.pengungsi||0).toLocaleString()} pengungsi · ${h.kerugian_material||'-'}</div>
-                                <p class="rm-tl-desc">${escapeHtml(h.deskripsi||'')}</p>
-                            </div>
-                        </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
-    } else if (tab === 'evakuasi') {
-        const fac = p.facilities || [];
-        content.innerHTML = `
-            <div class="rm-evac">
-                <h3 class="rm-section-title">Instruksi Evakuasi</h3>
-                <div class="rm-evac-box">${escapeHtml(p.instruksi_evakuasi || 'Tidak ada instruksi.')}</div>
-                ${fac.length > 0 ? `<h3 class="rm-section-title">Fasilitas Pengungsian</h3><div class="rm-fac-grid">${fac.map(f => `<span class="rm-fac-chip">${f}</span>`).join('')}</div>` : ''}
-                <h3 class="rm-section-title">Nomor Darurat</h3>
-                <div class="rm-contact-grid">
-                    <div class="rm-contact-card"><span class="rm-cc-icon">🚨</span><span class="rm-cc-name">BPBD DIY</span><span class="rm-cc-phone">+62274-515059</span></div>
-                    <div class="rm-contact-card"><span class="rm-cc-icon">🔍</span><span class="rm-cc-name">Basarnas</span><span class="rm-cc-phone">115</span></div>
-                    <div class="rm-contact-card"><span class="rm-cc-icon">🏥</span><span class="rm-cc-name">PMI DIY</span><span class="rm-cc-phone">+62274-561669</span></div>
-                    <div class="rm-contact-card"><span class="rm-cc-icon">⚡</span><span class="rm-cc-name">PLN</span><span class="rm-cc-phone">123</span></div>
-                    <div class="rm-contact-card"><span class="rm-cc-icon">💧</span><span class="rm-cc-name">PDAM</span><span class="rm-cc-phone">+62274-512345</span></div>
-                </div>
-            </div>`;
-    } else if (tab === 'kontak') {
-        content.innerHTML = `
-            <div class="rm-contacts">
-                <h3 class="rm-section-title">Kontak Instansi Terkait</h3>
-                <div class="rm-contact-grid rm-contact-grid-lg">
-                    <div class="rm-inst-card"><div class="rm-inst-icon">🚨</div><div class="rm-inst-name">BPBD DIY</div><div class="rm-inst-desc">Badan Penanggulangan Bencana Daerah</div><a class="rm-inst-phone" href="tel:+62274515059">📞 +62274-515059</a><a class="rm-inst-link" href="https://bpbd.jogjaprov.go.id" target="_blank">🌐 Website</a></div>
-                    <div class="rm-inst-card"><div class="rm-inst-icon">🌋</div><div class="rm-inst-name">BPPTKG</div><div class="rm-inst-desc">Balai Penyelidikan dan Pengembangan Teknologi Kebencanaan Geologi</div><a class="rm-inst-phone" href="tel:+62274514192">📞 +62274-514192</a><a class="rm-inst-link" href="https://merapi.bgl.esdm.go.id" target="_blank">🌐 Website</a></div>
-                    <div class="rm-inst-card"><div class="rm-inst-icon">🌤️</div><div class="rm-inst-name">BMKG Yogyakarta</div><div class="rm-inst-desc">Badan Meteorologi, Klimatologi, dan Geofisika</div><a class="rm-inst-phone" href="tel:+62274512346">📞 +62274-512346</a><a class="rm-inst-link" href="https://bmkg.go.id" target="_blank">🌐 Website</a></div>
-                    <div class="rm-inst-card"><div class="rm-inst-icon">🇮🇩</div><div class="rm-inst-name">BNPB</div><div class="rm-inst-desc">Badan Nasional Penanggulangan Bencana</div><a class="rm-inst-phone" href="tel:117">📞 117</a><a class="rm-inst-link" href="https://bnpb.go.id" target="_blank">🌐 Website</a></div>
-                </div>
-            </div>`;
-    }
-}
 
 // =====================================================
 // RECENT EVENTS WIDGET
@@ -1370,3 +1241,174 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') closeReportModal();
     });
 });
+}
+
+// =====================================================
+// SPA ROUTING & RENDERING
+// =====================================================
+function initSPA() {
+    document.querySelectorAll('.top-nav-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.top-nav-tab').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const pageId = e.target.getAttribute('data-page');
+            document.querySelectorAll('.spa-page').forEach(p => p.classList.add('hidden'));
+            
+            if (pageId !== 'map') {
+                const pageEl = document.getElementById(`${pageId}-page`);
+                if (pageEl) {
+                    pageEl.classList.remove('hidden');
+                    if (pageId === 'laporan') {
+                        const activeDisaster = document.querySelector('.page-tab.active')?.getAttribute('data-disaster') || 'erupsi';
+                        renderLaporan(activeDisaster);
+                    }
+                    if (pageId === 'statistik') renderStatistik();
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.page-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const container = e.target.closest('.page-tabs');
+            container.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            const dis = e.target.getAttribute('data-disaster');
+            if (dis) renderLaporan(dis);
+        });
+    });
+}
+
+function renderLaporan(disasterType) {
+    const content = document.getElementById('laporan-content');
+    const hist = DISASTER_HISTORY[disasterType] || [];
+    
+    const totalKorban = hist.reduce((s, h) => s + (h.korban_jiwa || 0), 0);
+    const totalPengungsi = hist.reduce((s, h) => s + (h.pengungsi || 0), 0);
+    const accentColor = disasterType === 'erupsi' ? '#ef4444' : disasterType === 'banjir' ? '#3b82f6' : disasterType === 'gempa' ? '#ea580c' : '#ca8a04';
+
+    content.innerHTML = `
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: start;">
+            <div style="display: flex; flex-direction: column; gap: 16px; position: sticky; top: 120px;">
+                <div style="background: #161b22; border-left: 3px solid ${accentColor}; border-radius: var(--radius-sm); padding: 16px;">
+                    <div style="font-size: 32px; font-weight: 700; color: ${accentColor};">${totalKorban.toLocaleString()}</div>
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Korban Jiwa</div>
+                </div>
+                <div style="background: #161b22; border-left: 3px solid ${accentColor}; border-radius: var(--radius-sm); padding: 16px;">
+                    <div style="font-size: 32px; font-weight: 700; color: ${accentColor};">${totalPengungsi.toLocaleString()}</div>
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Pengungsi</div>
+                </div>
+                <div style="background: #161b22; border-left: 3px solid ${accentColor}; border-radius: var(--radius-sm); padding: 16px;">
+                    <div style="font-size: 24px; font-weight: 700; color: ${accentColor};">${hist[0] ? hist[0].kerugian_material : '-'}</div>
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Kerugian (Terkini)</div>
+                </div>
+            </div>
+            
+            <div style="border-left: 1px solid #30363d; padding-left: 24px; display: flex; flex-direction: column; gap: 24px;">
+                ${hist.length === 0 ? '<p style="color: var(--text-muted);">Belum ada data riwayat tercatat.</p>' : 
+                hist.map(h => `
+                    <div style="position: relative; background: rgba(30,41,59,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px; transition: all 0.3s; cursor: default;" onmouseover="this.style.background='#1c2128'; this.style.transform='translateX(4px)'" onmouseout="this.style.background='rgba(30,41,59,0.3)'; this.style.transform='translateX(0)'">
+                        <div style="position: absolute; left: -29px; top: 24px; width: 10px; height: 10px; border-radius: 50%; background: ${accentColor}; border: 2px solid #0a0e1a;"></div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">${h.tanggal}</div>
+                        <div style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">${h.jenis} <span style="font-size: 11px; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 12px; margin-left: 8px; vertical-align: middle;">${h.skala || h.wilayah}</span></div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">${h.korban_jiwa ? h.korban_jiwa + ' korban · ' : ''}${h.rumah_terdampak ? h.rumah_terdampak + ' rumah terdampak · ' : ''}${h.pengungsi ? h.pengungsi + ' mengungsi · ' : ''}${h.kerugian_material || ''}</div>
+                        <p style="font-size: 14px; line-height: 1.6; color: var(--text-muted);">${h.deskripsi}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function renderStatistik() {
+    const content = document.getElementById('statistik-content');
+    const total = allFeatures.length;
+    const catCount = Object.keys(CATEGORIES).length;
+    let subcatCount = 0;
+    for (const m of Object.values(categoryMeta)) subcatCount += Object.keys(m.subcategories || {}).length;
+
+    const results = Object.entries(categoryData).map(([k, data]) => ({
+        key: k,
+        count: data.features ? data.features.length : 0,
+        color: CATEGORIES[k].color,
+        label: CATEGORIES[k].label
+    })).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
+
+    const maxCount = results[0] ? results[0].count : 1;
+
+    content.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
+            <div style="background: rgba(30,41,59,0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px;">
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-accent);">${total.toLocaleString()}</div>
+                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Total Tempat</div>
+            </div>
+            <div style="background: rgba(30,41,59,0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px;">
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);">${catCount}</div>
+                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Kategori Utama</div>
+            </div>
+            <div style="background: rgba(30,41,59,0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px;">
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);">${subcatCount}</div>
+                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px;">Subkategori Detail</div>
+            </div>
+        </div>
+        
+        <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 24px;">Distribusi Per Kategori</h3>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${results.map(r => {
+                const percent = ((r.count / maxCount) * 100).toFixed(1);
+                return `
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 180px; font-size: 13px; font-weight: 600; color: var(--text-secondary);">${r.label}</div>
+                    <div style="flex: 1; height: 8px; background: rgba(30,41,59,0.5); border-radius: 4px; overflow: hidden;">
+                        <div style="height: 100%; border-radius: 4px; width: 0%; background: ${r.color}; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);" data-target-width="${percent}%"></div>
+                    </div>
+                    <div style="width: 80px; text-align: right; font-size: 13px; font-weight: 700; color: var(--text-primary);">${r.count.toLocaleString()}</div>
+                </div>`;
+            }).join('')}
+        </div>
+    `;
+
+    setTimeout(() => {
+        content.querySelectorAll('[data-target-width]').forEach(bar => {
+            bar.style.width = bar.getAttribute('data-target-width');
+        });
+    }, 100);
+}
+
+// =====================================================
+// TOAST NOTIFICATION
+// =====================================================
+function showToast(message) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px;';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    toast.style.cssText = 'background: rgba(15,23,42,0.9); backdrop-filter: blur(8px); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 16px 20px; color: var(--text-primary); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); transform: translateY(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);';
+    toast.innerHTML = message;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initSPA();
+});
+

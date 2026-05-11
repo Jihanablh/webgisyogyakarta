@@ -17,6 +17,19 @@
 </head>
 <body>
 
+    <!-- ============ TOP NAVIGATION ============ -->
+    <nav class="top-nav" id="top-nav" style="display: none;">
+        <div class="top-nav-logo">
+            <span>JogjaMap</span>
+        </div>
+        <div class="top-nav-tabs">
+            <button class="top-nav-tab active" data-page="map">Peta</button>
+            <button class="top-nav-tab" data-page="laporan">Laporan Bencana</button>
+            <button class="top-nav-tab" data-page="statistik">Statistik</button>
+            <button class="top-nav-tab" data-page="tentang">Tentang</button>
+        </div>
+    </nav>
+
     <!-- ============ WELCOME OVERLAY ============ -->
     <div id="welcome-overlay" class="welcome-overlay">
         <div class="welcome-particles">
@@ -329,15 +342,71 @@
         </div>
     </div>
 
-    <!-- ============ FULLSCREEN STATS MODAL ============ -->
-    <div id="stats-modal" class="report-modal hidden">
-        <div class="rm-container" style="max-width: 600px;">
-            <button id="sm-close" class="rm-close" aria-label="Tutup statistik">✕</button>
-            <div class="rm-content" style="padding: 32px;">
-                <h2 class="rm-title" style="margin-bottom: 24px; text-align: center;">Dashboard Statistik</h2>
-                <div id="stats-bars-container" style="display: flex; flex-direction: column; gap: 16px;">
-                    <!-- Filled by JS -->
+    <!-- SPA PAGES -->
+    <!-- LAPORAN BENCANA PAGE -->
+    <div id="laporan-page" class="spa-page hidden">
+        <div class="page-header">
+            <h1 class="page-title">Laporan Kebencanaan DIY</h1>
+            <p class="page-subtitle">Data valid berdasarkan BPBD · BNPB · BMKG · BPPTKG</p>
+            <div class="page-tabs" id="laporan-tabs">
+                <button class="page-tab active" data-disaster="erupsi">Erupsi Merapi</button>
+                <button class="page-tab" data-disaster="banjir">Banjir</button>
+                <button class="page-tab" data-disaster="gempa">Gempa</button>
+                <button class="page-tab" data-disaster="longsor">Longsor</button>
+            </div>
+        </div>
+        <div class="page-content" id="laporan-content">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <!-- STATISTIK PAGE -->
+    <div id="statistik-page" class="spa-page hidden">
+        <div class="page-header">
+            <h1 class="page-title">Statistik JogjaMap</h1>
+            <p class="page-subtitle">Gambaran lengkap data wilayah DIY</p>
+        </div>
+        <div class="page-content" id="statistik-content">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <!-- TENTANG PAGE -->
+    <div id="tentang-page" class="spa-page hidden">
+        <div class="tentang-container">
+            <div class="tentang-hero">
+                <h1 class="tentang-title">JogjaMap</h1>
+                <p class="tentang-subtitle">Panduan digital lengkap wilayah DIY</p>
+                <p class="tentang-author">Dibuat oleh: Jihan Nabilah Rahman<br>Data: OpenStreetMap · BPBD DIY · BNPB · BMKG</p>
+            </div>
+            <div class="tentang-pillars">
+                <div class="pillar">
+                    <span class="pillar-icon">🗺️</span>
+                    <h3>Peta</h3>
+                    <p>Navigasi presisi</p>
                 </div>
+                <div class="pillar">
+                    <span class="pillar-icon">⚠️</span>
+                    <h3>Bencana</h3>
+                    <p>Keselamatan warga</p>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">📊</span>
+                    <h3>Statistik</h3>
+                    <p>Data akurat</p>
+                </div>
+            </div>
+            <div class="tentang-sources">
+                <h3 style="margin-bottom: 16px; font-size: 16px;">Sumber Data</h3>
+                <div class="source-grid">
+                    <div class="source-card"><strong>OSM/HOT</strong><br>Geometri</div>
+                    <div class="source-card"><strong>BPBD DIY</strong><br>Bencana</div>
+                    <div class="source-card"><strong>BMKG</strong><br>Cuaca</div>
+                    <div class="source-card"><strong>BNPB</strong><br>Risiko</div>
+                </div>
+            </div>
+            <div class="tentang-footer">
+                Versi 2.0 · Terakhir diperbarui: Januari 2025
             </div>
         </div>
     </div>

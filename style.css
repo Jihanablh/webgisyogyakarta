@@ -87,10 +87,10 @@ a:hover {
 /* --- Map --- */
 #map {
     position: absolute;
-    top: 0;
+    top: 60px;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
     z-index: 1;
 }
 
@@ -178,10 +178,10 @@ a:hover {
 /* --- Sidebar --- */
 .sidebar {
     position: fixed;
-    top: 0;
+    top: 60px;
     left: 0;
     width: var(--sidebar-width);
-    height: 100vh;
+    height: calc(100vh - 60px);
     background: #0d1117;
     border-right: 1px solid var(--border-glass);
     z-index: 1000;
@@ -2204,3 +2204,136 @@ a:hover {
     .disaster-panel { top: 0; right: 0; bottom: 0; width: 100%; border-radius: 0; }
     .rm-container { width: 95%; max-height: 90vh; }
 }
+
+/* ===================================================
+   TOP NAVIGATION
+   =================================================== */
+.top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: #0d1117;
+    border-bottom: 1px solid var(--border-glass);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+.top-nav-logo {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+.top-nav-tabs {
+    display: flex;
+    gap: 8px;
+}
+.top-nav-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.top-nav-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+}
+.top-nav-tab.active {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.1);
+}
+
+/* ===================================================
+   SPA PAGES (LAPORAN, STATISTIK, TENTANG)
+   =================================================== */
+.spa-page {
+    position: fixed;
+    top: 60px; left: 0; right: 0; bottom: 0;
+    background: #0a0e1a; /* solid dark background */
+    z-index: 1500; /* above map and sidebar, below top-nav */
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+    padding: 32px 0;
+}
+.spa-page.hidden {
+    display: none;
+}
+.page-header {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border-glass);
+}
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.page-subtitle {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+.page-tabs {
+    display: flex; gap: 16px; margin-top: 24px;
+    overflow-x: auto;
+}
+.page-tab {
+    padding: 12px 4px; border-radius: 0;
+    border: none; background: transparent;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s ease; white-space: nowrap;
+    margin-bottom: -1px;
+}
+.page-tab:hover { color: var(--text-primary); }
+.page-tab.active { border-bottom-color: #ef4444; color: #ef4444; font-weight: 600; }
+
+.page-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Tentang Page Specifics */
+.tentang-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 24px;
+    text-align: center;
+}
+.tentang-hero { margin-bottom: 48px; }
+.tentang-title { font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.5px; }
+.tentang-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; }
+.tentang-author { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+.tentang-pillars {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px;
+}
+.pillar {
+    background: rgba(30,41,59,0.3); border: 1px solid var(--border-glass);
+    padding: 24px; border-radius: var(--radius-lg); text-align: center;
+}
+.pillar-icon { font-size: 32px; margin-bottom: 16px; display: inline-block; }
+.pillar h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+.pillar p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+.tentang-sources { margin-bottom: 48px; text-align: left; background: rgba(30,41,59,0.2); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-glass); }
+.source-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
+.source-card { padding: 16px; background: rgba(15,23,42,0.6); border-radius: var(--radius-md); border: 1px solid var(--border-glass); font-size: 12px; color: var(--text-muted); }
+.source-card strong { font-size: 14px; color: var(--text-primary); display: block; margin-bottom: 4px; }
+
+.tentang-footer { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-glass); padding-top: 24px; }
