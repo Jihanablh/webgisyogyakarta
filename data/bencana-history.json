@@ -1,0 +1,17 @@
+{
+    "erupsi": [
+        { "tanggal": "2021-01-27", "jenis": "Erupsi Eksplosif", "skala": "VEI 2", "korban_jiwa": 0, "pengungsi": 4500, "kerugian_material": "Rp 12 Miliar", "deskripsi": "Erupsi eksplosif menghasilkan awan panas sejauh 3 km ke arah barat daya. Ribuan warga lereng Merapi mengungsi secara mandiri.", "sumber": "BPPTKG Yogyakarta" },
+        { "tanggal": "2023-04-11", "jenis": "Awan Panas Guguran", "skala": "VEI 1-2", "korban_jiwa": 0, "pengungsi": 2800, "kerugian_material": "Rp 8 Miliar", "deskripsi": "Guguran lava dan awan panas intensitas tinggi selama 3 hari berturut-turut. Status Siaga (Level III) dipertahankan.", "sumber": "BPPTKG Yogyakarta" },
+        { "tanggal": "2010-10-26", "jenis": "Erupsi Besar", "skala": "VEI 4", "korban_jiwa": 353, "pengungsi": 350000, "kerugian_material": "Rp 4,23 Triliun", "deskripsi": "Erupsi terbesar Merapi dalam 100 tahun terakhir. Wedhus gembel (awan panas) mencapai permukiman warga. Mbah Maridjan, juru kunci Merapi, menjadi korban.", "sumber": "BNPB / BPBD DIY" },
+        { "tanggal": "2006-05-27", "jenis": "Erupsi + Gempa", "skala": "VEI 2 + M6.3", "korban_jiwa": 5782, "pengungsi": 200000, "kerugian_material": "Rp 29,1 Triliun", "deskripsi": "Kombinasi erupsi Merapi dan gempa bumi M6.3 yang mengguncang Bantul. Ribuan rumah hancur di Klaten, Bantul, dan Sleman.", "sumber": "BNPB" }
+    ],
+    "banjir": [
+        { "tanggal": "2024-03-17", "jenis": "Banjir & Longsor", "wilayah": "Kulonprogo & Gunungkidul", "korban_jiwa": 4, "rumah_terdampak": 1240, "kerugian_material": "Rp 45 Miliar", "deskripsi": "Hujan ekstrem 3 hari menyebabkan banjir bandang di Kulonprogo dan longsor di Gunungkidul. Jalan provinsi terputus di 7 titik.", "sumber": "BPBD DIY 2024" },
+        { "tanggal": "2022-12-06", "jenis": "Banjir Perkotaan", "wilayah": "Kota Yogyakarta & Bantul", "korban_jiwa": 0, "rumah_terdampak": 3200, "kerugian_material": "Rp 18 Miliar", "deskripsi": "Sungai Winongo dan Code meluap akibat curah hujan 180mm/hari. Kawasan Pathuk, Keparakan, dan Kotagede terendam hingga 1,5 meter.", "sumber": "BPBD Kota Yogyakarta" }
+    ],
+    "gempa": [
+        { "tanggal": "2023-07-06", "jenis": "Gempa Tektonik", "skala": "M5.4", "korban_jiwa": 1, "luka_luka": 23, "bangunan_rusak": 467, "deskripsi": "Gempa berpusat di Bantul kedalaman 10 km. Kerusakan ringan hingga sedang tersebar di Bantul, Gunungkidul, dan Kota Yogyakarta.", "sumber": "BMKG" },
+        { "tanggal": "2006-05-27", "jenis": "Gempa Destruktif", "skala": "M6.3", "korban_jiwa": 5782, "luka_luka": 37000, "bangunan_rusak": 156000, "deskripsi": "Gempa paling mematikan dalam sejarah modern DIY. Pusat gempa di Bantul, 10 km kedalaman. Kecamatan Jetis, Pleret, dan Pundong paling parah.", "sumber": "BNPB / USGS" }
+    ],
+    "longsor": []
+}
