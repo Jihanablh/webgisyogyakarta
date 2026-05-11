@@ -18,16 +18,16 @@ const CONFIG = {
 };
 
 const CATEGORIES = {
-    kebencanaan:        { label: 'Kebencanaan',         icon: '🌋', color: '#dc2626', file: 'data/kebencanaan.geojson' },
-    lingkungan:         { label: 'Lingkungan',          icon: '🌿', color: '#16a34a', file: 'data/lingkungan.geojson' },
-    pariwisata:         { label: 'Pariwisata & Keramaian', icon: '🏛️', color: '#e11d48', file: 'data/pariwisata.geojson' },
-    tempat_tinggal:     { label: 'Tempat Tinggal',      icon: '🏠', color: '#8b5cf6', file: 'data/tempat_tinggal.geojson' },
-    kebutuhan:          { label: 'Kebutuhan',           icon: '🛒', color: '#f59e0b', file: 'data/kebutuhan.geojson' },
-    atm_bank:           { label: 'ATM & Bank',          icon: '🏦', color: '#10b981', file: 'data/atm_bank.geojson' },
-    sosial_tugas:       { label: 'Sosial & Tugas',      icon: '🍽️', color: '#f43f5e', file: 'data/sosial_tugas.geojson' },
-    akademik:           { label: 'Pusat Akademik',      icon: '🎓', color: '#3b82f6', file: 'data/akademik.geojson' },
-    kesehatan_darurat:  { label: 'Kesehatan & Darurat', icon: '🏥', color: '#ef4444', file: 'data/kesehatan_darurat.geojson' },
-    mobilitas:          { label: 'Mobilitas',           icon: '🚌', color: '#06b6d4', file: 'data/mobilitas.geojson' },
+    kebencanaan: { label: 'Kebencanaan', icon: '🌋', color: '#dc2626', file: 'data/kebencanaan.geojson' },
+    lingkungan: { label: 'Lingkungan', icon: '🌿', color: '#16a34a', file: 'data/lingkungan.geojson' },
+    pariwisata: { label: 'Pariwisata & Keramaian', icon: '🏛️', color: '#e11d48', file: 'data/pariwisata.geojson' },
+    tempat_tinggal: { label: 'Tempat Tinggal', icon: '🏠', color: '#8b5cf6', file: 'data/tempat_tinggal.geojson' },
+    kebutuhan: { label: 'Kebutuhan', icon: '🛒', color: '#f59e0b', file: 'data/kebutuhan.geojson' },
+    atm_bank: { label: 'ATM & Bank', icon: '🏦', color: '#10b981', file: 'data/atm_bank.geojson' },
+    sosial_tugas: { label: 'Sosial & Tugas', icon: '🍽️', color: '#f43f5e', file: 'data/sosial_tugas.geojson' },
+    akademik: { label: 'Pusat Akademik', icon: '🎓', color: '#3b82f6', file: 'data/akademik.geojson' },
+    kesehatan_darurat: { label: 'Kesehatan & Darurat', icon: '🏥', color: '#ef4444', file: 'data/kesehatan_darurat.geojson' },
+    mobilitas: { label: 'Mobilitas', icon: '🚌', color: '#06b6d4', file: 'data/mobilitas.geojson' },
 };
 
 // =====================================================
@@ -71,7 +71,7 @@ function createCustomIcon(categoryKey, opts = {}) {
 
     // Compute a lighter version of the color for gradient
     const lighten = (hex, amt) => {
-        let r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+        let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
         r = Math.min(255, r + amt); g = Math.min(255, g + amt); b = Math.min(255, b + amt);
         return `rgb(${r},${g},${b})`;
     };
@@ -99,20 +99,20 @@ function createCustomIcon(categoryKey, opts = {}) {
                     </linearGradient>
                 </defs>
                 <!-- Pin body -->
-                <path d="M${size/2} ${pinH}
-                         C${size/2} ${pinH}
-                          ${size*0.05} ${pinH*0.52}
-                          ${size*0.05} ${size*0.46}
-                         A${size*0.45} ${size*0.46} 0 1 1
-                          ${size*0.95} ${size*0.46}
-                         C${size*0.95} ${pinH*0.52}
-                          ${size/2} ${pinH}
-                          ${size/2} ${pinH}Z"
+                <path d="M${size / 2} ${pinH}
+                         C${size / 2} ${pinH}
+                          ${size * 0.05} ${pinH * 0.52}
+                          ${size * 0.05} ${size * 0.46}
+                         A${size * 0.45} ${size * 0.46} 0 1 1
+                          ${size * 0.95} ${size * 0.46}
+                         C${size * 0.95} ${pinH * 0.52}
+                          ${size / 2} ${pinH}
+                          ${size / 2} ${pinH}Z"
                       fill="url(#grad-${categoryKey})" />
                 <!-- White inner circle -->
-                <circle cx="${size/2}" cy="${size*0.46}" r="${iconW*0.52}" fill="rgba(255,255,255,0.2)" />
+                <circle cx="${size / 2}" cy="${size * 0.46}" r="${iconW * 0.52}" fill="rgba(255,255,255,0.2)" />
                 <!-- Inner icon -->
-                <g transform="translate(${size/2 - iconW/2}, ${size*0.46 - iconW/2}) scale(${iconW/24})">
+                <g transform="translate(${size / 2 - iconW / 2}, ${size * 0.46 - iconW / 2}) scale(${iconW / 24})">
                     ${innerSvg}
                 </g>
             </svg>
@@ -173,34 +173,6 @@ const DISASTER_HISTORY = {
     ],
     longsor: []
 };
-
-// =====================================================
-// MAP
-// =====================================================
-function initMap() {
-    map = L.map('map', {
-        center: CONFIG.center, zoom: CONFIG.zoom,
-        minZoom: CONFIG.minZoom, maxZoom: CONFIG.maxZoom,
-        zoomControl: false, attributionControl: true
-    });
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.tileLayer(CONFIG.tileUrl, {
-        attribution: CONFIG.tileAttribution, maxZoom: CONFIG.maxZoom, subdomains: 'abcd'
-    }).addTo(map);
-
-    map.on('mousemove', (e) => {
-        const { lat, lng } = e.latlng;
-        document.getElementById('coord-text').textContent =
-            `${lat.toFixed(4)}°${lat < 0 ? 'S' : 'N'}, ${lng.toFixed(4)}°E`;
-    });
-
-    map.on('click', () => {
-        closeInfoCard();
-        closeTourismPanel();
-        closeDisasterPanel();
-        removeSearchHighlight();
-    });
-}
 
 // =====================================================
 // DATA LOADING
@@ -300,7 +272,7 @@ function createShelterIcon() {
     return L.divIcon({
         className: 'shelter-marker',
         html: `<div class="shelter-marker-inner"><div class="shelter-pulse"></div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 18v-6l9-6 9 6v6"/><path d="M9 18v-4h6v4"/></svg></div>`,
-        iconSize: [36, 36], 
+        iconSize: [36, 36],
         iconAnchor: [18, 18],
         popupAnchor: [0, -18]
     });
@@ -336,7 +308,7 @@ function addCategoryLayer(categoryKey, data) {
                 });
                 const badge = props.level_risiko && props.level_risiko !== 'Info'
                     ? `<span class="popup-risk popup-risk-${props.level_risiko.toLowerCase()}">${props.level_risiko}</span>` : '';
-                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name||'')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory||'')} ${badge}</div></div>`, {closeButton:true, maxWidth:280});
+                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name || '')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory || '')} ${badge}</div></div>`, { closeButton: true, maxWidth: 280 });
             }
         });
         layerGroup.addLayer(geoLayer);
@@ -363,7 +335,7 @@ function addCategoryLayer(categoryKey, data) {
             },
             onEachFeature: (feature, layer) => {
                 const props = feature.properties;
-                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name||'Unnamed')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory||props.type||'')} · ${cat.label}</div></div>`, {closeButton:true, maxWidth:250});
+                layer.bindPopup(`<div class="popup-content"><div class="popup-name">${escapeHtml(props.name || 'Unnamed')}</div><div class="popup-type"><span class="popup-dot" style="background:${cat.color}"></span>${escapeHtml(props.subcategory || props.type || '')} · ${cat.label}</div></div>`, { closeButton: true, maxWidth: 250 });
                 layer.on('click', (e) => { L.DomEvent.stopPropagation(e); showTourismPanel(feature, categoryKey); });
             }
         });
@@ -413,7 +385,7 @@ function animateCount(id, target) {
 function dismissWelcome() {
     const o = document.getElementById('welcome-overlay');
     o.classList.add('hidden');
-    setTimeout(() => { try { o.remove(); } catch(e){} }, 700);
+    setTimeout(() => { try { o.remove(); } catch (e) { } }, 700);
     document.getElementById('sidebar').classList.remove('sidebar--hidden');
     document.getElementById('top-nav').style.display = 'flex';
     renderCategoryTabs();
@@ -821,7 +793,7 @@ function showInfoCard(feature, categoryKey) {
     let cLat, cLon;
     if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
     else if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); cLat = b.lat; cLon = b.lng; }
-    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length/2)]; cLon = c[0]; cLat = c[1]; }
+    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; cLon = c[0]; cLat = c[1]; }
     else { cLon = 110.3695; cLat = -7.7956; }
     const dist = haversineDistance(center.lat, center.lng, coords[1], coords[0]);
     document.getElementById('info-distance-text').textContent = formatDistance(dist);
@@ -878,344 +850,344 @@ function initSidebar() {
         if (statTab) statTab.click();
     });
 
-// =====================================================
-// TOURISM PANEL
-// =====================================================
-function showTourismPanel(feature, categoryKey) {
-    const panel = document.getElementById('tourism-panel');
-    const props = feature.properties;
-    const coords = feature.geometry.coordinates;
-    const catKey = categoryKey || props.category || 'pariwisata';
-    const cat = CATEGORIES[catKey] || CATEGORIES.pariwisata;
+    // =====================================================
+    // TOURISM PANEL
+    // =====================================================
+    function showTourismPanel(feature, categoryKey) {
+        const panel = document.getElementById('tourism-panel');
+        const props = feature.properties;
+        const coords = feature.geometry.coordinates;
+        const catKey = categoryKey || props.category || 'pariwisata';
+        const cat = CATEGORIES[catKey] || CATEGORIES.pariwisata;
 
-    closeInfoCard();
+        closeInfoCard();
 
-    // Header photo with dynamic category color fallback
-    const header = document.getElementById('tp-header');
-    if (props.foto) {
-        header.style.backgroundImage = `url('${props.foto}')`;
-    } else {
-        header.style.backgroundImage = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
-    }
-
-    // Category badge color
-    const badgeEl = document.getElementById('tp-category-badge');
-    badgeEl.textContent = props.subcategory || props.type || cat.label;
-    badgeEl.style.background = `${cat.color}cc`;
-
-    document.getElementById('tp-name').textContent = props.name || 'Unnamed';
-
-    // Rating (hide row if no rating)
-    const rating = props.rating || 0;
-    const statsRow = document.querySelector('.tp-stats-row');
-    if (rating > 0) {
-        statsRow.style.display = 'flex';
-        const starsEl = document.getElementById('tp-stars');
-        let starsHtml = '';
-        for (let i = 1; i <= 5; i++) {
-            if (i <= Math.floor(rating)) starsHtml += '<span class="star filled">★</span>';
-            else if (i - 0.5 <= rating) starsHtml += '<span class="star half">★</span>';
-            else starsHtml += '<span class="star">★</span>';
+        // Header photo with dynamic category color fallback
+        const header = document.getElementById('tp-header');
+        if (props.foto) {
+            header.style.backgroundImage = `url('${props.foto}')`;
+        } else {
+            header.style.backgroundImage = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
         }
-        starsEl.innerHTML = starsHtml;
-        document.getElementById('tp-rating').textContent = rating.toFixed(1);
-        document.getElementById('tp-reviews').textContent = props.reviews ? `· ${props.reviews.toLocaleString()} ulasan` : '';
-        document.getElementById('tp-visitors').textContent = props.visitors_per_day ? `~${props.visitors_per_day.toLocaleString()} / hari` : '';
-    } else {
-        statsRow.style.display = 'none';
+
+        // Category badge color
+        const badgeEl = document.getElementById('tp-category-badge');
+        badgeEl.textContent = props.subcategory || props.type || cat.label;
+        badgeEl.style.background = `${cat.color}cc`;
+
+        document.getElementById('tp-name').textContent = props.name || 'Unnamed';
+
+        // Rating (hide row if no rating)
+        const rating = props.rating || 0;
+        const statsRow = document.querySelector('.tp-stats-row');
+        if (rating > 0) {
+            statsRow.style.display = 'flex';
+            const starsEl = document.getElementById('tp-stars');
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) starsHtml += '<span class="star filled">★</span>';
+                else if (i - 0.5 <= rating) starsHtml += '<span class="star half">★</span>';
+                else starsHtml += '<span class="star">★</span>';
+            }
+            starsEl.innerHTML = starsHtml;
+            document.getElementById('tp-rating').textContent = rating.toFixed(1);
+            document.getElementById('tp-reviews').textContent = props.reviews ? `· ${props.reviews.toLocaleString()} ulasan` : '';
+            document.getElementById('tp-visitors').textContent = props.visitors_per_day ? `~${props.visitors_per_day.toLocaleString()} / hari` : '';
+        } else {
+            statsRow.style.display = 'none';
+        }
+
+        // Hours & ticket (show/hide)
+        const pillsRow = document.querySelector('.tp-info-pills');
+        if (props.opening_hours || props.ticket_price) {
+            pillsRow.style.display = 'flex';
+            document.getElementById('tp-hours').textContent = props.opening_hours || '-';
+            document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
+        } else {
+            pillsRow.style.display = 'none';
+        }
+
+        // Crowd chart (only for pariwisata or data with hourly_crowd)
+        const chartSection = document.querySelector('.tp-chart-section');
+        const hourlyData = props.hourly_crowd;
+        if (hourlyData && hourlyData.length === 24) {
+            chartSection.style.display = 'block';
+            const currentHour = new Date().getHours();
+            const crowdLevel = hourlyData[currentHour] || 0;
+            const badge = document.getElementById('tp-crowd-badge');
+            if (crowdLevel >= 60) { badge.textContent = '🔴 Keramaian tinggi'; badge.className = 'tp-crowd-badge crowd-high'; }
+            else if (crowdLevel >= 30) { badge.textContent = '🟡 Keramaian sedang'; badge.className = 'tp-crowd-badge crowd-medium'; }
+            else { badge.textContent = '🟢 Keramaian rendah'; badge.className = 'tp-crowd-badge crowd-low'; }
+        } else {
+            chartSection.style.display = 'none';
+        }
+
+        // Facilities
+        const facilitiesSection = document.querySelector('.tp-facilities-section');
+        const facilities = props.facilities || [];
+        if (facilities.length > 0) {
+            facilitiesSection.style.display = 'flex';
+            document.getElementById('tp-facilities').innerHTML = facilities.map(f => {
+                const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
+                return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
+            }).join('');
+        } else {
+            facilitiesSection.style.display = 'none';
+        }
+
+        // Description
+        const descEl = document.getElementById('tp-description');
+        descEl.textContent = props.description || '';
+        descEl.style.display = props.description ? 'block' : 'none';
+
+        // Address
+        const addrRow = document.getElementById('tp-address-row');
+        if (props.address) {
+            addrRow.style.display = 'flex';
+            document.getElementById('tp-address').textContent = props.address;
+        } else {
+            addrRow.style.display = 'none';
+        }
+
+        // Tips
+        const tipsRow = document.getElementById('tp-tips-row');
+        if (props.tips) {
+            tipsRow.style.display = 'block';
+            document.getElementById('tp-tips').textContent = props.tips;
+        } else {
+            tipsRow.style.display = 'none';
+        }
+
+        // Action buttons
+        document.getElementById('tp-btn-fly').onclick = () => map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
+        document.getElementById('tp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
+
+        // Button color
+        const primaryBtn = document.getElementById('tp-btn-fly');
+        primaryBtn.style.background = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
+        primaryBtn.style.boxShadow = `0 4px 15px ${cat.color}4d`;
+
+        panel.classList.remove('hidden');
+        panel.style.animation = 'none';
+        panel.offsetHeight;
+        panel.style.animation = '';
+
+        // Render chart if visible
+        if (hourlyData && hourlyData.length === 24) {
+            requestAnimationFrame(() => {
+                try { renderMiniBarChart(document.getElementById('tp-chart'), hourlyData); }
+                catch (e) { console.warn('Chart render error:', e); }
+            });
+        }
     }
 
-    // Hours & ticket (show/hide)
-    const pillsRow = document.querySelector('.tp-info-pills');
-    if (props.opening_hours || props.ticket_price) {
-        pillsRow.style.display = 'flex';
-        document.getElementById('tp-hours').textContent = props.opening_hours || '-';
-        document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
-    } else {
-        pillsRow.style.display = 'none';
+    function closeTourismPanel() {
+        document.getElementById('tourism-panel').classList.add('hidden');
     }
 
-    // Crowd chart (only for pariwisata or data with hourly_crowd)
-    const chartSection = document.querySelector('.tp-chart-section');
-    const hourlyData = props.hourly_crowd;
-    if (hourlyData && hourlyData.length === 24) {
-        chartSection.style.display = 'block';
+    function renderMiniBarChart(canvas, data) {
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+
+        const max = Math.max(...data, 1);
+        const barW = (w - 2) / 24;
+        const gap = 1;
         const currentHour = new Date().getHours();
-        const crowdLevel = hourlyData[currentHour] || 0;
-        const badge = document.getElementById('tp-crowd-badge');
-        if (crowdLevel >= 60) { badge.textContent = '🔴 Keramaian tinggi'; badge.className = 'tp-crowd-badge crowd-high'; }
-        else if (crowdLevel >= 30) { badge.textContent = '🟡 Keramaian sedang'; badge.className = 'tp-crowd-badge crowd-medium'; }
-        else { badge.textContent = '🟢 Keramaian rendah'; badge.className = 'tp-crowd-badge crowd-low'; }
-    } else {
-        chartSection.style.display = 'none';
-    }
 
-    // Facilities
-    const facilitiesSection = document.querySelector('.tp-facilities-section');
-    const facilities = props.facilities || [];
-    if (facilities.length > 0) {
-        facilitiesSection.style.display = 'flex';
-        document.getElementById('tp-facilities').innerHTML = facilities.map(f => {
-            const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
-            return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
-        }).join('');
-    } else {
-        facilitiesSection.style.display = 'none';
-    }
+        for (let i = 0; i < 24; i++) {
+            const val = data[i] / max;
+            const barH = val * (h - 8);
+            const x = i * barW + 1;
+            const y = h - barH - 2;
 
-    // Description
-    const descEl = document.getElementById('tp-description');
-    descEl.textContent = props.description || '';
-    descEl.style.display = props.description ? 'block' : 'none';
+            // Color based on value
+            let color;
+            if (data[i] >= 60) color = '#ef4444';
+            else if (data[i] >= 30) color = '#f59e0b';
+            else color = '#10b981';
 
-    // Address
-    const addrRow = document.getElementById('tp-address-row');
-    if (props.address) {
-        addrRow.style.display = 'flex';
-        document.getElementById('tp-address').textContent = props.address;
-    } else {
-        addrRow.style.display = 'none';
-    }
+            // Highlight current hour
+            if (i === currentHour) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 8;
+            }
 
-    // Tips
-    const tipsRow = document.getElementById('tp-tips-row');
-    if (props.tips) {
-        tipsRow.style.display = 'block';
-        document.getElementById('tp-tips').textContent = props.tips;
-    } else {
-        tipsRow.style.display = 'none';
-    }
-
-    // Action buttons
-    document.getElementById('tp-btn-fly').onclick = () => map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
-    document.getElementById('tp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
-
-    // Button color
-    const primaryBtn = document.getElementById('tp-btn-fly');
-    primaryBtn.style.background = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
-    primaryBtn.style.boxShadow = `0 4px 15px ${cat.color}4d`;
-
-    panel.classList.remove('hidden');
-    panel.style.animation = 'none';
-    panel.offsetHeight;
-    panel.style.animation = '';
-
-    // Render chart if visible
-    if (hourlyData && hourlyData.length === 24) {
-        requestAnimationFrame(() => {
-            try { renderMiniBarChart(document.getElementById('tp-chart'), hourlyData); }
-            catch (e) { console.warn('Chart render error:', e); }
-        });
-    }
-}
-
-function closeTourismPanel() {
-    document.getElementById('tourism-panel').classList.add('hidden');
-}
-
-function renderMiniBarChart(canvas, data) {
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, w, h);
-
-    const max = Math.max(...data, 1);
-    const barW = (w - 2) / 24;
-    const gap = 1;
-    const currentHour = new Date().getHours();
-
-    for (let i = 0; i < 24; i++) {
-        const val = data[i] / max;
-        const barH = val * (h - 8);
-        const x = i * barW + 1;
-        const y = h - barH - 2;
-
-        // Color based on value
-        let color;
-        if (data[i] >= 60) color = '#ef4444';
-        else if (data[i] >= 30) color = '#f59e0b';
-        else color = '#10b981';
-
-        // Highlight current hour
-        if (i === currentHour) {
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 8;
+            ctx.fillStyle = i === currentHour ? '#ffffff' : color;
+            ctx.fillRect(x, y, barW - gap, Math.max(barH, 1));
+            ctx.shadowBlur = 0;
         }
-
-        ctx.fillStyle = i === currentHour ? '#ffffff' : color;
-        ctx.fillRect(x, y, barW - gap, Math.max(barH, 1));
-        ctx.shadowBlur = 0;
     }
-}
 
-// =====================================================
-// HEATMAP
-// =====================================================
-function buildHeatmap() {
-    if (!categoryData.pariwisata) return;
-    const heatPoints = categoryData.pariwisata.features.map(f => {
-        const coords = f.geometry.coordinates;
-        const intensity = (f.properties.visitors_per_day || 1000) / 5000;
-        return [coords[1], coords[0], Math.min(intensity, 1)];
-    });
-    heatmapLayer = L.heatLayer(heatPoints, {
-        radius: 35, blur: 25, maxZoom: 15,
-        gradient: { 0.2: '#06b6d4', 0.4: '#10b981', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#e11d48' }
-    });
-}
-
-// =====================================================
-// UTILITIES
-// =====================================================
-function haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-function toRad(d) { return d * Math.PI / 180; }
-function formatDistance(km) {
-    return km < 1 ? `~${Math.round(km*1000)} meter dari pusat peta` : `~${km.toFixed(1)} km dari pusat peta`;
-}
-function escapeHtml(str) {
-    const d = document.createElement('div');
-    d.appendChild(document.createTextNode(str));
-    return d.innerHTML;
-}
-
-// =====================================================
-// DISASTER SUB-TABS
-// =====================================================
-function renderDisasterSubTabs() {
-    const container = document.getElementById('disaster-sub-tabs');
-    const subcats = categoryMeta.kebencanaan ? Object.keys(categoryMeta.kebencanaan.subcategories || {}) : [];
-    const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ','').replace('Rawan ','') }))];
-    container.innerHTML = tabs.map(t =>
-        `<button class="dst-tab ${t.key === activeDisasterSubTab ? 'active' : ''}" data-subtab="${t.key}">${t.label}</button>`
-    ).join('');
-    container.querySelectorAll('.dst-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            activeDisasterSubTab = btn.dataset.subtab;
-            container.querySelectorAll('.dst-tab').forEach(b => b.classList.toggle('active', b === btn));
-            rebuildCategoryLayer('kebencanaan');
+    // =====================================================
+    // HEATMAP
+    // =====================================================
+    function buildHeatmap() {
+        if (!categoryData.pariwisata) return;
+        const heatPoints = categoryData.pariwisata.features.map(f => {
+            const coords = f.geometry.coordinates;
+            const intensity = (f.properties.visitors_per_day || 1000) / 5000;
+            return [coords[1], coords[0], Math.min(intensity, 1)];
         });
-    });
-}
+        heatmapLayer = L.heatLayer(heatPoints, {
+            radius: 35, blur: 25, maxZoom: 15,
+            gradient: { 0.2: '#06b6d4', 0.4: '#10b981', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#e11d48' }
+        });
+    }
 
-// =====================================================
-// DISASTER DETAIL PANEL
-// =====================================================
-function getFeatureCenter(feature) {
-    const g = feature.geometry;
-    if (g.type === 'Point') return [g.coordinates[1], g.coordinates[0]];
-    if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); return [b.lat, b.lng]; }
-    if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; return [c[1], c[0]]; }
-    return [-7.7956, 110.3695];
-}
+    // =====================================================
+    // UTILITIES
+    // =====================================================
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    function toRad(d) { return d * Math.PI / 180; }
+    function formatDistance(km) {
+        return km < 1 ? `~${Math.round(km * 1000)} meter dari pusat peta` : `~${km.toFixed(1)} km dari pusat peta`;
+    }
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
 
-function showDisasterPanel(feature, categoryKey) {
-    const panel = document.getElementById('disaster-panel');
-    const props = feature.properties;
-    closeTourismPanel();
-    closeInfoCard();
-    currentReportFeature = { feature, categoryKey };
-
-    // Header photo
-    const header = document.getElementById('dp-header');
-    header.style.backgroundImage = props.foto ? `url('${props.foto}')` : `linear-gradient(135deg, #dc2626, #991b1b)`;
-
-    // Risk badge
-    const badgeEl = document.getElementById('dp-risk-badge');
-    const lr = props.level_risiko || 'Info';
-    const zona = props.zona ? ` · ${props.zona}` : '';
-    const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : lr === 'Rendah' ? 'risk-low' : 'risk-info';
-    badgeEl.className = `dp-risk-badge ${riskClass}`;
-    badgeEl.textContent = `${lr === 'Tinggi' ? '🔴' : lr === 'Sedang' ? '🟠' : lr === 'Rendah' ? '🟡' : 'ℹ️'} RISIKO ${lr.toUpperCase()}${zona}`;
-
-    document.getElementById('dp-name').textContent = props.name || 'Unnamed';
-
-    // Meta line
-    const metaItems = [];
-    if (props.radius_km) metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
-    if (props.sumber_data) metaItems.push(`📊 Sumber: ${props.sumber_data}`);
-    if (props.last_updated) metaItems.push(`Diperbarui: ${props.last_updated}`);
-    document.getElementById('dp-meta').innerHTML = metaItems.join(' · ');
-
-    document.getElementById('dp-description').textContent = props.deskripsi || '';
-
-    // Facilities
-    const facSection = document.getElementById('dp-facilities-section');
-    const facilities = props.facilities || [];
-    if (facilities.length > 0) {
-        facSection.style.display = 'block';
-        document.getElementById('dp-facilities').innerHTML = facilities.map(f =>
-            `<span class="dp-facility-chip">${f}</span>`
+    // =====================================================
+    // DISASTER SUB-TABS
+    // =====================================================
+    function renderDisasterSubTabs() {
+        const container = document.getElementById('disaster-sub-tabs');
+        const subcats = categoryMeta.kebencanaan ? Object.keys(categoryMeta.kebencanaan.subcategories || {}) : [];
+        const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ', '').replace('Rawan ', '') }))];
+        container.innerHTML = tabs.map(t =>
+            `<button class="dst-tab ${t.key === activeDisasterSubTab ? 'active' : ''}" data-subtab="${t.key}">${t.label}</button>`
         ).join('');
-    } else { facSection.style.display = 'none'; }
+        container.querySelectorAll('.dst-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                activeDisasterSubTab = btn.dataset.subtab;
+                container.querySelectorAll('.dst-tab').forEach(b => b.classList.toggle('active', b === btn));
+                rebuildCategoryLayer('kebencanaan');
+            });
+        });
+    }
 
-    // Evacuation
-    const evacBox = document.getElementById('dp-evac-box');
-    if (props.instruksi_evakuasi) {
-        evacBox.style.display = 'block';
-        document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi;
-    } else { evacBox.style.display = 'none'; }
+    // =====================================================
+    // DISASTER DETAIL PANEL
+    // =====================================================
+    function getFeatureCenter(feature) {
+        const g = feature.geometry;
+        if (g.type === 'Point') return [g.coordinates[1], g.coordinates[0]];
+        if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); return [b.lat, b.lng]; }
+        if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; return [c[1], c[0]]; }
+        return [-7.7956, 110.3695];
+    }
 
-    // History
-    const histSection = document.getElementById('dp-history-section');
-    const history = props.riwayat_bencana || [];
-    if (history.length > 0) {
-        histSection.style.display = 'block';
-        document.getElementById('dp-history-list').innerHTML = history.slice(0, 3).map(h => `
+    function showDisasterPanel(feature, categoryKey) {
+        const panel = document.getElementById('disaster-panel');
+        const props = feature.properties;
+        closeTourismPanel();
+        closeInfoCard();
+        currentReportFeature = { feature, categoryKey };
+
+        // Header photo
+        const header = document.getElementById('dp-header');
+        header.style.backgroundImage = props.foto ? `url('${props.foto}')` : `linear-gradient(135deg, #dc2626, #991b1b)`;
+
+        // Risk badge
+        const badgeEl = document.getElementById('dp-risk-badge');
+        const lr = props.level_risiko || 'Info';
+        const zona = props.zona ? ` · ${props.zona}` : '';
+        const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : lr === 'Rendah' ? 'risk-low' : 'risk-info';
+        badgeEl.className = `dp-risk-badge ${riskClass}`;
+        badgeEl.textContent = `${lr === 'Tinggi' ? '🔴' : lr === 'Sedang' ? '🟠' : lr === 'Rendah' ? '🟡' : 'ℹ️'} RISIKO ${lr.toUpperCase()}${zona}`;
+
+        document.getElementById('dp-name').textContent = props.name || 'Unnamed';
+
+        // Meta line
+        const metaItems = [];
+        if (props.radius_km) metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
+        if (props.sumber_data) metaItems.push(`📊 Sumber: ${props.sumber_data}`);
+        if (props.last_updated) metaItems.push(`Diperbarui: ${props.last_updated}`);
+        document.getElementById('dp-meta').innerHTML = metaItems.join(' · ');
+
+        document.getElementById('dp-description').textContent = props.deskripsi || '';
+
+        // Facilities
+        const facSection = document.getElementById('dp-facilities-section');
+        const facilities = props.facilities || [];
+        if (facilities.length > 0) {
+            facSection.style.display = 'block';
+            document.getElementById('dp-facilities').innerHTML = facilities.map(f =>
+                `<span class="dp-facility-chip">${f}</span>`
+            ).join('');
+        } else { facSection.style.display = 'none'; }
+
+        // Evacuation
+        const evacBox = document.getElementById('dp-evac-box');
+        if (props.instruksi_evakuasi) {
+            evacBox.style.display = 'block';
+            document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi;
+        } else { evacBox.style.display = 'none'; }
+
+        // History
+        const histSection = document.getElementById('dp-history-section');
+        const history = props.riwayat_bencana || [];
+        if (history.length > 0) {
+            histSection.style.display = 'block';
+            document.getElementById('dp-history-list').innerHTML = history.slice(0, 3).map(h => `
             <div class="dp-history-item">
                 <div class="dp-history-date">🗓️ ${h.tanggal}</div>
                 <div class="dp-history-detail">${h.jenis} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
-                <div class="dp-history-sub">${(h.pengungsi||0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
+                <div class="dp-history-sub">${(h.pengungsi || 0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
             </div>
         `).join('');
-    } else { histSection.style.display = 'none'; }
+        } else { histSection.style.display = 'none'; }
 
-    // Contact
-    const contactEl = document.getElementById('dp-contact');
-    if (props.kontak_darurat) {
-        contactEl.style.display = 'flex';
-        const phone = props.kontak_darurat.replace(/[^+\d]/g, '').slice(0, 16);
-        document.getElementById('dp-contact-phone').textContent = props.kontak_darurat;
-        document.getElementById('dp-contact-phone').href = `tel:${phone}`;
-    } else { contactEl.style.display = 'none'; }
+        // Contact
+        const contactEl = document.getElementById('dp-contact');
+        if (props.kontak_darurat) {
+            contactEl.style.display = 'flex';
+            const phone = props.kontak_darurat.replace(/[^+\d]/g, '').slice(0, 16);
+            document.getElementById('dp-contact-phone').textContent = props.kontak_darurat;
+            document.getElementById('dp-contact-phone').href = `tel:${phone}`;
+        } else { contactEl.style.display = 'none'; }
 
-    // Actions
-    const center = getFeatureCenter(feature);
-    document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${center[0]},${center[1]}`, '_blank');
-    document.getElementById('dp-btn-report').onclick = () => {
-        const lapTab = document.querySelector('.top-nav-tab[data-page="laporan"]');
-        if (lapTab) lapTab.click();
-    };
+        // Actions
+        const center = getFeatureCenter(feature);
+        document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${center[0]},${center[1]}`, '_blank');
+        document.getElementById('dp-btn-report').onclick = () => {
+            const lapTab = document.querySelector('.top-nav-tab[data-page="laporan"]');
+            if (lapTab) lapTab.click();
+        };
 
-    panel.classList.remove('hidden');
-}
+        panel.classList.remove('hidden');
+    }
 
-function closeDisasterPanel() {
-    document.getElementById('disaster-panel').classList.add('hidden');
-}
+    function closeDisasterPanel() {
+        document.getElementById('disaster-panel').classList.add('hidden');
+    }
 
 
 
-// =====================================================
-// RECENT EVENTS WIDGET
-// =====================================================
-function renderRecentEvents() {
-    const widget = document.getElementById('recent-events-widget');
-    const list = document.getElementById('rew-list');
-    const events = [
-        { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
-        { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
-        { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
-    ];
-    list.innerHTML = events.map(e => `
+    // =====================================================
+    // RECENT EVENTS WIDGET
+    // =====================================================
+    function renderRecentEvents() {
+        const widget = document.getElementById('recent-events-widget');
+        const list = document.getElementById('rew-list');
+        const events = [
+            { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
+            { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
+            { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
+        ];
+        list.innerHTML = events.map(e => `
         <div class="rew-item">
             <span class="rew-icon">${e.icon}</span>
             <div class="rew-info">
@@ -1224,23 +1196,23 @@ function renderRecentEvents() {
             </div>
         </div>
     `).join('');
-    widget.style.display = 'none'; // shown only when disaster category active
-}
+        widget.style.display = 'none'; // shown only when disaster category active
+    }
 
-// =====================================================
-// INIT
-// =====================================================
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    initSidebar();
-    initSearch();
-    initWelcome();
-    loadAllData();
-    // Report modal ESC key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeReportModal();
+    // =====================================================
+    // INIT
+    // =====================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        initSidebar();
+        initSearch();
+        initWelcome();
+        loadAllData();
+        // Report modal ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeReportModal();
+        });
     });
-});
 }
 
 // =====================================================
@@ -1251,10 +1223,10 @@ function initSPA() {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.top-nav-tab').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            
+
             const pageId = e.target.getAttribute('data-page');
             document.querySelectorAll('.spa-page').forEach(p => p.classList.add('hidden'));
-            
+
             if (pageId !== 'map') {
                 const pageEl = document.getElementById(`${pageId}-page`);
                 if (pageEl) {
@@ -1283,7 +1255,7 @@ function initSPA() {
 function renderLaporan(disasterType) {
     const content = document.getElementById('laporan-content');
     const hist = DISASTER_HISTORY[disasterType] || [];
-    
+
     const totalKorban = hist.reduce((s, h) => s + (h.korban_jiwa || 0), 0);
     const totalPengungsi = hist.reduce((s, h) => s + (h.pengungsi || 0), 0);
     const accentColor = disasterType === 'erupsi' ? '#ef4444' : disasterType === 'banjir' ? '#3b82f6' : disasterType === 'gempa' ? '#ea580c' : '#ca8a04';
@@ -1306,8 +1278,8 @@ function renderLaporan(disasterType) {
             </div>
             
             <div style="border-left: 1px solid #30363d; padding-left: 24px; display: flex; flex-direction: column; gap: 24px;">
-                ${hist.length === 0 ? '<p style="color: var(--text-muted);">Belum ada data riwayat tercatat.</p>' : 
-                hist.map(h => `
+                ${hist.length === 0 ? '<p style="color: var(--text-muted);">Belum ada data riwayat tercatat.</p>' :
+            hist.map(h => `
                     <div style="position: relative; background: rgba(30,41,59,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px; transition: all 0.3s; cursor: default;" onmouseover="this.style.background='#1c2128'; this.style.transform='translateX(4px)'" onmouseout="this.style.background='rgba(30,41,59,0.3)'; this.style.transform='translateX(0)'">
                         <div style="position: absolute; left: -29px; top: 24px; width: 10px; height: 10px; border-radius: 50%; background: ${accentColor}; border: 2px solid #0a0e1a;"></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">${h.tanggal}</div>
@@ -1356,8 +1328,8 @@ function renderStatistik() {
         <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 24px;">Distribusi Per Kategori</h3>
         <div style="display: flex; flex-direction: column; gap: 16px;">
             ${results.map(r => {
-                const percent = ((r.count / maxCount) * 100).toFixed(1);
-                return `
+        const percent = ((r.count / maxCount) * 100).toFixed(1);
+        return `
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <div style="width: 180px; font-size: 13px; font-weight: 600; color: var(--text-secondary);">${r.label}</div>
                     <div style="flex: 1; height: 8px; background: rgba(30,41,59,0.5); border-radius: 4px; overflow: hidden;">
@@ -1365,7 +1337,7 @@ function renderStatistik() {
                     </div>
                     <div style="width: 80px; text-align: right; font-size: 13px; font-weight: 700; color: var(--text-primary);">${r.count.toLocaleString()}</div>
                 </div>`;
-            }).join('')}
+    }).join('')}
         </div>
     `;
 
@@ -1387,19 +1359,19 @@ function showToast(message) {
         container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px;';
         document.body.appendChild(container);
     }
-    
+
     const toast = document.createElement('div');
     toast.style.cssText = 'background: rgba(15,23,42,0.9); backdrop-filter: blur(8px); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 16px 20px; color: var(--text-primary); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); transform: translateY(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);';
     toast.innerHTML = message;
-    
+
     container.appendChild(toast);
-    
+
     // Animate in
     setTimeout(() => {
         toast.style.transform = 'translateY(0)';
         toast.style.opacity = '1';
     }, 10);
-    
+
     // Animate out and remove
     setTimeout(() => {
         toast.style.transform = 'translateY(100%)';

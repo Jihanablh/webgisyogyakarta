@@ -43,7 +43,7 @@ function showInfoCard(feature, categoryKey) {
     let cLat, cLon;
     if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
     else if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); cLat = b.lat; cLon = b.lng; }
-    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length/2)]; cLon = c[0]; cLat = c[1]; }
+    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; cLon = c[0]; cLat = c[1]; }
     else { cLon = 110.3695; cLat = -7.7956; }
     const dist = haversineDistance(center.lat, center.lng, coords[1], coords[0]);
     document.getElementById('info-distance-text').textContent = formatDistance(dist);
@@ -270,7 +270,7 @@ function buildHeatmap() {
 function renderDisasterSubTabs() {
     const container = document.getElementById('disaster-sub-tabs');
     const subcats = categoryMeta.kebencanaan ? Object.keys(categoryMeta.kebencanaan.subcategories || {}) : [];
-    const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ','').replace('Rawan ','') }))];
+    const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ', '').replace('Rawan ', '') }))];
     container.innerHTML = tabs.map(t =>
         `<button class="dst-tab ${t.key === activeDisasterSubTab ? 'active' : ''}" data-subtab="${t.key}">${t.label}</button>`
     ).join('');
@@ -350,7 +350,7 @@ function showDisasterPanel(feature, categoryKey) {
             <div class="dp-history-item">
                 <div class="dp-history-date">🗓️ ${h.tanggal}</div>
                 <div class="dp-history-detail">${h.jenis} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
-                <div class="dp-history-sub">${(h.pengungsi||0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
+                <div class="dp-history-sub">${(h.pengungsi || 0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
             </div>
         `).join('');
     } else { histSection.style.display = 'none'; }
@@ -418,7 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') closeReportModal();
     });
 });
-}
 
 // =====================================================
 // SPA ROUTING & RENDERING
