@@ -1,36 +1,39 @@
 export class Router {
-  constructor() {
-    this.routes = {};
-    this.current = 'map';
-  }
-
-  register(name, { onEnter, onLeave }) {
-    this.routes[name] = { onEnter, onLeave };
-  }
-
-  navigate(to) {
-    const from = this.current;
-    if (from === to) return;
-
-    document.querySelectorAll('.spa-page, #map').forEach(el => {
-      if(el) el.classList.add('hidden');
-    });
-
-    if(this.routes[from]?.onLeave) this.routes[from].onLeave();
-    if(this.routes[to]?.onEnter) this.routes[to].onEnter();
-
-    const target = document.getElementById(to === 'map' ? 'map' : `${to}-page`);
-    if(target) {
-        target.classList.remove('hidden');
-        target.classList.add('page-enter');
-        setTimeout(() => target.classList.remove('page-enter'), 300);
+    constructor() {
+        this.routes  = {};
+        this.current = null; // start null so first navigate always fires
     }
 
-    document.querySelectorAll('.top-nav-tab').forEach(btn => {
-      if(btn.dataset.page === to) btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
+    register(name, options = {}) {
+        this.routes[name] = options;
+    }
 
-    this.current = to;
-  }
+    navigate(to) {
+        const from = this.current;
+
+        // Hide all pages and map
+        document.querySelectorAll('.spa-page').forEach(el => el.classList.add('hidden'));
+        const mapEl = document.getElementById('map');
+        if (mapEl) mapEl.classList.add('hidden');
+
+        // Sidebar visibility: show on map, hide on other pages (optional, remove if unwanted)
+        // const sidebar = document.getElementById('sidebar');
+
+        if (from && this.routes[from]?.onLeave) this.routes[from].onLeave();
+        if (this.routes[to]?.onEnter) this.routes[to].onEnter();
+
+        const target = document.getElementById(to === 'map' ? 'map' : `${to}-page`);
+        if (target) {
+            target.classList.remove('hidden');
+            target.classList.add('page-enter');
+            setTimeout(() => target.classList.remove('page-enter'), 350);
+        }
+
+        // Update active tab
+        document.querySelectorAll('.top-nav-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.page === to);
+        });
+
+        this.current = to;
+    }
 }

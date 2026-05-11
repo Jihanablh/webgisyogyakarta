@@ -1,5 +1,5 @@
 import { initMap } from './map.js';
-import { loadLayer } from './layers.js';
+import { loadLayer, showOnlyKebencanaan } from './layers.js';
 import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
@@ -9,53 +9,58 @@ import { initStatisticsPage } from './pages/statistics.js';
 import { initAboutPage } from './pages/about.js';
 import { State, CATEGORIES } from './state.js';
 
-// Setup globals just in case legacy functions still need them
 window.State = State;
 window.CATEGORIES = CATEGORIES;
 
 async function init() {
-  const map = initMap();
-  const router = new Router();
-  const loader = new LoadingManager(6);
+    const map    = initMap();
+    const router = new Router();
+    const loader = new LoadingManager(6);
 
-  router.register('map', {});
-  router.register('laporan', { onEnter: () => initReportPage() });
-  router.register('statistik', { onEnter: () => initStatisticsPage() });
-  router.register('tentang', { onEnter: () => initAboutPage() });
+    // Register SPA routes
+    router.register('map',       {});
+    router.register('laporan',   { onEnter: () => initReportPage() });
+    router.register('statistik', { onEnter: () => initStatisticsPage() });
+    router.register('tentang',   { onEnter: () => initAboutPage() });
 
-  initSidebar({ map, router, onCategoryToggle: (cat) => loadLayer(cat, map) });
-  initDetailPanel();
+    // Nav tab click handling (Bug 5 fix)
+    document.querySelectorAll('.top-nav-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const page = e.currentTarget.dataset.page;
+            router.navigate(page);
+            // Invalidate map size if switching back to map
+            if (page === 'map' && State.map) {
+                setTimeout(() => State.map.invalidateSize(), 50);
+            }
+        });
+    });
 
-  // Load kebencanaan pertama
-  await loadLayer('kebencanaan', map);
-  loader.tick('Kebencanaan');
+    initSidebar({ map, router, onCategoryToggle: (cat) => loadLayer(cat) });
+    initDetailPanel();
 
-  // Load sisanya paralel
-  const others = ['pariwisata', 'kebutuhan', 'atm_bank', 'tempat_tinggal', 'lingkungan'];
-  await Promise.all(others.map(async (cat) => {
-    await loadLayer(cat, map);
-    loader.tick(CATEGORIES[cat].label);
-  }));
+    // Load kebencanaan first (Bug 2 — start with disaster only)
+    showOnlyKebencanaan();
+    await loadLayer('kebencanaan');
+    loader.tick('Kebencanaan');
 
-  const appEl = document.getElementById('app');
-  if (appEl) appEl.classList.remove('hidden');
+    // Load others in parallel (hidden until user clicks "Tampilkan Semua")
+    const others = ['pariwisata', 'kebutuhan', 'atm_bank', 'tempat_tinggal', 'lingkungan'];
+    await Promise.all(others.map(async (cat) => {
+        await loadLayer(cat);
+        if (CATEGORIES[cat]) loader.tick(CATEGORIES[cat].label);
+    }));
 
-  // Handle SPA routing from tabs
-  document.querySelectorAll('.top-nav-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-          router.navigate(e.target.dataset.page);
-      });
-  });
-
-  // Dismiss welcome overlay
-  const welcomeBtn = document.getElementById('welcome-btn');
-  if (welcomeBtn) {
-      welcomeBtn.addEventListener('click', () => {
-          document.getElementById('welcome-overlay').classList.add('hidden');
-          document.getElementById('top-nav').style.display = 'flex';
-          document.getElementById('sidebar').classList.remove('sidebar--hidden');
-      });
-  }
+    // Welcome button handler (Bug 2)
+    const welcomeBtn = document.getElementById('welcome-btn');
+    if (welcomeBtn) {
+        welcomeBtn.addEventListener('click', () => {
+            document.getElementById('welcome-overlay').classList.add('hidden');
+            document.getElementById('top-nav').style.display = 'flex';
+            document.getElementById('sidebar').classList.remove('sidebar--hidden');
+            // Only show kebencanaan on start
+            showOnlyKebencanaan();
+        });
+    }
 }
 
 if (document.readyState === 'loading') {

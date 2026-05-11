@@ -1,311 +1,249 @@
-import { State, CATEGORIES } from './state.js';
-import { formatDistance, escapeHtml } from './utils/helpers.js';
+import { State, CATEGORIES, FACILITY_MAP } from './state.js';
+import { haversineDistance, formatDistance, escapeHtml } from './utils/helpers.js';
 
 export function initDetailPanel() {
-    // We attach these to window so legacy onclicks in markers work
-    window.showInfoCard = showInfoCard;
-    window.closeInfoCard = closeInfoCard;
-    window.showTourismPanel = showTourismPanel;
-    window.closeTourismPanel = closeTourismPanel;
-    window.renderMiniBarChart = renderMiniBarChart;
-    window.buildHeatmap = buildHeatmap;
-    window.renderDisasterSubTabs = renderDisasterSubTabs;
-    window.showDisasterPanel = showDisasterPanel;
+    // Expose to window for legacy onclick compatibility
+    window.showInfoCard       = showInfoCard;
+    window.closeInfoCard      = closeInfoCard;
+    window.showTourismPanel   = showTourismPanel;
+    window.closeTourismPanel  = closeTourismPanel;
+    window.showDisasterPanel  = showDisasterPanel;
     window.closeDisasterPanel = closeDisasterPanel;
-    window.renderRecentEvents = renderRecentEvents;
+    window.renderMiniBarChart = renderMiniBarChart;
+
+    // Listen for marker click events dispatched by layers.js
+    document.addEventListener('markerClicked', (e) => {
+        const { feature, category } = e.detail;
+        if (category === 'kebencanaan') {
+            showDisasterPanel(feature, category);
+        } else {
+            showTourismPanel(feature, category);
+        }
+    });
+
+    // Report modal close
+    const rmClose = document.getElementById('rm-close');
+    if (rmClose) rmClose.addEventListener('click', closeReportModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeReportModal(); });
+
+    // Report modal tabs
+    const rmTabs = document.getElementById('rm-tabs');
+    if (rmTabs) {
+        rmTabs.querySelectorAll('.rm-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                rmTabs.querySelectorAll('.rm-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                renderReportModalTab(tab.dataset.tab);
+            });
+        });
+    }
 }
+
+// ── Info Card ─────────────────────────────────────────────────────────────────
 function showInfoCard(feature, categoryKey) {
     const card = document.getElementById('info-card');
-    const cat = CATEGORIES[categoryKey];
+    if (!card) return;
+    const cat   = CATEGORIES[categoryKey] || CATEGORIES.kebencanaan;
     const props = feature.properties;
-    const coords = feature.geometry.coordinates;
+    const g     = feature.geometry;
 
     document.getElementById('info-card-badge').style.background = `${cat.color}20`;
-    document.getElementById('info-card-icon').textContent = cat.icon;
-    document.getElementById('info-card-name').textContent = props.name || 'Unnamed';
-    document.getElementById('info-card-type').textContent = props.type || cat.label;
-
+    document.getElementById('info-card-icon').textContent  = cat.icon;
+    document.getElementById('info-card-name').textContent  = props.name || 'Unnamed';
+    document.getElementById('info-card-type').textContent  = props.type || cat.label;
     document.getElementById('info-category-text').textContent = cat.label;
-    document.getElementById('info-category-text').style.color = cat.color;
+    document.getElementById('info-category-text').style.color  = cat.color;
 
-    // Subcategory
     const scRow = document.getElementById('info-detail-subcategory');
     if (props.subcategory) {
         scRow.style.display = 'flex';
         document.getElementById('info-subcategory-text').textContent = props.subcategory;
-    } else {
-        scRow.style.display = 'none';
+    } else { scRow.style.display = 'none'; }
+
+    // Distance from map center
+    if (State.map) {
+        const center = State.map.getCenter();
+        let cLat, cLon;
+        if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
+        else { cLat = -7.7956; cLon = 110.3695; }
+        const dist = haversineDistance(center.lat, center.lng, cLat, cLon);
+        document.getElementById('info-distance-text').textContent = formatDistance(dist);
+        document.getElementById('info-detail-distance').style.display = 'flex';
     }
 
-    // Distance
-    const center = map.getCenter();
-    const g = feature.geometry;
-    let cLat, cLon;
-    if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
-    else if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); cLat = b.lat; cLon = b.lng; }
-    else if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; cLon = c[0]; cLat = c[1]; }
-    else { cLon = 110.3695; cLat = -7.7956; }
-    const dist = haversineDistance(center.lat, center.lng, coords[1], coords[0]);
-    document.getElementById('info-distance-text').textContent = formatDistance(dist);
-
-    // Hours
     const hoursRow = document.getElementById('info-detail-hours');
     if (props.opening_hours) { hoursRow.style.display = 'flex'; document.getElementById('info-hours-text').textContent = props.opening_hours; }
     else { hoursRow.style.display = 'none'; }
 
-    // Operator
     const opRow = document.getElementById('info-detail-operator');
     if (props.operator) { opRow.style.display = 'flex'; document.getElementById('info-operator-text').textContent = props.operator; }
     else { opRow.style.display = 'none'; }
 
-    // Buttons
-    document.getElementById('info-btn-fly').onclick = () => {
-        map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
-    };
-    document.getElementById('info-btn-gmaps').onclick = () => {
-        window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
-    };
+    const coords = g.type === 'Point' ? g.coordinates : [110.3695, -7.7956];
+    document.getElementById('info-btn-fly').onclick = () => State.map?.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
+    document.getElementById('info-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
 
     card.classList.remove('hidden');
-    card.style.animation = 'none';
-    card.offsetHeight;
-    card.style.animation = '';
 }
 
 function closeInfoCard() {
-    document.getElementById('info-card').classList.add('hidden');
+    document.getElementById('info-card')?.classList.add('hidden');
 }
 
-// =====================================================
-// SIDEBAR
+// ── Tourism / General Detail Panel ───────────────────────────────────────────
 function showTourismPanel(feature, categoryKey) {
     const panel = document.getElementById('tourism-panel');
-    const props = feature.properties;
-    const coords = feature.geometry.coordinates;
+    if (!panel) return;
+    const props  = feature.properties;
+    const g      = feature.geometry;
     const catKey = categoryKey || props.category || 'pariwisata';
-    const cat = CATEGORIES[catKey] || CATEGORIES.pariwisata;
+    const cat    = CATEGORIES[catKey] || CATEGORIES.pariwisata;
 
     closeInfoCard();
+    closeDisasterPanel();
 
-    // Header photo with dynamic category color fallback
+    // Header photo / gradient
     const header = document.getElementById('tp-header');
-    if (props.foto) {
-        header.style.backgroundImage = `url('${props.foto}')`;
-    } else {
-        header.style.backgroundImage = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
-    }
+    if (props.foto) header.style.backgroundImage = `url('${props.foto}')`;
+    else            header.style.backgroundImage = `linear-gradient(135deg, ${cat.color}, ${cat.color}99)`;
 
-    // Category badge color
-    const badgeEl = document.getElementById('tp-category-badge');
-    badgeEl.textContent = props.subcategory || props.type || cat.label;
-    badgeEl.style.background = `${cat.color}cc`;
+    const badge = document.getElementById('tp-category-badge');
+    badge.textContent  = props.subcategory || props.type || cat.label;
+    badge.style.background = `${cat.color}cc`;
 
     document.getElementById('tp-name').textContent = props.name || 'Unnamed';
 
-    // Rating (hide row if no rating)
-    const rating = props.rating || 0;
-    const statsRow = document.querySelector('.tp-stats-row');
-    if (rating > 0) {
+    // Rating
+    const rating    = props.rating || 0;
+    const statsRow  = document.querySelector('.tp-stats-row');
+    if (rating > 0 && statsRow) {
         statsRow.style.display = 'flex';
-        const starsEl = document.getElementById('tp-stars');
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
-            if (i <= Math.floor(rating)) starsHtml += '<span class="star filled">★</span>';
-            else if (i - 0.5 <= rating) starsHtml += '<span class="star half">★</span>';
-            else starsHtml += '<span class="star">★</span>';
+            if (i <= Math.floor(rating))      starsHtml += '<span class="star filled">★</span>';
+            else if (i - 0.5 <= rating)       starsHtml += '<span class="star half">★</span>';
+            else                              starsHtml += '<span class="star">★</span>';
         }
-        starsEl.innerHTML = starsHtml;
+        document.getElementById('tp-stars').innerHTML   = starsHtml;
         document.getElementById('tp-rating').textContent = rating.toFixed(1);
         document.getElementById('tp-reviews').textContent = props.reviews ? `· ${props.reviews.toLocaleString()} ulasan` : '';
         document.getElementById('tp-visitors').textContent = props.visitors_per_day ? `~${props.visitors_per_day.toLocaleString()} / hari` : '';
-    } else {
-        statsRow.style.display = 'none';
-    }
+    } else if (statsRow) { statsRow.style.display = 'none'; }
 
-    // Hours & ticket (show/hide)
+    // Hours & ticket
     const pillsRow = document.querySelector('.tp-info-pills');
     if (props.opening_hours || props.ticket_price) {
-        pillsRow.style.display = 'flex';
-        document.getElementById('tp-hours').textContent = props.opening_hours || '-';
+        if (pillsRow) pillsRow.style.display = 'flex';
+        document.getElementById('tp-hours').textContent  = props.opening_hours  || '-';
         document.getElementById('tp-ticket').textContent = props.ticket_price || '-';
-    } else {
-        pillsRow.style.display = 'none';
-    }
+    } else if (pillsRow) { pillsRow.style.display = 'none'; }
 
-    // Crowd chart (only for pariwisata or data with hourly_crowd)
+    // Crowd chart
     const chartSection = document.querySelector('.tp-chart-section');
-    const hourlyData = props.hourly_crowd;
+    const hourlyData   = props.hourly_crowd;
     if (hourlyData && hourlyData.length === 24) {
-        chartSection.style.display = 'block';
+        if (chartSection) chartSection.style.display = 'block';
         const currentHour = new Date().getHours();
-        const crowdLevel = hourlyData[currentHour] || 0;
-        const badge = document.getElementById('tp-crowd-badge');
-        if (crowdLevel >= 60) { badge.textContent = '🔴 Keramaian tinggi'; badge.className = 'tp-crowd-badge crowd-high'; }
-        else if (crowdLevel >= 30) { badge.textContent = '🟡 Keramaian sedang'; badge.className = 'tp-crowd-badge crowd-medium'; }
-        else { badge.textContent = '🟢 Keramaian rendah'; badge.className = 'tp-crowd-badge crowd-low'; }
-    } else {
-        chartSection.style.display = 'none';
-    }
+        const crowdLevel  = hourlyData[currentHour] || 0;
+        const badge2 = document.getElementById('tp-crowd-badge');
+        if (badge2) {
+            if (crowdLevel >= 60) { badge2.textContent = '🔴 Keramaian tinggi';  badge2.className = 'tp-crowd-badge crowd-high'; }
+            else if (crowdLevel >= 30) { badge2.textContent = '🟡 Keramaian sedang'; badge2.className = 'tp-crowd-badge crowd-medium'; }
+            else { badge2.textContent = '🟢 Keramaian rendah'; badge2.className = 'tp-crowd-badge crowd-low'; }
+        }
+    } else if (chartSection) { chartSection.style.display = 'none'; }
 
     // Facilities
-    const facilitiesSection = document.querySelector('.tp-facilities-section');
-    const facilities = props.facilities || [];
+    const facSection = document.querySelector('.tp-facilities-section');
+    const facilities  = props.facilities || [];
     if (facilities.length > 0) {
-        facilitiesSection.style.display = 'flex';
+        if (facSection) facSection.style.display = 'flex';
         document.getElementById('tp-facilities').innerHTML = facilities.map(f => {
             const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
-            return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${fac.label}</span></div>`;
+            return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${escapeHtml(fac.label)}</span></div>`;
         }).join('');
-    } else {
-        facilitiesSection.style.display = 'none';
-    }
+    } else if (facSection) { facSection.style.display = 'none'; }
 
     // Description
     const descEl = document.getElementById('tp-description');
-    descEl.textContent = props.description || '';
-    descEl.style.display = props.description ? 'block' : 'none';
+    if (descEl) { descEl.textContent = props.description || ''; descEl.style.display = props.description ? 'block' : 'none'; }
 
     // Address
     const addrRow = document.getElementById('tp-address-row');
-    if (props.address) {
-        addrRow.style.display = 'flex';
-        document.getElementById('tp-address').textContent = props.address;
-    } else {
-        addrRow.style.display = 'none';
-    }
+    if (props.address) { addrRow.style.display = 'flex'; document.getElementById('tp-address').textContent = props.address; }
+    else if (addrRow) { addrRow.style.display = 'none'; }
 
     // Tips
     const tipsRow = document.getElementById('tp-tips-row');
-    if (props.tips) {
-        tipsRow.style.display = 'block';
-        document.getElementById('tp-tips').textContent = props.tips;
-    } else {
-        tipsRow.style.display = 'none';
-    }
+    if (props.tips) { if(tipsRow) tipsRow.style.display = 'block'; document.getElementById('tp-tips').textContent = props.tips; }
+    else if (tipsRow) { tipsRow.style.display = 'none'; }
 
     // Action buttons
-    document.getElementById('tp-btn-fly').onclick = () => map.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
-    document.getElementById('tp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
-
-    // Button color
-    const primaryBtn = document.getElementById('tp-btn-fly');
-    primaryBtn.style.background = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
-    primaryBtn.style.boxShadow = `0 4px 15px ${cat.color}4d`;
+    const coords = g.type === 'Point' ? g.coordinates : [110.3695, -7.7956];
+    const flyBtn = document.getElementById('tp-btn-fly');
+    if (flyBtn) {
+        flyBtn.onclick = () => State.map?.flyTo([coords[1], coords[0]], 17, { duration: 1.2 });
+        flyBtn.style.background  = `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`;
+        flyBtn.style.boxShadow   = `0 4px 15px ${cat.color}4d`;
+    }
+    const mapsBtn = document.getElementById('tp-btn-gmaps');
+    if (mapsBtn) mapsBtn.onclick = () => window.open(`https://www.google.com/maps?q=${coords[1]},${coords[0]}`, '_blank');
 
     panel.classList.remove('hidden');
-    panel.style.animation = 'none';
-    panel.offsetHeight;
-    panel.style.animation = '';
 
-    // Render chart if visible
+    // Render chart
     if (hourlyData && hourlyData.length === 24) {
         requestAnimationFrame(() => {
-            try { renderMiniBarChart(document.getElementById('tp-chart'), hourlyData); }
-            catch (e) { console.warn('Chart render error:', e); }
+            const canvas = document.getElementById('tp-chart');
+            if (canvas) renderMiniBarChart(canvas, hourlyData);
         });
     }
 }
 
 function closeTourismPanel() {
-    document.getElementById('tourism-panel').classList.add('hidden');
+    document.getElementById('tourism-panel')?.classList.add('hidden');
 }
 
+// ── Mini Bar Chart ────────────────────────────────────────────────────────────
 function renderMiniBarChart(canvas, data) {
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    canvas.width = w * dpr;
+    const w = canvas.clientWidth || 340;
+    const h = canvas.clientHeight || 100;
+    canvas.width  = w * dpr;
     canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, w, h);
-
     const max = Math.max(...data, 1);
     const barW = (w - 2) / 24;
-    const gap = 1;
     const currentHour = new Date().getHours();
-
     for (let i = 0; i < 24; i++) {
-        const val = data[i] / max;
+        const val  = data[i] / max;
         const barH = val * (h - 8);
         const x = i * barW + 1;
         const y = h - barH - 2;
-
-        // Color based on value
-        let color;
-        if (data[i] >= 60) color = '#ef4444';
-        else if (data[i] >= 30) color = '#f59e0b';
-        else color = '#10b981';
-
-        // Highlight current hour
-        if (i === currentHour) {
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 8;
-        }
-
+        let color = data[i] >= 60 ? '#ef4444' : data[i] >= 30 ? '#f59e0b' : '#10b981';
+        if (i === currentHour) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
         ctx.fillStyle = i === currentHour ? '#ffffff' : color;
-        ctx.fillRect(x, y, barW - gap, Math.max(barH, 1));
+        ctx.fillRect(x, y, barW - 1, Math.max(barH, 1));
         ctx.shadowBlur = 0;
     }
 }
 
-// =====================================================
-// HEATMAP
-// =====================================================
-function buildHeatmap() {
-    if (!categoryData.pariwisata) return;
-    const heatPoints = categoryData.pariwisata.features.map(f => {
-        const coords = f.geometry.coordinates;
-        const intensity = (f.properties.visitors_per_day || 1000) / 5000;
-        return [coords[1], coords[0], Math.min(intensity, 1)];
-    });
-    heatmapLayer = L.heatLayer(heatPoints, {
-        radius: 35, blur: 25, maxZoom: 15,
-        gradient: { 0.2: '#06b6d4', 0.4: '#10b981', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#e11d48' }
-    });
-}
-
-// =====================================================
-// UTILITIES
-function renderDisasterSubTabs() {
-    const container = document.getElementById('disaster-sub-tabs');
-    const subcats = categoryMeta.kebencanaan ? Object.keys(categoryMeta.kebencanaan.subcategories || {}) : [];
-    const tabs = [{ key: 'all', label: 'Semua' }, ...subcats.map(s => ({ key: s, label: s.replace('Risiko ', '').replace('Rawan ', '') }))];
-    container.innerHTML = tabs.map(t =>
-        `<button class="dst-tab ${t.key === activeDisasterSubTab ? 'active' : ''}" data-subtab="${t.key}">${t.label}</button>`
-    ).join('');
-    container.querySelectorAll('.dst-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            activeDisasterSubTab = btn.dataset.subtab;
-            container.querySelectorAll('.dst-tab').forEach(b => b.classList.toggle('active', b === btn));
-            rebuildCategoryLayer('kebencanaan');
-        });
-    });
-}
-
-// =====================================================
-// DISASTER DETAIL PANEL
-// =====================================================
-function getFeatureCenter(feature) {
-    const g = feature.geometry;
-    if (g.type === 'Point') return [g.coordinates[1], g.coordinates[0]];
-    if (g.type === 'Polygon') { const b = L.geoJSON(feature).getBounds().getCenter(); return [b.lat, b.lng]; }
-    if (g.type === 'LineString') { const c = g.coordinates[Math.floor(g.coordinates.length / 2)]; return [c[1], c[0]]; }
-    return [-7.7956, 110.3695];
-}
-
+// ── Disaster Detail Panel ─────────────────────────────────────────────────────
 function showDisasterPanel(feature, categoryKey) {
     const panel = document.getElementById('disaster-panel');
+    if (!panel) return;
     const props = feature.properties;
     closeTourismPanel();
     closeInfoCard();
-    currentReportFeature = { feature, categoryKey };
+    State.currentReportFeature = { feature, categoryKey };
 
-    // Header photo
     const header = document.getElementById('dp-header');
-    header.style.backgroundImage = props.foto ? `url('${props.foto}')` : `linear-gradient(135deg, #dc2626, #991b1b)`;
+    header.style.backgroundImage = props.foto
+        ? `url('${props.foto}')`
+        : 'linear-gradient(135deg, #dc2626, #991b1b)';
 
-    // Risk badge
     const badgeEl = document.getElementById('dp-risk-badge');
     const lr = props.level_risiko || 'Info';
     const zona = props.zona ? ` · ${props.zona}` : '';
@@ -315,33 +253,25 @@ function showDisasterPanel(feature, categoryKey) {
 
     document.getElementById('dp-name').textContent = props.name || 'Unnamed';
 
-    // Meta line
     const metaItems = [];
-    if (props.radius_km) metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
-    if (props.sumber_data) metaItems.push(`📊 Sumber: ${props.sumber_data}`);
+    if (props.radius_km)    metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
+    if (props.sumber_data)  metaItems.push(`📊 Sumber: ${props.sumber_data}`);
     if (props.last_updated) metaItems.push(`Diperbarui: ${props.last_updated}`);
     document.getElementById('dp-meta').innerHTML = metaItems.join(' · ');
 
     document.getElementById('dp-description').textContent = props.deskripsi || '';
 
-    // Facilities
     const facSection = document.getElementById('dp-facilities-section');
     const facilities = props.facilities || [];
     if (facilities.length > 0) {
         facSection.style.display = 'block';
-        document.getElementById('dp-facilities').innerHTML = facilities.map(f =>
-            `<span class="dp-facility-chip">${f}</span>`
-        ).join('');
+        document.getElementById('dp-facilities').innerHTML = facilities.map(f => `<span class="dp-facility-chip">${escapeHtml(f)}</span>`).join('');
     } else { facSection.style.display = 'none'; }
 
-    // Evacuation
     const evacBox = document.getElementById('dp-evac-box');
-    if (props.instruksi_evakuasi) {
-        evacBox.style.display = 'block';
-        document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi;
-    } else { evacBox.style.display = 'none'; }
+    if (props.instruksi_evakuasi) { evacBox.style.display = 'block'; document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi; }
+    else { evacBox.style.display = 'none'; }
 
-    // History
     const histSection = document.getElementById('dp-history-section');
     const history = props.riwayat_bencana || [];
     if (history.length > 0) {
@@ -349,24 +279,25 @@ function showDisasterPanel(feature, categoryKey) {
         document.getElementById('dp-history-list').innerHTML = history.slice(0, 3).map(h => `
             <div class="dp-history-item">
                 <div class="dp-history-date">🗓️ ${h.tanggal}</div>
-                <div class="dp-history-detail">${h.jenis} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
+                <div class="dp-history-detail">${escapeHtml(h.jenis)} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
                 <div class="dp-history-sub">${(h.pengungsi || 0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
-            </div>
-        `).join('');
+            </div>`).join('');
     } else { histSection.style.display = 'none'; }
 
-    // Contact
     const contactEl = document.getElementById('dp-contact');
     if (props.kontak_darurat) {
         contactEl.style.display = 'flex';
-        const phone = props.kontak_darurat.replace(/[^+\d]/g, '').slice(0, 16);
+        const phone = props.kontak_darurat.replace(/[^\d+]/g, '').slice(0, 16);
         document.getElementById('dp-contact-phone').textContent = props.kontak_darurat;
         document.getElementById('dp-contact-phone').href = `tel:${phone}`;
     } else { contactEl.style.display = 'none'; }
 
-    // Actions
-    const center = getFeatureCenter(feature);
-    document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${center[0]},${center[1]}`, '_blank');
+    // Detect center for gmaps
+    const g = feature.geometry;
+    let cLat = -7.7956, cLon = 110.3695;
+    if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
+
+    document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${cLat},${cLon}`, '_blank');
     document.getElementById('dp-btn-report').onclick = () => {
         const lapTab = document.querySelector('.top-nav-tab[data-page="laporan"]');
         if (lapTab) lapTab.click();
@@ -376,48 +307,28 @@ function showDisasterPanel(feature, categoryKey) {
 }
 
 function closeDisasterPanel() {
-    document.getElementById('disaster-panel').classList.add('hidden');
+    document.getElementById('disaster-panel')?.classList.add('hidden');
 }
 
-
-
-// =====================================================
-// RECENT EVENTS WIDGET
-// =====================================================
-function renderRecentEvents() {
-    const widget = document.getElementById('recent-events-widget');
-    const list = document.getElementById('rew-list');
-    const events = [
-        { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
-        { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
-        { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
-    ];
-    list.innerHTML = events.map(e => `
-        <div class="rew-item">
-            <span class="rew-icon">${e.icon}</span>
-            <div class="rew-info">
-                <div class="rew-event-title">${e.title} <span class="rew-status ${e.statusClass}">→ ${e.status}</span></div>
-                <div class="rew-time">Terakhir: ${e.time}</div>
-            </div>
-        </div>
-    `).join('');
-    widget.style.display = 'none'; // shown only when disaster category active
+// ── Report Modal ──────────────────────────────────────────────────────────────
+function closeReportModal() {
+    document.getElementById('report-modal')?.classList.add('hidden');
 }
 
-// =====================================================
-// INIT
-// =====================================================
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    initSidebar();
-    initSearch();
-    initWelcome();
-    loadAllData();
-    // Report modal ESC key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeReportModal();
-    });
-});
-
-// =====================================================
-// SPA ROUTING & RENDERING
+function renderReportModalTab(tab) {
+    const content = document.getElementById('rm-content');
+    if (!content) return;
+    const feature = State.currentReportFeature?.feature;
+    if (!feature) { content.innerHTML = '<p style="color:var(--text-muted);padding:20px">Tidak ada data dipilih.</p>'; return; }
+    const props = feature.properties;
+    if (tab === 'ringkasan') {
+        content.innerHTML = `<div style="padding:20px"><h3>${escapeHtml(props.name||'')}</h3><p>${escapeHtml(props.deskripsi||'')}</p></div>`;
+    } else if (tab === 'riwayat') {
+        const hist = props.riwayat_bencana || [];
+        content.innerHTML = `<div style="padding:20px">${hist.length ? hist.map(h => `<div style="margin-bottom:12px;padding:12px;background:rgba(30,41,59,0.4);border-radius:8px"><strong>${h.tanggal}</strong><br>${h.jenis} ${h.skala}<br>${h.deskripsi||''}</div>`).join('') : '<p style="color:var(--text-muted)">Belum ada riwayat.</p>'}</div>`;
+    } else if (tab === 'evakuasi') {
+        content.innerHTML = `<div style="padding:20px"><p>${escapeHtml(props.instruksi_evakuasi||'Tidak ada instruksi tersedia.')}</p></div>`;
+    } else if (tab === 'kontak') {
+        content.innerHTML = `<div style="padding:20px"><p>Kontak Darurat BPBD: <a href="tel:${props.kontak_darurat||''}">${escapeHtml(props.kontak_darurat||'-')}</a></p></div>`;
+    }
+}
