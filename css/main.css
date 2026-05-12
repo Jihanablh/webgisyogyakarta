@@ -117,17 +117,23 @@ img {
 
 /* ── TOP NAVIGATION ──────────────────────────────────────── */
 #top-nav {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   height: 60px;
-  flex-shrink: 0;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 0;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 3vw, 32px);
   background: var(--nav-bg);
   border-bottom: 1px solid var(--nav-border);
   box-shadow: 0 2px 0 0 var(--accent-gold);
+}
+
+#top-nav.is-visible {
+  display: flex;
 }
 
 path.diy-boundary {
@@ -137,7 +143,7 @@ path.diy-boundary {
 /* ============ DISASTER FILTERS (TAB 1) ============ */
 #disaster-filters {
   position: absolute;
-  top: 72px;
+  top: 12px;
   left: 60px;
   z-index: 800;
   display: flex;
@@ -146,6 +152,38 @@ path.diy-boundary {
 
 #disaster-filters.hidden {
   display: none;
+}
+
+/* Sidebar hamburger when panel closed */
+.sidebar-fab-open {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  z-index: 700;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: rgba(10, 15, 30, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 160, 23, 0.15);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-fab-open:hover {
+  border-color: rgba(212, 160, 23, 0.35);
+  color: var(--text-primary);
 }
 
 .d-filter-btn {
@@ -165,99 +203,6 @@ path.diy-boundary {
   background: var(--accent-gold);
   border-color: var(--accent-gold);
   color: #000;
-}
-
-/* ============ CATEGORY TABS ============ */
-#category-tabs {
-  position: absolute;
-  top: 72px;
-  left: 60px;
-  /* Right of sidebar open button */
-  right: 16px;
-  z-index: 800;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  /* For scrollbar */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-#category-tabs::-webkit-scrollbar {
-  display: none;
-  /* Chrome/Safari */
-}
-
-#category-tabs.hidden {
-  display: none;
-}
-
-.cat-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  color: var(--text-secondary);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.cat-btn:hover {
-  border-color: var(--accent-gold);
-  color: var(--text-primary);
-}
-
-.cat-btn.active {
-  background: var(--accent-gold);
-  border-color: var(--accent-gold);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-}
-
-/* ============ SUBCATEGORY CHIPS ============ */
-#subcategory-chips {
-  position: absolute;
-  top: 120px;
-  left: 60px;
-  right: 16px;
-  z-index: 800;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-#subcategory-chips.hidden {
-  display: none;
-}
-
-.sub-chip {
-  background: rgba(16, 22, 40, 0.8);
-  border: 1px solid var(--border-glass);
-  color: var(--text-secondary);
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
-}
-
-.sub-chip:hover {
-  border-color: var(--text-secondary);
-}
-
-.sub-chip.active {
-  background: var(--bg-elevated);
-  border-color: var(--accent-blue);
-  color: var(--accent-blue);
-  box-shadow: 0 0 10px rgba(41, 128, 185, 0.3);
 }
 
 #top-nav::before {
@@ -345,6 +290,11 @@ path.diy-boundary {
   /* critical: allows flex child to shrink below content size */
 }
 
+body.app-started #main-content {
+  margin-top: 60px;
+  min-height: calc(100vh - 60px);
+}
+
 /* ── MAP ──────────────────────────────────────────────────── */
 #map {
   position: absolute;
@@ -382,6 +332,10 @@ path.diy-boundary {
 
 #category-tabs::-webkit-scrollbar {
   display: none;
+}
+
+#category-tabs.hidden {
+  display: none !important;
 }
 
 .cat-btn {
@@ -611,8 +565,8 @@ path.diy-boundary {
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg-primary);
-  z-index: 950;
-  /* above category-tabs(800), legend(750), basemap(700) */
+  z-index: 500;
+  /* Map controls 700–800 stay above when visible; router hides them on SPA routes */
   padding: clamp(16px, 4vw, 48px);
   scrollbar-width: thin;
   scrollbar-color: rgba(212, 160, 23, 0.25) transparent;

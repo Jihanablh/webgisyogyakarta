@@ -13,6 +13,14 @@
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Noto+Serif:wght@400;600&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            prefix: 'tw-',
+            corePlugins: { preflight: false }
+        };
+    </script>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
@@ -22,6 +30,7 @@
     <link rel="stylesheet" href="css/detail-panel.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
 </head>
 
 <body>
@@ -126,12 +135,14 @@
     </div>
 
     <!-- ============ TOP NAVIGATION ============ -->
-    <nav id="top-nav" style="display:none">
-        <div class="nav-logo">
+    <nav id="top-nav"
+        class="batik-pattern tw-flex tw-h-[60px] tw-w-full tw-min-w-0 tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-pl-4 tw-pr-4 lg:tw-px-8"
+        aria-label="Navigasi utama">
+        <div class="nav-logo tw-shrink-0">
             JOGJA SIAGA
             <span class="nav-logo-sub">Sistem Informasi Geografis Kebencanaan DIY</span>
         </div>
-        <div id="nav-tabs">
+        <div id="nav-tabs" class="tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
             <button class="top-nav-tab active" data-page="map">Peta Kebencanaan</button>
             <button class="top-nav-tab" data-page="laporan">Laporan Bencana</button>
             <button class="top-nav-tab" data-page="statistik">Statistika</button>
@@ -196,8 +207,7 @@
         </aside>
 
         <!-- Sidebar open button (when closed) -->
-        <button id="sidebar-open-btn"
-            style="position:absolute;top:72px;left:16px;z-index:700;width:36px;height:36px;border-radius:6px;background:rgba(10,15,30,0.88);backdrop-filter:blur(16px);border:1px solid rgba(212,160,23,0.15);color:#a8a49b;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3)">&#9776;</button>
+        <button type="button" id="sidebar-open-btn" class="sidebar-fab-open" aria-label="Buka panel layer">Menu</button>
 
         <!-- ============ DISASTER FILTERS (TAB 1) ============ -->
         <div id="disaster-filters" class="hidden">
@@ -362,8 +372,8 @@
                     </div>
                     <div class="fitur-card">
                         <div class="fitur-name">Asisten SIGAJOG</div>
-                        <div class="fitur-desc">Chatbot berbasis AI untuk menjawab pertanyaan seputar kebencanaan dan
-                            fasilitas DIY.</div>
+                        <div class="fitur-desc">Asisten jawaban singkat berbasis pencocokan kata kunci lokal di
+                            peramban, untuk pertanyaan seputar kebencanaan dan fasilitas DIY.</div>
                     </div>
                 </div>
             </div>
@@ -422,8 +432,15 @@
         <div class="loading-text">Memuat data<span class="loading-dots"></span></div>
     </div>
 
+    <!-- ============ AMBIENT AUDIO (optional file: audio/jogja-ambient.mp3) ============ -->
+    <audio id="bgm-audio" loop playsinline preload="metadata">
+        <source src="audio/jogja-ambient.mp3" type="audio/mpeg">
+    </audio>
+    <button type="button" class="bgm-toggle" id="bgm-toggle" aria-pressed="false"
+        title="Musik latar (letakkan audio/jogja-ambient.mp3)">Musik</button>
+
     <!-- ============ CHATBOT WIDGET ============ -->
-    <button class="chatbot-toggle" id="chatbot-toggle">Tanya SIGAJOG</button>
+    <button type="button" class="chatbot-toggle" id="chatbot-toggle">Tanya SIGAJOG</button>
     <div class="chatbot-panel hidden" id="chatbot-panel">
         <div class="chatbot-header">
             <div class="chatbot-header-info">

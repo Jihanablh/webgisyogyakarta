@@ -418,19 +418,29 @@ function openUnifiedPanel(feature, categoryKey) {
         window._detailLatLng = [avgLat, avgLon];
     }
 
-    // Photo
+    // Photo — stable Unsplash URLs (source.unsplash.com is unreliable)
     const imgEl = document.getElementById('detail-photo-img');
-    const photoQueries = {
-        kebencanaan: 'disaster+yogyakarta+merapi',
-        pariwisata:  'yogyakarta+temple+tourism',
-        wisata:      'yogyakarta+temple+tourism',
-        mobilitas:   'yogyakarta+transport+station',
-        lingkungan:  'yogyakarta+nature+environment',
-        kesehatan_darurat: 'hospital+indonesia'
+    const fallbackUnsplashId = {
+        kebencanaan: 'photo-1588668214407-6ea9a6d8c272',
+        pariwisata: 'photo-1584810359583-96fc3448beaa',
+        wisata: 'photo-1584810359583-96fc3448beaa',
+        mobilitas: 'photo-1570125909232-e0963dc1758e',
+        lingkungan: 'photo-1448375240586-882707db888b',
+        kesehatan_darurat: 'photo-1519494026892-80bbd2d6fd0d',
+        kebutuhan: 'photo-1555529669-e69e7aa0ba9a',
+        tempat_tinggal: 'photo-1566073771259-6a8506099945',
+        atm_bank: 'photo-1563013544-824ae1b704d3',
+        sosial_tugas: 'photo-1450101499163-a353f31ffcc4',
+        akademik: 'photo-1523050854058-8df90110c9f1',
+        default: 'photo-1555890725-11ccf6d9922a'
     };
-    const q = photoQueries[categoryKey] || encodeURIComponent(props.name || 'yogyakarta');
-    imgEl.src = props.foto || `https://source.unsplash.com/400x200/?${q}`;
-    imgEl.onerror = () => { imgEl.src = `https://picsum.photos/seed/${encodeURIComponent(props.name||'jogja')}/400/200`; };
+    const pid = fallbackUnsplashId[categoryKey] || fallbackUnsplashId.default;
+    const builtFallback = `https://images.unsplash.com/${pid}?auto=format&fit=crop&w=400&h=200&q=80`;
+    imgEl.src = props.foto || builtFallback;
+    imgEl.onerror = () => {
+        imgEl.onerror = null;
+        imgEl.src = `https://picsum.photos/seed/${encodeURIComponent(props.name || props.nama || 'jogja')}/400/200`;
+    };
 
     // Badge
     const badge = document.getElementById('detail-cat-badge');

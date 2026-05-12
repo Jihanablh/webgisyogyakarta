@@ -1,7 +1,5 @@
 import { CONFIG, State } from './state.js';
 
-// Will fetch actual boundary from geojson
-
 export function initMap() {
     State.map = L.map('map', {
         center: CONFIG.center,
@@ -23,28 +21,31 @@ export function initMap() {
         updateWhenZooming: false
     }).addTo(State.map);
 
-    // --- DIY Boundary GeoJSON ---
-    fetch('data/yogyakarta_boundary.geojson')
-        .then(response => response.json())
-        .then(data => {
+    (async () => {
+        try {
+            const response = await fetch('data/yogyakarta_boundary.geojson');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
             L.geoJSON(data, {
                 style: {
-                    color: '#3b82f6',  // Neon blue
-                    weight: 2,
-                    opacity: 0.8,
-                    fill: false,
-                    dashArray: '8 4',
-                    className: 'diy-boundary'
-                }
-            }).bindTooltip('Batas Wilayah DIY', {
-                permanent: false,
-                direction: 'center',
-                className: 'boundary-tooltip'
-            }).addTo(State.map);
-        })
-        .catch(err => console.error('Error loading boundary:', err));
+                    color: '#2980b9',
+                    weight: 1.5,
+                    opacity: 0.7,
+                    fillOpacity: 0
+                },
+                className: 'diy-boundary'
+            })
+                .bindTooltip('Batas Wilayah DIY', {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'boundary-tooltip'
+                })
+                .addTo(State.map);
+        } catch (err) {
+            console.warn('GeoJSON batas wilayah gagal dimuat:', err?.message || err);
+        }
+    })();
 
-    // --- Marker Cluster Group ---
     State.markerClusterGroup = L.markerClusterGroup({
         maxClusterRadius: 50,
         spiderfyOnMaxZoom: true,
@@ -65,12 +66,23 @@ export function initMap() {
 
     State.map.addLayer(State.markerClusterGroup);
 
-    // Update coordinate display on mouse move
     State.map.on('mousemove', (e) => {
         const coordEl = document.getElementById('coord-text');
         if (coordEl) {
             coordEl.textContent = `${Math.abs(e.latlng.lat).toFixed(4)}°${e.latlng.lat < 0 ? 'S' : 'N'}, ${Math.abs(e.latlng.lng).toFixed(4)}°${e.latlng.lng > 0 ? 'E' : 'W'}`;
         }
+    });
+
+    setTimeout(() => {
+        try {
+            State.map.invalidateSize();
+        } catch (_) { /* ignore */ }
+    }, 300);
+
+    window.addEventListener('resize', () => {
+        try {
+            if (State.map) State.map.invalidateSize();
+        } catch (_) { /* ignore */ }
     });
 
     return State.map;

@@ -67,5 +67,13 @@ export class Router {
         });
 
         this.current = to;
+
+        if ((to === 'map' || to === 'tatakota') && typeof window !== 'undefined' && window.State?.map) {
+            setTimeout(() => {
+                try {
+                    window.State.map.invalidateSize();
+                } catch (_) { /* ignore */ }
+            }, 200);
+        }
     }
 }

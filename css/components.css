@@ -249,6 +249,42 @@
 }
 .leaflet-control-attribution a { color: #d4a017 !important; }
 
+/* ── Ambient music toggle (left of chatbot) ─────────────── */
+.bgm-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 200px;
+  z-index: 1100;
+  background: rgba(19, 29, 53, 0.95);
+  color: var(--accent-gold, #d4a017);
+  border: 1.5px solid rgba(212, 160, 23, 0.45);
+  padding: 10px 18px;
+  border-radius: 50px;
+  font-family: var(--font-ui, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.bgm-toggle:hover {
+  background: rgba(212, 160, 23, 0.12);
+  border-color: rgba(212, 160, 23, 0.7);
+}
+.bgm-toggle.is-playing {
+  background: rgba(212, 160, 23, 0.2);
+  color: #0a0f1e;
+  border-color: var(--accent-gold, #d4a017);
+}
+
+@media (max-width: 520px) {
+  .bgm-toggle {
+    right: 12px;
+    bottom: 72px;
+  }
+}
+
 /* ── Utilities ───────────────────────────────────────────── */
 .hidden { display: none !important; }
 .gold-divider { height:1px; background:linear-gradient(to right,transparent,rgba(212,160,23,0.2),transparent); border:none; margin:24px 0; }

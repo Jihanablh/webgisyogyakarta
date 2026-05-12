@@ -10,6 +10,7 @@ import { initAboutPage }      from './pages/about.js';
 import { initTataKotaPage }   from './pages/tatakota.js';
 import { State, CATEGORIES }  from './state.js';
 import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js';
+import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js';
 
 window.State = State;
 window.CATEGORIES = CATEGORIES;
@@ -71,6 +72,7 @@ async function init() {
 
     initSidebar({ map, router, onCategoryToggle: (cat) => loadLayer(cat) });
     initDetailPanel();
+    initBgm();
     initCategoryTabs();
     initDisasterFilters();
 
@@ -88,11 +90,13 @@ async function init() {
             const overlay = document.getElementById('welcome-overlay');
             overlay.classList.add('fade-out');
             setTimeout(() => { overlay.style.display = 'none'; }, 750);
-            document.getElementById('top-nav').style.display = 'flex';
+            document.body.classList.add('app-started');
+            document.getElementById('top-nav')?.classList.add('is-visible');
             document.getElementById('disaster-filters').classList.remove('hidden');
             document.getElementById('category-tabs').classList.add('hidden');
             document.getElementById('risk-legend').classList.remove('hidden');
             showOnlyKebencanaan();
+            tryResumeBgmFromWelcomeGesture();
             if (State.map) setTimeout(() => State.map.invalidateSize(), 100);
         });
     }
