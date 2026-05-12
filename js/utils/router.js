@@ -1,7 +1,7 @@
 export class Router {
     constructor() {
         this.routes  = {};
-        this.current = null; // start null so first navigate always fires
+        this.current = null;
     }
 
     register(name, options = {}) {
@@ -11,32 +11,57 @@ export class Router {
     navigate(to) {
         const from = this.current;
 
-        // Hide all pages and map
+        // Elements that only make sense on the map view
+        const mapOnlyIds = ['category-tabs','basemap-toggle','risk-legend',
+                            'coord-display','disaster-sub-tabs','sidebar-open-btn'];
+
+        // Hide all spa-pages
         document.querySelectorAll('.spa-page').forEach(el => el.classList.add('hidden'));
         const mapEl = document.getElementById('map');
-        if (mapEl) mapEl.classList.add('hidden');
+        
+        const isMapView = (to === 'map' || to === 'tatakota');
 
-        // Sidebar visibility
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            if (to === 'map') {
-                sidebar.style.display = '';
-            } else {
-                sidebar.style.display = 'none';
-            }
+        if (!isMapView) {
+            if (mapEl) mapEl.classList.add('hidden');
+        } else {
+            if (mapEl) mapEl.classList.remove('hidden');
+        }
+
+        if (isMapView) {
+            // Show map-only elements
+            mapOnlyIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = '';
+            });
+            // Except sidebar which is only for map (Kebencanaan)
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.style.display = (to === 'map') ? '' : 'none';
+        } else {
+            // Hide map-only elements so they don't float over SPA pages
+            mapOnlyIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            // Also close detail panel if open
+            const dp = document.getElementById('detail-panel');
+            if (dp) dp.classList.remove('open');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.style.display = 'none';
         }
 
         if (from && this.routes[from]?.onLeave) this.routes[from].onLeave();
         if (this.routes[to]?.onEnter) this.routes[to].onEnter();
 
-        const target = document.getElementById(to === 'map' ? 'map' : `${to}-page`);
+        const target = isMapView ? document.getElementById('map') : document.getElementById(`${to}-page`);
         if (target) {
+            target.classList.remove('page-enter');
             target.classList.remove('hidden');
+            void target.offsetHeight; // force reflow
             target.classList.add('page-enter');
             setTimeout(() => target.classList.remove('page-enter'), 350);
         }
 
-        // Update active tab
+        // Update active nav tab
         document.querySelectorAll('.top-nav-tab').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.page === to);
         });

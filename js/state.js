@@ -77,4 +77,6 @@ export const State = {
     searchHighlightMarker: null,
     currentReportFeature: null,
     onlyKebencanaan: true,
+    // Tracks which categories the user has toggled ON
+    enabledCategories: new Set(['kebencanaan']),
 };

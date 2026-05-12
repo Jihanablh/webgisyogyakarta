@@ -29,13 +29,11 @@ export function initMap() {
         .then(data => {
             L.geoJSON(data, {
                 style: {
-                    color: '#4ade80',  // Softer green to fit aesthetic
-                    weight: 1.5,
+                    color: '#3b82f6',  // Neon blue
+                    weight: 2,
                     opacity: 0.8,
-                    fill: true,
-                    fillColor: '#4ade80',
-                    fillOpacity: 0.05,
-                    dashArray: '5 5',
+                    fill: false,
+                    dashArray: '8 4',
                     className: 'diy-boundary'
                 }
             }).bindTooltip('Batas Wilayah DIY', {

@@ -1,444 +1,461 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WebGIS interaktif untuk mahasiswa perantau di Yogyakarta. Temukan kampus, kos, restoran, klinik, ATM, dan halte bus terdekat.">
-    <title>JogjaMap - Panduan Mahasiswa Perantau Yogyakarta</title>
+    <meta name="description" content="JOGJA SIAGA — Sistem Informasi Geografis Kebencanaan Daerah Istimewa Yogyakarta">
+    <title>JOGJA SIAGA — WebGIS Kebencanaan Yogyakarta</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Noto+Serif:wght@400;600&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/welcome.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/detail-panel.css">
     <link rel="stylesheet" href="css/pages.css">
-    <link rel="stylesheet" href="css/welcome.css">
     <link rel="stylesheet" href="css/components.css">
 </head>
+
 <body>
 
-    <!-- ============ TOP NAVIGATION ============ -->
-    <nav class="top-nav" id="top-nav" style="display: none;">
-        <div class="top-nav-logo">
-            <span>JogjaMap</span>
+    <!-- ============ WELCOME OVERLAY ============ -->
+    <div id="welcome-overlay">
+        <!-- Decorative frame -->
+        <div class="welcome-frame">
+            <svg viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Corner ornaments -->
+                <g stroke="rgba(212,160,23,0.35)" fill="none" stroke-width="1.5">
+                    <polyline points="28,28 28,60 60,28" />
+                    <polyline points="1412,28 1380,28 1412,60" />
+                    <polyline points="28,872 28,840 60,872" />
+                    <polyline points="1412,872 1380,872 1412,840" />
+                </g>
+                <!-- Parang motif lines -->
+                <g stroke="rgba(212,160,23,0.08)" stroke-width="1" fill="none">
+                    <path
+                        d="M0,50 Q72,0 144,50 T288,50 T432,50 T576,50 T720,50 T864,50 T1008,50 T1152,50 T1296,50 T1440,50" />
+                    <path
+                        d="M0,850 Q72,900 144,850 T288,850 T432,850 T576,850 T720,850 T864,850 T1008,850 T1152,850 T1296,850 T1440,850" />
+                </g>
+            </svg>
         </div>
-        <div class="top-nav-tabs">
-            <button class="top-nav-tab active" data-page="map">Peta</button>
+
+        <!-- Sky gradient -->
+        <div class="welcome-sky"></div>
+
+        <!-- Yogyakarta Silhouette SVG -->
+        <div class="welcome-silhouette">
+            <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="silGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0d1530" stop-opacity="0.9" />
+                        <stop offset="100%" stop-color="#0a0f1e" stop-opacity="1" />
+                    </linearGradient>
+                </defs>
+                <!-- Gunung Merapi (center-left) -->
+                <polygon points="580,10 480,280 680,280" fill="#0f1a30" opacity="0.97" />
+                <polygon points="580,50 510,280 650,280" fill="#0b1425" opacity="0.98" />
+                <!-- Snow/glow cap -->
+                <polygon points="580,10 555,60 605,60" fill="#1a2845" opacity="0.6" />
+                <!-- Secondary ridgeline -->
+                <path d="M380,280 Q460,160 540,200 Q560,210 580,10 Q600,210 640,200 Q720,160 780,280" fill="#0c1528"
+                    opacity="0.9" />
+                <!-- Rolling hills -->
+                <ellipse cx="200" cy="350" rx="350" ry="140" fill="#0b1322" opacity="0.95" />
+                <ellipse cx="1240" cy="350" rx="350" ry="140" fill="#0b1322" opacity="0.95" />
+                <ellipse cx="700" cy="380" rx="500" ry="100" fill="#0a0f1e" opacity="0.95" />
+                <!-- Kraton Yogyakarta silhouette -->
+                <rect x="660" y="240" width="160" height="70" fill="#0a0f1e" />
+                <rect x="680" y="225" width="120" height="20" fill="#0a0f1e" />
+                <rect x="700" y="210" width="80" height="18" fill="#0a0f1e" />
+                <rect x="715" y="196" width="50" height="17" fill="#0a0f1e" />
+                <rect x="724" y="184" width="32" height="15" fill="#0a0f1e" />
+                <rect x="730" y="172" width="20" height="14" fill="#0a0f1e" />
+                <!-- Prambanan temple cluster -->
+                <polygon points="310,310 322,235 334,310" fill="#0c1528" />
+                <polygon points="325,310 340,220 355,310" fill="#0e1a30" />
+                <polygon points="350,310 362,240 374,310" fill="#0c1528" />
+                <rect x="300" y="300" width="84" height="20" fill="#0a0f1e" />
+                <!-- Tugu Yogyakarta -->
+                <rect x="1090" y="260" width="10" height="60" fill="#0d1830" />
+                <polygon points="1085,260 1095,238 1105,260" fill="#0f1a34" />
+                <ellipse cx="1095" cy="263" rx="14" ry="5" fill="#0a0f1e" />
+                <!-- Ground -->
+                <rect x="0" y="310" width="1440" height="100" fill="#0a0f1e" />
+                <!-- Overlay gradient -->
+                <rect x="0" y="0" width="1440" height="400" fill="url(#silGrad)" opacity="0.5" />
+            </svg>
+        </div>
+
+        <!-- Bottom gradient -->
+        <div class="welcome-gradient"></div>
+
+        <!-- Content -->
+        <div class="welcome-content">
+            <div class="welcome-pretitle">Pemerintah Daerah Istimewa Yogyakarta</div>
+            <div class="welcome-divider"></div>
+            <h1 class="welcome-title">JOGJA SIAGA</h1>
+            <p class="welcome-subtitle">Sistem Informasi Geografis Kebencanaan<br>Daerah Istimewa Yogyakarta</p>
+            <div class="welcome-tagline">Hamemayu Hayuning Bawana</div>
+            <div class="welcome-stats">
+                <div class="welcome-stat">
+                    <span class="welcome-stat-num" id="ws-total">—</span>
+                    <span class="welcome-stat-label">Lokasi</span>
+                </div>
+                <div class="welcome-stat-sep"></div>
+                <div class="welcome-stat">
+                    <span class="welcome-stat-num" id="ws-cats">—</span>
+                    <span class="welcome-stat-label">Kategori</span>
+                </div>
+                <div class="welcome-stat-sep"></div>
+                <div class="welcome-stat">
+                    <span class="welcome-stat-num" id="ws-subcats">—</span>
+                    <span class="welcome-stat-label">Sub-Kategori</span>
+                </div>
+            </div>
+            <button id="welcome-btn" class="welcome-cta"><span>Mulai Eksplorasi</span></button>
+        </div>
+    </div>
+
+    <!-- ============ TOP NAVIGATION ============ -->
+    <nav id="top-nav" style="display:none">
+        <div class="nav-logo">
+            JOGJA SIAGA
+            <span class="nav-logo-sub">Sistem Informasi Geografis Kebencanaan DIY</span>
+        </div>
+        <div id="nav-tabs">
+            <button class="top-nav-tab active" data-page="map">Peta Kebencanaan</button>
             <button class="top-nav-tab" data-page="laporan">Laporan Bencana</button>
-            <button class="top-nav-tab" data-page="statistik">Statistik</button>
+            <button class="top-nav-tab" data-page="statistik">Statistika</button>
+            <button class="top-nav-tab" data-page="tatakota">Tata Kelola</button>
             <button class="top-nav-tab" data-page="tentang">Tentang</button>
         </div>
     </nav>
 
-    <!-- ============ WELCOME OVERLAY ============ -->
-    <div id="welcome-overlay" class="welcome-overlay">
-        <div class="welcome-particles">
-            <div class="particle p1"></div>
-            <div class="particle p2"></div>
-            <div class="particle p3"></div>
-            <div class="particle p4"></div>
-            <div class="particle p5"></div>
-        </div>
-        <div class="welcome-content">
-            <div class="welcome-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                WebGIS Yogyakarta
-            </div>
-            <h1 class="welcome-title">Discover<br><span>Yogyakarta</span></h1>
-            <p class="welcome-desc">Jelajahi ribuan lokasi wisata, layanan publik, dan fasilitas di Daerah Istimewa Yogyakarta dalam satu peta interaktif.</p>
-            <button id="welcome-btn" class="welcome-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                Mulai Eksplorasi
-            </button>
-            <div class="welcome-stats" id="welcome-stats">
-                <div class="welcome-stat">
-                    <span class="ws-num" id="ws-total">—</span>
-                    <span class="ws-label">Lokasi</span>
-                </div>
-                <div class="welcome-stat-divider"></div>
-                <div class="welcome-stat">
-                    <span class="ws-num" id="ws-cats">—</span>
-                    <span class="ws-label">Kategori</span>
-                </div>
-                <div class="welcome-stat-divider"></div>
-                <div class="welcome-stat">
-                    <span class="ws-num" id="ws-subcats">—</span>
-                    <span class="ws-label">Sub-Kategori</span>
+    <!-- ============ MAIN CONTENT ============ -->
+    <div id="main-content">
+
+        <!-- MAP -->
+        <div id="map"></div>
+
+        <!-- ============ SIDEBAR ============ -->
+        <aside id="sidebar">
+            <button class="sidebar-close" id="sidebar-toggle" aria-label="Tutup sidebar">x</button>
+            <div class="sidebar-header">
+                <div class="sidebar-logo">JOGJA SIAGA
+                    <div class="sidebar-logo-sub">Sistem Informasi Geografis</div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- ============ SIDEBAR ============ -->
-    <aside id="sidebar" class="sidebar sidebar--hidden">
-        <div class="sidebar-header">
-            <div class="logo-area">
-                <div class="logo-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
+            <div class="sidebar-body">
+                <!-- Search -->
+                <div class="sidebar-search-wrap">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" id="search-input" class="table-search" style="width:100%;padding-left:32px"
+                        placeholder="Cari nama tempat..." autocomplete="off">
+                    <div id="search-results" class="hidden"></div>
                 </div>
-                <div>
-                    <h1 class="logo-title">JogjaMap</h1>
-                    <p class="logo-subtitle">Panduan Mahasiswa Perantau</p>
-                </div>
-            </div>
-            <button id="sidebar-toggle-close" class="sidebar-close" aria-label="Close sidebar">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-        </div>
-
-        <!-- Search -->
-        <div class="search-container">
-            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="search-input" class="search-input" placeholder="Cari nama tempat..." autocomplete="off">
-            <div id="search-results" class="search-results hidden"></div>
-        </div>
-
-        <!-- Category Accordion (Kategori) -->
-        <div id="accordion-container"></div>
-        
-        <!-- Active Category Detail -->
-        <div class="category-detail-section" id="category-detail">
-            <!-- Filled by JS when a tab is selected -->
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-section">
-            <h2 class="section-title">Ringkasan Wilayah</h2>
-            <div class="stats-grid" id="stats-grid"></div>
-            
-            <div class="status-grid" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div class="status-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
-                    <div class="status-icon" style="font-size: 20px;">🌋</div>
-                    <div class="status-info">
-                        <div class="status-label" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Status Merapi</div>
-                        <div class="status-value" style="font-size: 11px; font-weight: 700; color: #fbbf24; margin-top: 2px;">Siaga (Lv III)</div>
+                <!-- Layer panel filled by JS -->
+                <div id="sidebar-mode-panel"></div>
+                <!-- Stats -->
+                <div id="stats-grid"></div>
+                <!-- Status info -->
+                <div class="sb-stat-card" style="margin-top:12px">
+                    <div class="sb-stat-row">
+                        <span class="sb-stat-label">Status Merapi</span>
+                        <span style="font-size:11px;font-weight:700;color:#f39c12">Siaga (Lv III)</span>
+                    </div>
+                    <div class="sb-stat-row" style="margin-top:6px">
+                        <span class="sb-stat-label">Cuaca DIY</span>
+                        <span style="font-size:11px;font-weight:700;color:#27ae60">Cerah Berawan</span>
                     </div>
                 </div>
-                <div class="status-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
-                    <div class="status-icon" style="font-size: 20px;">🌤️</div>
-                    <div class="status-info">
-                        <div class="status-label" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Cuaca DIY</div>
-                        <div class="status-value" style="font-size: 11px; font-weight: 700; color: #34d399; margin-top: 2px;">Cerah Berawan</div>
-                    </div>
+                <button id="btn-open-stats" class="sb-see-all" style="margin-top:10px">Buka Dashboard
+                    Statistika</button>
+                <!-- Recent events (kebencanaan) -->
+                <div id="recent-events-widget" style="display:none">
+                    <div class="sb-section-label">KEJADIAN TERKINI</div>
+                    <div id="rew-list"></div>
+                    <button class="sb-see-all" id="rew-see-all">Lihat Semua Kejadian</button>
+                </div>
+                <!-- Footer -->
+                <div
+                    style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border-card);font-size:10px;color:var(--text-muted);line-height:1.6">
+                    Data: OpenStreetMap via HOTOSM<br>
+                    Boundary: GADM v4.1 · Wilayah DIY<br>
+                    Jihan Nabilah Rahman
                 </div>
             </div>
-            <button id="btn-open-stats" class="rew-see-all" style="margin-top: 12px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">📊 Buka Dashboard Statistik →</button>
+        </aside>
+
+        <!-- Sidebar open button (when closed) -->
+        <button id="sidebar-open-btn"
+            style="position:absolute;top:72px;left:16px;z-index:700;width:36px;height:36px;border-radius:6px;background:rgba(10,15,30,0.88);backdrop-filter:blur(16px);border:1px solid rgba(212,160,23,0.15);color:#a8a49b;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3)">&#9776;</button>
+
+        <!-- ============ DISASTER FILTERS (TAB 1) ============ -->
+        <div id="disaster-filters" class="hidden">
+            <button class="d-filter-btn active" data-filter="Zona Bencana">Zona Bencana</button>
+            <button class="d-filter-btn" data-filter="Tempat Pengungsian">Tempat Pengungsian</button>
         </div>
 
-        <!-- Recent Events Widget -->
-        <div class="recent-events-widget" id="recent-events-widget" style="display:none">
-            <div class="rew-header">
-                <span class="rew-title">⚡ KEJADIAN TERKINI</span>
-            </div>
-            <div class="rew-list" id="rew-list">
-                <!-- Filled by JS -->
-            </div>
-            <button class="rew-see-all" id="rew-see-all">🔔 Lihat Semua Kejadian →</button>
-        </div>
-
-        <div class="sidebar-footer">
-            <p>Data: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> via HOTOSM</p>
-            <p>Boundary: GADM v4.1 • Hanya wilayah DIY</p>
-            <p>Jihan Nabilah Rahman</p>
-        </div>
-    </aside>
-
-    <!-- Mobile Toggle -->
-    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-    </button>
-
-    <!-- ============ CATEGORY TABS ============ -->
-    <div id="category-tabs" class="category-tabs hidden" role="tablist">
-        <!-- Filled by JS -->
-    </div>
-
-    <!-- ============ DISASTER SUBCATEGORY TABS ============ -->
-    <div id="disaster-sub-tabs" class="disaster-sub-tabs hidden">
-        <!-- Filled by JS when kebencanaan is active -->
-    </div>
-
-    <!-- Map -->
-    <div id="map"></div>
-
-    <!-- Info Card -->
-    <div id="info-card" class="info-card hidden">
-        <button id="info-card-close" class="info-card-close back-btn" aria-label="Kembali">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            <span style="font-size: 13px; font-weight: 600; margin-left: 4px;">Kembali</span>
-        </button>
-        <div class="info-card-badge" id="info-card-badge">
-            <span id="info-card-icon"></span>
-        </div>
-        <h3 id="info-card-name" class="info-card-name"></h3>
-        <span id="info-card-type" class="info-card-type"></span>
-        <div class="info-card-details">
-            <div class="info-detail-row" id="info-detail-category">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                <span id="info-category-text"></span>
-            </div>
-            <div class="info-detail-row" id="info-detail-subcategory">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                <span id="info-subcategory-text"></span>
-            </div>
-            <div class="info-detail-row" id="info-detail-distance">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span id="info-distance-text"></span>
-            </div>
-            <div class="info-detail-row" id="info-detail-hours">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span id="info-hours-text"></span>
-            </div>
-            <div class="info-detail-row" id="info-detail-operator">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span id="info-operator-text"></span>
-            </div>
-        </div>
-        <div class="info-card-actions">
-            <button id="info-btn-fly" class="info-btn info-btn-primary">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                Arahkan
-            </button>
-            <button id="info-btn-gmaps" class="info-btn info-btn-secondary">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                Google Maps
-            </button>
-        </div>
-    </div>
-
-    <!-- Tourism Detail Panel -->
-    <div id="tourism-panel" class="tourism-panel hidden">
-        <button id="tp-close" class="tp-close back-btn" aria-label="Kembali" style="display:flex; align-items:center; gap:4px; padding: 6px 12px; width:auto; border-radius: 20px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            <span style="font-size: 13px; font-weight: 600;">Kembali</span>
-        </button>
-        <div class="tp-header" id="tp-header">
-            <div class="tp-header-overlay">
-                <span class="tp-category-badge" id="tp-category-badge"></span>
-                <h2 class="tp-name" id="tp-name"></h2>
-            </div>
-        </div>
-        <div class="tp-body">
-            <div class="tp-stats-row">
-                <div class="tp-stat">
-                    <div class="tp-rating-stars" id="tp-stars"></div>
-                    <span class="tp-rating-num" id="tp-rating"></span>
-                    <span class="tp-reviews" id="tp-reviews"></span>
-                </div>
-                <div class="tp-stat">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <span class="tp-visitors" id="tp-visitors"></span>
-                </div>
-            </div>
-            <div class="tp-info-pills">
-                <div class="tp-pill" id="tp-hours-pill">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span id="tp-hours"></span>
-                </div>
-                <div class="tp-pill" id="tp-ticket-pill">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-                    <span id="tp-ticket"></span>
-                </div>
-            </div>
-            <div class="tp-chart-section">
-                <div class="tp-chart-header">
-                    <span class="tp-chart-title">Grafik Keramaian Per Jam</span>
-                    <span class="tp-crowd-badge" id="tp-crowd-badge"></span>
-                </div>
-                <canvas id="tp-chart" width="340" height="100"></canvas>
-                <div class="tp-chart-labels">
-                    <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
-                </div>
-            </div>
-            <div class="tp-facilities-section">
-                <span class="tp-section-label">Fasilitas</span>
-                <div class="tp-facilities-grid" id="tp-facilities"></div>
-            </div>
-            <p class="tp-description" id="tp-description"></p>
-            <div class="tp-address" id="tp-address-row" style="display:none">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="tp-address"></span>
-            </div>
-            <div class="tp-tips" id="tp-tips-row" style="display:none">
-                <div class="tp-tips-header">💡 Tips Berkunjung</div>
-                <p id="tp-tips"></p>
-            </div>
-            <div class="tp-actions">
-                <button id="tp-btn-fly" class="tp-btn tp-btn-primary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                    Arahkan
-                </button>
-                <button id="tp-btn-gmaps" class="tp-btn tp-btn-secondary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                    Google Maps
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============ DISASTER DETAIL PANEL ============ -->
-    <div id="disaster-panel" class="disaster-panel hidden">
-        <button id="dp-close" class="dp-close back-btn" aria-label="Kembali" style="display:flex; align-items:center; gap:4px; padding: 6px 12px; width:auto; border-radius: 20px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            <span style="font-size: 13px; font-weight: 600;">Kembali</span>
-        </button>
-        <div class="dp-header" id="dp-header">
-            <div class="dp-header-overlay">
-                <div class="dp-risk-badge" id="dp-risk-badge"></div>
-                <h2 class="dp-name" id="dp-name"></h2>
-                <div class="dp-meta" id="dp-meta"></div>
-            </div>
-        </div>
-        <div class="dp-body" id="dp-body">
-            <!-- Description -->
-            <p class="dp-description" id="dp-description"></p>
-
-            <!-- Facilities chips -->
-            <div class="dp-facilities-section" id="dp-facilities-section" style="display:none">
-                <span class="dp-section-label">🏕️ FASILITAS PENGUNGSIAN</span>
-                <div class="dp-facilities-grid" id="dp-facilities"></div>
-            </div>
-
-            <!-- Evacuation Instructions -->
-            <div class="dp-evac-box" id="dp-evac-box" style="display:none">
-                <div class="dp-evac-header">💡 Instruksi Evakuasi</div>
-                <p id="dp-evac-text"></p>
-            </div>
-
-            <!-- Disaster History -->
-            <div class="dp-history-section" id="dp-history-section" style="display:none">
-                <div class="dp-history-header">📋 RIWAYAT BENCANA TERAKHIR</div>
-                <div class="dp-history-list" id="dp-history-list"></div>
-            </div>
-
-            <!-- Emergency contact -->
-            <div class="dp-contact" id="dp-contact" style="display:none">
-                <span>📞 Kontak Darurat BPBD: </span>
-                <a id="dp-contact-phone" href="tel:"></a>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="dp-actions">
-                <button id="dp-btn-report" class="dp-btn dp-btn-report">
-                    📄 Buka Laporan Lengkap
-                </button>
-                <button id="dp-btn-gmaps" class="dp-btn dp-btn-gmaps">
-                    🗺️ Lihat di Google Maps
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============ FULLSCREEN REPORT MODAL ============ -->
-    <div id="report-modal" class="report-modal hidden">
-        <div class="rm-container">
-            <button id="rm-close" class="rm-close" aria-label="Tutup laporan">✕</button>
-            <div class="rm-tabs" id="rm-tabs">
-                <button class="rm-tab active" data-tab="ringkasan">Ringkasan</button>
-                <button class="rm-tab" data-tab="riwayat">Riwayat Bencana</button>
-                <button class="rm-tab" data-tab="evakuasi">Evakuasi</button>
-                <button class="rm-tab" data-tab="kontak">Kontak</button>
-            </div>
-            <div class="rm-content" id="rm-content">
-                <!-- Filled by JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- SPA PAGES -->
-    <!-- LAPORAN BENCANA PAGE -->
-    <div id="laporan-page" class="spa-page hidden">
-        <div class="page-header">
-            <h1 class="page-title">Laporan Kebencanaan DIY</h1>
-            <p class="page-subtitle">Data valid berdasarkan BPBD · BNPB · BMKG · BPPTKG</p>
-            <div class="page-tabs" id="laporan-tabs">
-                <button class="page-tab active" data-disaster="erupsi">Erupsi Merapi</button>
-                <button class="page-tab" data-disaster="banjir">Banjir</button>
-                <button class="page-tab" data-disaster="gempa">Gempa</button>
-                <button class="page-tab" data-disaster="longsor">Longsor</button>
-            </div>
-        </div>
-        <div class="page-content" id="laporan-content">
+        <!-- ============ CATEGORY TABS (TAB 3) ============ -->
+        <div id="category-tabs" class="hidden" role="tablist">
             <!-- Filled by JS -->
         </div>
-    </div>
 
-    <!-- STATISTIK PAGE -->
-    <div id="statistik-page" class="spa-page hidden">
-        <div class="page-header">
-            <h1 class="page-title">Statistik JogjaMap</h1>
-            <p class="page-subtitle">Gambaran lengkap data wilayah DIY</p>
-        </div>
-        <div class="page-content" id="statistik-content">
+        <!-- ============ SUBCATEGORY CHIPS ============ -->
+        <div id="subcategory-chips" class="hidden">
             <!-- Filled by JS -->
         </div>
-    </div>
 
-    <!-- TENTANG PAGE -->
-    <div id="tentang-page" class="spa-page hidden">
-        <div class="tentang-container">
+        <!-- ============ BASEMAP TOGGLE ============ -->
+        <div id="basemap-toggle">
+            <button class="bm-btn active" data-bm="osm">Peta</button>
+            <button class="bm-btn" data-bm="satellite">Satelit</button>
+            <button class="bm-btn" data-bm="terrain">Terrain</button>
+        </div>
+
+        <!-- ============ RISK LEGEND ============ -->
+        <div id="risk-legend" class="hidden">
+            <div class="legend-title">Tingkat Risiko</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#c0392b"></div>Sangat Tinggi
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#e67e22"></div>Tinggi
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#f39c12"></div>Sedang
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#27ae60"></div>Rendah
+            </div>
+            <div class="legend-title"
+                style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(212,160,23,0.15)">Infrastruktur</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#2980b9;border-radius:50%"></div>Pengungsian
+            </div>
+        </div>
+
+        <!-- ============ UNIFIED DETAIL PANEL ============ -->
+        <div id="detail-panel">
+            <button class="dp-close-btn" id="detail-panel-close">Kembali</button>
+            <div class="detail-photo">
+                <img id="detail-photo-img" src="" alt="">
+                <div class="detail-photo-overlay">
+                    <span class="detail-category-badge" id="detail-cat-badge"></span>
+                    <h2 class="detail-name" id="detail-name"></h2>
+                </div>
+            </div>
+            <div class="detail-tabs" id="detail-tabs">
+                <button class="dtab active" data-dtab="info">Informasi</button>
+                <button class="dtab" data-dtab="detail">Detail</button>
+                <button class="dtab" data-dtab="fasilitas">Fasilitas</button>
+                <button class="dtab" data-dtab="grafik">Grafik</button>
+            </div>
+            <div class="detail-content">
+                <div id="dtab-info" class="dtab-pane"></div>
+                <div id="dtab-detail" class="dtab-pane hidden"></div>
+                <div id="dtab-fasilitas" class="dtab-pane hidden"></div>
+                <div id="dtab-grafik" class="dtab-pane hidden">
+                    <div class="dp-chart-wrap"><canvas id="detail-chart"></canvas></div>
+                </div>
+            </div>
+            <div class="detail-actions">
+                <button id="detail-btn-fly">Arahkan</button>
+                <button id="detail-btn-gmaps">Google Maps</button>
+            </div>
+        </div>
+
+        <!-- LEGACY PANELS (hidden, kept for JS backward compat) -->
+        <div id="info-card" class="hidden" style="display:none!important"></div>
+        <div id="tourism-panel" class="hidden" style="display:none!important"></div>
+        <div id="disaster-panel" class="hidden" style="display:none!important"></div>
+        <div id="report-modal" class="hidden" style="display:none!important"></div>
+
+        <!-- ============ SPA PAGES ============ -->
+        <div id="tatakota-page" class="spa-page hidden">
+            <div class="page-header">
+                <h1 class="page-title">Tata Kelola Kota</h1>
+                <p class="page-subtitle">Lingkungan dan Mobilitas Wilayah DIY</p>
+                <div class="page-tabs" id="tatakota-tabs">
+                    <button class="laporan-pill-tab active" data-sub="lingkungan">Lingkungan</button>
+                    <button class="laporan-pill-tab" data-sub="mobilitas">Mobilitas</button>
+                </div>
+            </div>
+            <div id="tatakota-content"></div>
+        </div>
+
+        <div id="laporan-page" class="spa-page hidden">
+            <div class="page-header">
+                <h1 class="page-title">Laporan Kebencanaan DIY</h1>
+                <p class="page-subtitle">Data terverifikasi · BPBD DIY · BNPB · BMKG · BPPTKG</p>
+                <div class="page-tabs" id="laporan-tabs">
+                    <button class="laporan-pill-tab active" data-disaster="erupsi" style="--tab-color:#e67e22">Erupsi
+                        Merapi</button>
+                    <button class="laporan-pill-tab" data-disaster="banjir" style="--tab-color:#2980b9">Banjir</button>
+                    <button class="laporan-pill-tab" data-disaster="gempa" style="--tab-color:#8e44ad">Gempa</button>
+                    <button class="laporan-pill-tab" data-disaster="longsor"
+                        style="--tab-color:#795548">Longsor</button>
+                </div>
+            </div>
+            <div id="laporan-content"></div>
+        </div>
+
+        <div id="statistik-page" class="spa-page hidden">
+            <div class="page-header">
+                <h1 class="page-title">Statistika Kebencanaan</h1>
+                <p class="page-subtitle">Gambaran komprehensif data bencana wilayah DIY</p>
+            </div>
+            <div id="statistik-content"></div>
+        </div>
+
+        <div id="tentang-page" class="spa-page hidden">
             <div class="tentang-hero">
-                <h1 class="tentang-title">JogjaMap</h1>
-                <p class="tentang-subtitle">Panduan digital lengkap wilayah DIY</p>
-                <p class="tentang-author">Dibuat oleh: Jihan Nabilah Rahman<br>Data: OpenStreetMap · BPBD DIY · BNPB · BMKG</p>
+                <div class="tentang-hero-title">JOGJA SIAGA</div>
+                <p class="tentang-hero-sub">Hamemayu Hayuning Bawana — Menjaga Keselamatan Tanah Jogja</p>
             </div>
-            <div class="tentang-pillars">
-                <div class="pillar">
-                    <span class="pillar-icon">🗺️</span>
-                    <h3>Peta</h3>
-                    <p>Navigasi presisi</p>
-                </div>
-                <div class="pillar">
-                    <span class="pillar-icon">⚠️</span>
-                    <h3>Bencana</h3>
-                    <p>Keselamatan warga</p>
-                </div>
-                <div class="pillar">
-                    <span class="pillar-icon">📊</span>
-                    <h3>Statistik</h3>
-                    <p>Data akurat</p>
+            <div class="tentang-section">
+                <div class="tentang-section-title">Tentang Sistem</div>
+                <p>JOGJA SIAGA adalah platform Sistem Informasi Geografis (SIG) yang dirancang khusus untuk mendukung
+                    kesiapsiagaan dan penanggulangan bencana di Daerah Istimewa Yogyakarta. Sistem ini menyajikan data
+                    spasial kebencanaan secara interaktif dan informatif untuk membantu pemangku kepentingan dalam
+                    pengambilan keputusan berbasis data.</p>
+                <p style="margin-top:12px">Dikembangkan dengan semangat filosofi Jawa Hamemayu Hayuning Bawana —
+                    memperindah dan menjaga keselamatan dunia — sistem ini hadir sebagai wujud komitmen nyata melindungi
+                    warga Yogyakarta dari ancaman bencana.</p>
+            </div>
+            <div class="tentang-section">
+                <div class="tentang-section-title">Fitur Unggulan</div>
+                <div class="fitur-grid">
+                    <div class="fitur-card">
+                        <div class="fitur-name">Peta Risiko Interaktif</div>
+                        <div class="fitur-desc">Visualisasi zona risiko bencana dengan gradasi warna tingkat bahaya dan
+                            filter layer dinamis.</div>
+                    </div>
+                    <div class="fitur-card">
+                        <div class="fitur-name">Panel Detail Terintegrasi</div>
+                        <div class="fitur-desc">Panel analitik dengan tab informasi, dampak, fasilitas, dan grafik tren
+                            kejadian.</div>
+                    </div>
+                    <div class="fitur-card">
+                        <div class="fitur-name">Dashboard Statistika</div>
+                        <div class="fitur-desc">Lima jenis visualisasi data mencakup distribusi, tren historis,
+                            komposisi, dan indeks kerentanan.</div>
+                    </div>
+                    <div class="fitur-card">
+                        <div class="fitur-name">Timeline Laporan</div>
+                        <div class="fitur-desc">Dokumentasi kronologis kejadian bencana dengan data dampak dan kontak
+                            darurat.</div>
+                    </div>
+                    <div class="fitur-card">
+                        <div class="fitur-name">Tata Kelola Fasilitas</div>
+                        <div class="fitur-desc">Direktori fasilitas publik dengan sistem filter kategori dan subkategori
+                            terintegrasi.</div>
+                    </div>
+                    <div class="fitur-card">
+                        <div class="fitur-name">Asisten SIGAJOG</div>
+                        <div class="fitur-desc">Chatbot berbasis AI untuk menjawab pertanyaan seputar kebencanaan dan
+                            fasilitas DIY.</div>
+                    </div>
                 </div>
             </div>
-            <div class="tentang-sources">
-                <h3 style="margin-bottom: 16px; font-size: 16px;">Sumber Data</h3>
-                <div class="source-grid">
-                    <div class="source-card"><strong>OSM/HOT</strong><br>Geometri</div>
-                    <div class="source-card"><strong>BPBD DIY</strong><br>Bencana</div>
-                    <div class="source-card"><strong>BMKG</strong><br>Cuaca</div>
-                    <div class="source-card"><strong>BNPB</strong><br>Risiko</div>
+            <div class="tentang-section">
+                <div class="tentang-section-title">Sumber Data</div>
+                <div class="sumber-grid"
+                    style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px">
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
+                        <div
+                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
+                            BPBD DIY</div>
+                        <div style="font-size:11px;color:var(--text-muted)">Data kebencanaan</div>
+                    </div>
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
+                        <div
+                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
+                            BMKG</div>
+                        <div style="font-size:11px;color:var(--text-muted)">Meteorologi</div>
+                    </div>
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
+                        <div
+                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
+                            BIG</div>
+                        <div style="font-size:11px;color:var(--text-muted)">Peta dasar</div>
+                    </div>
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
+                        <div
+                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
+                            OSM/HOT</div>
+                        <div style="font-size:11px;color:var(--text-muted)">Geometri</div>
+                    </div>
                 </div>
+                <div class="disclaimer" style="margin-top:20px">Disclaimer: Data yang ditampilkan merupakan data
+                    estimasi dan historis dari instansi resmi. Sistem ini tidak dimaksudkan sebagai satu-satunya acuan
+                    dalam kedaruratan. Selalu hubungi BPBD DIY untuk informasi terkini.</div>
             </div>
-            <div class="tentang-footer">
-                Versi 2.0 · Terakhir diperbarui: Januari 2025
+            <div
+                style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-card);font-size:11px;color:var(--text-muted)">
+                Versi 2.0 · Terakhir diperbarui: Januari 2025 · Dikembangkan oleh Jihan Nabilah Rahman
             </div>
         </div>
-    </div>
 
-    <!-- Coordinate -->
-    <div id="coord-display" class="coord-display">
+    </div><!-- end #main-content -->
+
+    <!-- ============ COORDINATE DISPLAY ============ -->
+    <div id="coord-display">
         <span id="coord-text">-7.7956°S, 110.3695°E</span>
     </div>
 
-    <!-- Loading -->
+    <!-- ============ LOADING OVERLAY ============ -->
     <div id="loading-overlay" class="loading-overlay">
-        <div class="loading-spinner">
-            <div class="spinner-ring"></div>
-            <p class="loading-text">Memuat data peta...</p>
+        <div class="loading-text">Memuat data<span class="loading-dots"></span></div>
+    </div>
+
+    <!-- ============ CHATBOT WIDGET ============ -->
+    <button class="chatbot-toggle" id="chatbot-toggle">Tanya SIGAJOG</button>
+    <div class="chatbot-panel hidden" id="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-title">SIGAJOG</div>
+                <div class="chatbot-subtitle">Asisten Informasi Kebencanaan Yogyakarta</div>
+            </div>
+            <div class="chatbot-status"><span class="status-dot"></span> Online</div>
+            <button class="chatbot-close-btn" id="chatbot-close">&#x2715;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chat-msg bot">
+                <div class="msg-bubble">
+                    Halo! Saya <strong>SIGAJOG</strong>, asisten informasi kebencanaan Yogyakarta.<br><br>
+                    Saya bisa bantu tentang zona bencana, lokasi pengungsian, jalur evakuasi, kontak darurat, wisata,
+                    dan fasilitas kota DIY.
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-suggestions" id="chatbot-suggestions"></div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatbot-input" class="chatbot-input"
+                placeholder="Tanya tentang bencana, pengungsian, wisata..." autocomplete="off">
+            <button id="chatbot-send" class="chatbot-send-btn">Kirim</button>
         </div>
     </div>
 
+    <!-- ============ SCRIPTS ============ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" defer></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>

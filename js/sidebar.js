@@ -1,200 +1,289 @@
 import { State, CATEGORIES } from './state.js';
-import { rebuildCategoryLayer, showOnlyKebencanaan, showAllLayers } from './layers.js';
+import { loadLayer, showLayer, hideLayer, rebuildCategoryLayer } from './layers.js';
 import { escapeHtml } from './utils/helpers.js';
 
 let _map = null;
 
+// ── Disaster subcategory definitions ───────────────────────────────────────────
+const DISASTER_BUTTONS = [
+    { label: 'Erupsi Merapi', subcats: ['Rawan Erupsi', 'Risiko Erupsi', 'KRB III', 'KRB II', 'KRB I'], color: '#ef4444' },
+    { label: 'Rawan Banjir',  subcats: ['Rawan Banjir', 'Risiko Banjir', 'Daerah Banjir'],              color: '#3b82f6' },
+    { label: 'Rawan Gempa',   subcats: ['Rawan Gempa', 'Risiko Gempa', 'Zona Gempa'],                   color: '#f97316' },
+    { label: 'Rawan Longsor', subcats: ['Rawan Longsor', 'Risiko Longsor', 'Zona Longsor'],              color: '#92400e' },
+    { label: 'Rawan Kekeringan', subcats: ['Rawan Kekeringan', 'Kekeringan'],                           color: '#ca8a04' },
+    { label: 'Jalur Evakuasi', subcats: ['Jalur Evakuasi'],                                             color: '#22c55e' },
+    { label: 'Titik Kumpul',  subcats: ['Titik Kumpul', 'Pengungsian'],                                 color: '#06b6d4' },
+];
+
+// ── Tata Kota category definitions ─────────────────────────────────────────────
+const TATAKOTA_BUTTONS = [
+    { key: 'pariwisata',        label: 'Pariwisata & Keramaian', color: '#f59e0b' },
+    { key: 'tempat_tinggal',    label: 'Tempat Tinggal',         color: '#8b5cf6' },
+    { key: 'kebutuhan',         label: 'Kebutuhan Sehari-hari',  color: '#3b82f6' },
+    { key: 'atm_bank',          label: 'ATM & Bank',             color: '#06b6d4' },
+    { key: 'sosial_tugas',      label: 'Sosial & Tugas',         color: '#16a34a' },
+    { key: 'akademik',          label: 'Pusat Akademik',         color: '#a855f7' },
+    { key: 'kesehatan_darurat', label: 'Kesehatan & Darurat',    color: '#f43f5e' },
+];
+
+let _sidebarMode = 'kebencanaan'; // 'kebencanaan' | 'tatakota'
+
+// Exclusive active state: null = "Lihat Semua" (all shown)
+let _activeDisasterLabel = null; // null → all disaster layers shown
+let _activeTataKotaKey   = null; // null → all tatakota layers shown
+
+export function getSidebarMode() { return _sidebarMode; }
+
 export function initSidebar({ map, router, onCategoryToggle }) {
     _map = map;
 
-    // --- Sidebar open/close ---
-    const sidebar = document.getElementById('sidebar');
+    const sidebar   = document.getElementById('sidebar');
+    const closeBtn  = document.getElementById('sidebar-toggle-close');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    const closeBtn = document.getElementById('sidebar-toggle-close');
     if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
-    if (closeBtn) closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+    if (closeBtn)  closeBtn.addEventListener('click',  () => sidebar.classList.remove('open'));
 
-    // --- Panel close buttons ---
+    // Panel close buttons
     const icClose = document.getElementById('info-card-close');
     if (icClose) icClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeInfoCard?.(); });
-
     const tpClose = document.getElementById('tp-close');
     if (tpClose) tpClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeTourismPanel?.(); });
-
     const dpClose = document.getElementById('dp-close');
     if (dpClose) dpClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeDisasterPanel?.(); });
 
-    // --- Stats page link ---
+    // Stats page link
     const statsBtn = document.getElementById('btn-open-stats');
     if (statsBtn) statsBtn.addEventListener('click', () => {
-        const tab = document.querySelector('.top-nav-tab[data-page="statistik"]');
-        if (tab) tab.click();
+        document.querySelector('.top-nav-tab[data-page="statistik"]')?.click();
     });
 
-    // --- Recent events widget ---
+    // Recent events
     const rewAll = document.getElementById('rew-see-all');
     if (rewAll) rewAll.addEventListener('click', () => {
-        const tab = document.querySelector('.top-nav-tab[data-page="laporan"]');
-        if (tab) tab.click();
+        document.querySelector('.top-nav-tab[data-page="laporan"]')?.click();
     });
     renderRecentEventsWidget();
 
-    // --- Accordion (built after layers load) ---
-    // Listen for each layer load to refresh the accordion
+    // Update counts when layers load
     document.addEventListener('layerLoaded', () => {
-        renderAccordion();
-        buildSearchIndex();
         updateWelcomeStats();
+        buildSearchIndex();
+        if (_sidebarMode === 'tatakota') renderTataKotaPanel();
     });
 
-    // --- Search ---
+    // Initial render
+    renderKebencanaaanPanel();
     initSearch();
-
-    // --- "Show All / Hide Others" toggle button ---
-    _insertToggleButton();
 }
 
-// ── Toggle All/Only Disaster ──────────────────────────────────────────────────
-function _insertToggleButton() {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar) return;
-    // Insert before sidebar-footer
-    const footer = sidebar.querySelector('.sidebar-footer');
-    const btn = document.createElement('button');
-    btn.id = 'btn-toggle-layers';
-    btn.className = 'layer-toggle-btn';
-    btn.textContent = 'Tampilkan Semua Kategori';
-    btn.addEventListener('click', () => {
-        if (State.onlyKebencanaan) {
-            showAllLayers();
-            btn.textContent = 'Sembunyikan Kategori Lain';
-            btn.classList.add('active');
-        } else {
-            showOnlyKebencanaan();
-            btn.textContent = 'Tampilkan Semua Kategori';
-            btn.classList.remove('active');
-        }
-    });
-    if (footer) sidebar.insertBefore(btn, footer);
-    else sidebar.appendChild(btn);
+// ── Mode switching ─────────────────────────────────────────────────────────────
+export function setSidebarMode(mode) {
+    _sidebarMode = mode;
+    if (mode === 'kebencanaan') {
+        renderKebencanaaanPanel();
+    } else {
+        renderTataKotaPanel();
+    }
 }
 
-// ── Accordion ─────────────────────────────────────────────────────────────────
-function renderAccordion() {
-    let container = document.getElementById('accordion-container');
+// ── Kebencanaan panel ──────────────────────────────────────────────────────────
+function renderKebencanaaanPanel() {
+    const panel = document.getElementById('sidebar-mode-panel');
+    if (!panel) return;
+
+    const lihatSemuaActive = _activeDisasterLabel === null;
+
+    panel.innerHTML = `
+    <div style="padding:16px 20px 8px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#4b5568;margin-bottom:10px;">
+            Kebencanaan
+        </div>
+        <button id="disaster-lihat-semua"
+            style="${_lihatSemuaStyle(lihatSemuaActive, '#dc2626')}">
+            🗺️ Lihat Semua
+        </button>
+        <div id="disaster-pill-container" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+    </div>`;
+
+    document.getElementById('disaster-lihat-semua').addEventListener('click', _showAllDisaster);
+
+    const container = document.getElementById('disaster-pill-container');
     if (!container) return;
 
-    const html = Object.entries(CATEGORIES).map(([key, cat]) => {
-        const data = State.categoryData[key];
-        const count = data ? data.features.length : 0;
-        const meta = State.categoryMeta[key];
-        const subcats = meta ? meta.subcategories : {};
-
-        const subcatHtml = Object.entries(subcats).map(([scName, scCount]) => {
-            const isActive = State.activeSubcats[key] && State.activeSubcats[key].has(scName);
-            const dotColor = (key === 'kebencanaan' || key === 'lingkungan')
-                ? (State.categoryMeta[key]?.subcatColors?.[scName] || cat.color)
-                : cat.color;
-            return `
-            <div class="subcat-item" data-category="${key}" data-subcat="${escapeHtml(scName)}">
-                <div class="subcat-check ${isActive ? 'checked' : ''}" style="--check-color:${cat.color}"></div>
-                <span class="subcat-name">${escapeHtml(scName)}</span>
-                <span class="subcat-badge">${scCount}</span>
-            </div>`;
-        }).join('');
-
-        const isOn = State.activeSubcats[key] && State.activeSubcats[key].size > 0;
-        return `
-        <div class="accordion-item" id="acc-${key}">
-            <div class="accordion-header" data-category="${key}">
-                <div class="acc-icon" style="background:${cat.color}20;color:${cat.color}">${cat.icon}</div>
-                <div class="acc-info">
-                    <div class="acc-label">${cat.label}</div>
-                    <div class="acc-count">${count.toLocaleString()} tempat</div>
-                </div>
-                <button class="acc-master-toggle ${isOn ? 'on' : ''}" data-category="${key}" style="--toggle-color:${cat.color}" title="Tampilkan/Sembunyikan"></button>
-                <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="6 9 12 15 18 9"/>
-                </svg>
-            </div>
-            <div class="accordion-body">
-                <div class="subcat-list">${subcatHtml}</div>
-            </div>
-        </div>`;
-    }).join('');
-
-    container.innerHTML = html;
-    _attachAccordionListeners(container);
-}
-
-function _attachAccordionListeners(container) {
-    // Expand/collapse
-    container.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', (e) => {
-            if (e.target.closest('.acc-master-toggle')) return;
-            header.closest('.accordion-item').classList.toggle('expanded');
-        });
-    });
-
-    // Master toggle
-    container.querySelectorAll('.acc-master-toggle').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const key = btn.dataset.category;
-            const isOn = btn.classList.contains('on');
-            if (isOn) {
-                btn.classList.remove('on');
-                State.activeSubcats[key] = new Set();
-                btn.closest('.accordion-item').querySelectorAll('.subcat-check').forEach(c => c.classList.remove('checked'));
-            } else {
-                btn.classList.add('on');
-                const raw = State.rawGeojsonCache[key] || [];
-                const all = new Set(raw.map(f => f.properties.subcategory || f.properties.type || 'Lainnya'));
-                State.activeSubcats[key] = all;
-                btn.closest('.accordion-item').querySelectorAll('.subcat-check').forEach(c => c.classList.add('checked'));
-            }
-            rebuildCategoryLayer(key);
-        });
-    });
-
-    // Subcat toggle
-    container.querySelectorAll('.subcat-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const key = item.dataset.category;
-            const sc = item.dataset.subcat;
-            const check = item.querySelector('.subcat-check');
-            if (check.classList.contains('checked')) {
-                check.classList.remove('checked');
-                State.activeSubcats[key]?.delete(sc);
-            } else {
-                check.classList.add('checked');
-                State.activeSubcats[key] = State.activeSubcats[key] || new Set();
-                State.activeSubcats[key].add(sc);
-            }
-            // Update master toggle state
-            const accItem = item.closest('.accordion-item');
-            const anyChecked = [...accItem.querySelectorAll('.subcat-check')].some(c => c.classList.contains('checked'));
-            const masterBtn = accItem.querySelector('.acc-master-toggle');
-            if (masterBtn) anyChecked ? masterBtn.classList.add('on') : masterBtn.classList.remove('on');
-            rebuildCategoryLayer(key);
-        });
+    DISASTER_BUTTONS.forEach(btn => {
+        const isActive = _activeDisasterLabel === btn.label;
+        const pill = document.createElement('button');
+        pill.className = 'disaster-pill';
+        pill.dataset.label = btn.label;
+        _applyExclusivePillStyle(pill, btn.color, isActive);
+        pill.innerHTML = `
+            <span style="width:8px;height:8px;border-radius:50%;background:${btn.color};flex-shrink:0;
+                ${isActive ? `box-shadow:0 0 8px ${btn.color};` : 'opacity:0.45;'}"></span>
+            <span style="flex:1;text-align:left;font-size:13px;font-weight:600;">${btn.label}</span>
+            ${isActive ? `<span style="font-size:10px;background:${btn.color}33;color:${btn.color};padding:2px 7px;border-radius:10px;font-weight:700;">Aktif</span>` : ''}
+        `;
+        pill.addEventListener('click', () => _clickDisasterPill(btn));
+        container.appendChild(pill);
     });
 }
 
-// ── Stats ────────────────────────────────────────────────────────────────────
+function _clickDisasterPill(btnDef) {
+    // Exclusive: activate only this layer, hide all others
+    _activeDisasterLabel = btnDef.label;
+
+    // Set subcats to ONLY this button's subcats
+    State.activeSubcats['kebencanaan'] = new Set(btnDef.subcats);
+    State.enabledCategories.add('kebencanaan');
+
+    rebuildCategoryLayer('kebencanaan');
+    renderKebencanaaanPanel();
+}
+
+function _showAllDisaster() {
+    _activeDisasterLabel = null; // "Lihat Semua"
+
+    // Collect ALL subcats from all disaster buttons
+    const allSubcats = new Set();
+    DISASTER_BUTTONS.forEach(b => b.subcats.forEach(sc => allSubcats.add(sc)));
+    State.activeSubcats['kebencanaan'] = allSubcats;
+    State.enabledCategories.add('kebencanaan');
+
+    rebuildCategoryLayer('kebencanaan');
+    renderKebencanaaanPanel();
+}
+
+// ── Tata Kota panel ────────────────────────────────────────────────────────────
+function renderTataKotaPanel() {
+    const panel = document.getElementById('sidebar-mode-panel');
+    if (!panel) return;
+
+    const lihatSemuaActive = _activeTataKotaKey === null;
+
+    panel.innerHTML = `
+    <div style="padding:16px 20px 8px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#4b5568;margin-bottom:10px;">
+            Tata Kota
+        </div>
+        <button id="tatakota-lihat-semua"
+            style="${_lihatSemuaStyle(lihatSemuaActive, '#f59e0b')}">
+            🗺️ Lihat Semua
+        </button>
+        <div id="tatakota-pill-container" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+    </div>`;
+
+    document.getElementById('tatakota-lihat-semua').addEventListener('click', _showAllTataKota);
+
+    const container = document.getElementById('tatakota-pill-container');
+    if (!container) return;
+
+    TATAKOTA_BUTTONS.forEach(btnDef => {
+        const isActive = _activeTataKotaKey === btnDef.key;
+        const count    = State.categoryData[btnDef.key]?.features?.length || 0;
+        const pill = document.createElement('button');
+        pill.className = 'tatakota-pill';
+        pill.dataset.key = btnDef.key;
+        _applyExclusivePillStyle(pill, btnDef.color, isActive);
+        pill.innerHTML = `
+            <span style="width:8px;height:8px;border-radius:50%;background:${btnDef.color};flex-shrink:0;
+                ${isActive ? `box-shadow:0 0 8px ${btnDef.color};` : 'opacity:0.45;'}"></span>
+            <span style="flex:1;text-align:left;font-size:13px;font-weight:600;">${btnDef.label}</span>
+            ${count ? `<span style="font-size:10px;color:#4b5568;font-weight:600;">${count.toLocaleString()}</span>` : ''}
+        `;
+        pill.addEventListener('click', () => _clickTataKotaPill(btnDef));
+        container.appendChild(pill);
+    });
+}
+
+function _clickTataKotaPill(btnDef) {
+    // Exclusive: hide all other tatakota layers, show only this one
+    _activeTataKotaKey = btnDef.key;
+
+    TATAKOTA_BUTTONS.forEach(b => {
+        if (b.key !== btnDef.key) {
+            hideLayer(b.key);
+        }
+    });
+
+    // Load or show this layer
+    if (!State.layerCache[btnDef.key]) {
+        State.enabledCategories.add(btnDef.key);
+        loadLayer(btnDef.key);
+    } else {
+        showLayer(btnDef.key);
+    }
+
+    renderTataKotaPanel();
+}
+
+function _showAllTataKota() {
+    _activeTataKotaKey = null;
+
+    TATAKOTA_BUTTONS.forEach(btnDef => {
+        if (!State.layerCache[btnDef.key]) {
+            State.enabledCategories.add(btnDef.key);
+            loadLayer(btnDef.key);
+        } else {
+            showLayer(btnDef.key);
+        }
+    });
+
+    renderTataKotaPanel();
+}
+
+// ── Hide all Tata Kota layers (called when leaving tatakota mode) ──────────────
+export function hideTataKotaLayers() {
+    TATAKOTA_BUTTONS.forEach(btnDef => {
+        hideLayer(btnDef.key);
+    });
+    _activeTataKotaKey = null;
+}
+
+// ── Style helpers ──────────────────────────────────────────────────────────────
+function _applyExclusivePillStyle(el, color, isActive) {
+    el.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: var(--font-body, sans-serif);
+        background: ${isActive ? color : 'transparent'};
+        border: 1px solid ${isActive ? color : color + '55'};
+        color: ${isActive ? '#fff' : '#64748b'};
+        ${isActive ? `box-shadow: 0 2px 12px ${color}55;` : ''}
+    `;
+}
+
+function _lihatSemuaStyle(isActive, color) {
+    return `
+        display:flex;align-items:center;gap:8px;
+        width:100%;padding:9px 14px;border-radius:10px;
+        cursor:pointer;transition:all 0.2s ease;
+        font-family:var(--font-body,sans-serif);font-size:12px;font-weight:700;
+        background:${isActive ? color + 'cc' : 'rgba(255,255,255,0.04)'};
+        border:1px solid ${isActive ? color : 'rgba(255,255,255,0.1)'};
+        color:${isActive ? '#fff' : '#94a3b8'};
+        ${isActive ? `box-shadow:0 2px 12px ${color}44;` : ''}
+        margin-bottom:2px;
+    `;
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
 function updateWelcomeStats() {
-    const total = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
-    const cats = Object.keys(State.categoryData).length;
+    const total   = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
+    const cats    = Object.keys(State.categoryData).length;
     const subcats = Object.values(State.categoryMeta).reduce((s, m) => s + Object.keys(m?.subcategories || {}).length, 0);
 
     const wsTotal = document.getElementById('ws-total');
-    const wsCats = document.getElementById('ws-cats');
-    const wsSub = document.getElementById('ws-subcats');
+    const wsCats  = document.getElementById('ws-cats');
+    const wsSub   = document.getElementById('ws-subcats');
     if (wsTotal) wsTotal.textContent = total.toLocaleString();
-    if (wsCats) wsCats.textContent = cats;
-    if (wsSub) wsSub.textContent = subcats;
+    if (wsCats)  wsCats.textContent  = cats;
+    if (wsSub)   wsSub.textContent   = subcats;
 
-    // Also update sidebar stats grid
     const grid = document.getElementById('stats-grid');
     if (grid && total > 0) {
         grid.innerHTML = `
@@ -204,7 +293,7 @@ function updateWelcomeStats() {
     }
 }
 
-// ── Search ────────────────────────────────────────────────────────────────────
+// ── Search ─────────────────────────────────────────────────────────────────────
 function buildSearchIndex() {
     State.searchIndex = [];
     for (const [key, data] of Object.entries(State.categoryData)) {
@@ -214,7 +303,7 @@ function buildSearchIndex() {
 }
 
 function initSearch() {
-    const input = document.getElementById('search-input');
+    const input      = document.getElementById('search-input');
     const resultsDiv = document.getElementById('search-results');
     if (!input || !resultsDiv) return;
 
@@ -240,7 +329,7 @@ function performSearch(query, resultsDiv) {
         .filter(f => {
             const name = (f.properties.name || '').toLowerCase();
             const type = (f.properties.type || '').toLowerCase();
-            const sc = (f.properties.subcategory || '').toLowerCase();
+            const sc   = (f.properties.subcategory || '').toLowerCase();
             return name.includes(query) || type.includes(query) || sc.includes(query);
         })
         .slice(0, 20);
@@ -249,8 +338,8 @@ function performSearch(query, resultsDiv) {
         resultsDiv.innerHTML = '<div class="search-result-item"><span class="search-result-name" style="color:var(--text-muted)">Tidak ditemukan</span></div>';
     } else {
         resultsDiv.innerHTML = matches.map((f, i) => {
-            const cat = CATEGORIES[f._categoryKey];
-            const sc = f.properties.subcategory || f.properties.type || '';
+            const cat    = CATEGORIES[f._categoryKey];
+            const sc     = f.properties.subcategory || f.properties.type || '';
             const coords = f.geometry.coordinates;
             return `<div class="search-result-item" data-idx="${i}" data-lon="${coords[0]}" data-lat="${coords[1]}" data-cat="${f._categoryKey}">
                 <span class="search-result-dot" style="background:${cat.color}"></span>
@@ -263,23 +352,18 @@ function performSearch(query, resultsDiv) {
 
         resultsDiv.querySelectorAll('.search-result-item[data-lon]').forEach((item, idx) => {
             item.addEventListener('click', () => {
-                const lat = parseFloat(item.dataset.lat);
-                const lon = parseFloat(item.dataset.lon);
+                const lat    = parseFloat(item.dataset.lat);
+                const lon    = parseFloat(item.dataset.lon);
                 const catKey = item.dataset.cat;
                 resultsDiv.classList.add('hidden');
                 document.getElementById('search-input').value = '';
-
                 if (_map) _map.flyTo([lat, lon], 17, { duration: 1.2 });
-
-                // Remove previous highlight
                 if (State.searchHighlightMarker) {
                     _map.removeLayer(State.searchHighlightMarker);
                     State.searchHighlightMarker = null;
                 }
-
                 const feature = matches[idx];
                 if (feature) {
-                    // Show detail panel via custom event
                     document.dispatchEvent(new CustomEvent('markerClicked', {
                         detail: { feature, category: catKey }
                     }));
@@ -290,19 +374,18 @@ function performSearch(query, resultsDiv) {
     resultsDiv.classList.remove('hidden');
 }
 
-// ── Recent Events Widget ──────────────────────────────────────────────────────
+// ── Recent Events Widget ───────────────────────────────────────────────────────
 function renderRecentEventsWidget() {
-    const list = document.getElementById('rew-list');
+    const list   = document.getElementById('rew-list');
     const widget = document.getElementById('recent-events-widget');
     if (!list) return;
     const events = [
-        { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
-        { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
-        { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
+        { title: 'Aktivitas Merapi',    status: 'Siaga (Level III)', statusClass: 'status-danger',   time: '3 jam lalu' },
+        { title: 'Banjir Bantul',       status: 'Waspada',           statusClass: 'status-warning',  time: '2 hari lalu' },
+        { title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)',   statusClass: 'status-moderate', time: '1 jam lalu' },
     ];
     list.innerHTML = events.map(e => `
         <div class="rew-item">
-            <span class="rew-icon">${e.icon}</span>
             <div class="rew-info">
                 <div class="rew-event-title">${e.title} <span class="rew-status ${e.statusClass}">→ ${e.status}</span></div>
                 <div class="rew-time">Terakhir: ${e.time}</div>

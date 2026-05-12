@@ -1,77 +1,245 @@
-import { State, CATEGORIES } from '../state.js';
-
-const DISASTER_HISTORY = {
-    erupsi: [
-        { tanggal: 'Nov 2010', jenis: 'Erupsi Eksplosif', skala: 'VEI-4', wilayah: 'Sleman & Magelang', korban_jiwa: 347, rumah_terdampak: 2682, pengungsi: 410388, kerugian_material: 'Rp 3,56 T', deskripsi: 'Erupsi terbesar Merapi dalam seabad. Awan panas mencapai 15 km. Semua zona KRB III dievakuasi.' },
-        { tanggal: 'Jan 2021', jenis: 'Erupsi Effusif', skala: 'VEI-2', wilayah: 'Sleman', korban_jiwa: 0, rumah_terdampak: 0, pengungsi: 1200, kerugian_material: 'Rp 28 M', deskripsi: 'Guguran lava pijar mencapai 3 km ke arah barat daya. Hujan abu tipis di Sleman selatan.' },
-        { tanggal: 'Jun 2006', jenis: 'Erupsi Effusif', skala: 'VEI-2', wilayah: 'Sleman', korban_jiwa: 2, rumah_terdampak: 0, pengungsi: 25000, kerugian_material: 'Rp 64 M', deskripsi: 'Bersamaan dengan gempa Yogyakarta. Awan panas kecil ke arah selatan.' },
-    ],
-    banjir: [
-        { tanggal: 'Mar 2023', jenis: 'Banjir Bandang', skala: 'Sedang', wilayah: 'Bantul (Opak)', korban_jiwa: 0, rumah_terdampak: 312, pengungsi: 890, kerugian_material: 'Rp 4,2 M', deskripsi: 'Luapan Sungai Opak akibat intensitas hujan tinggi selama 6 jam berturut-turut.' },
-        { tanggal: 'Jan 2022', jenis: 'Banjir Genangan', skala: 'Ringan', wilayah: 'Kota Yogyakarta', korban_jiwa: 0, rumah_terdampak: 178, pengungsi: 220, kerugian_material: 'Rp 1,8 M', deskripsi: 'Drainase kota tak mampu menampung debit hujan. Beberapa ruas jalan terendam 30–80 cm.' },
-        { tanggal: 'Feb 2021', jenis: 'Banjir Lahar', skala: 'Berat', wilayah: 'Sleman (Merapi)', korban_jiwa: 1, rumah_terdampak: 58, pengungsi: 140, kerugian_material: 'Rp 7,5 M', deskripsi: 'Material vulkanik Merapi terbawa hujan membentuk lahar dingin di Kali Boyong dan Kali Kuning.' },
-    ],
-    gempa: [
-        { tanggal: '27 Mei 2006', jenis: 'Gempa Tektonik', skala: 'M 6.3', wilayah: 'Bantul', korban_jiwa: 5782, rumah_terdampak: 127000, pengungsi: 600000, kerugian_material: 'Rp 29,1 T', deskripsi: 'Gempa paling mematikan dalam sejarah modern DIY. Episentrum 10 km selatan Bantul, kedalaman 17 km.' },
-        { tanggal: 'Jun 2022', jenis: 'Gempa Tektonik', skala: 'M 5.1', wilayah: 'Gunung Kidul', korban_jiwa: 0, rumah_terdampak: 45, pengungsi: 0, kerugian_material: 'Rp 320 jt', deskripsi: 'Guncangan terasa hingga Kota Yogyakarta. Beberapa rumah tua di Wonosari rusak ringan.' },
-    ],
-    longsor: [
-        { tanggal: 'Feb 2020', jenis: 'Tanah Longsor', skala: 'Besar', wilayah: 'Kulon Progo', korban_jiwa: 3, rumah_terdampak: 22, pengungsi: 60, kerugian_material: 'Rp 2,1 M', deskripsi: 'Lereng bukit di Kokap longsor setelah hujan 3 hari berturut-turut. Jalan penghubung desa terputus.' },
-        { tanggal: 'Jan 2023', jenis: 'Tanah Longsor', skala: 'Sedang', wilayah: 'Gunung Kidul', korban_jiwa: 0, rumah_terdampak: 8, pengungsi: 15, kerugian_material: 'Rp 450 jt', deskripsi: 'Longsoran material tanah dan batu menutup akses jalan di Kecamatan Panggang.' },
-    ],
-};
-
-let _initialized = false;
+import { State } from '../state.js';
 
 export function initReportPage() {
-    renderLaporan('erupsi');
-    if (_initialized) return;
-    _initialized = true;
-    document.querySelectorAll('.page-tab[data-disaster]').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            document.querySelectorAll('.page-tab[data-disaster]').forEach(t => t.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            renderLaporan(e.currentTarget.dataset.disaster);
-        });
-    });
+    const container = document.getElementById('laporan-content');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="report-dashboard" style="padding: 24px; max-width: 1200px; margin: 0 auto; color: var(--text-primary);">
+            
+            <!-- ROW 1: HEADER SUMMARY -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <div style="background: transparent; border-left: 3px solid var(--accent-gold); padding-left: 16px;">
+                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kejadian</div>
+                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">452</div>
+                </div>
+                <div style="background: transparent; border-left: 3px solid var(--accent-red); padding-left: 16px;">
+                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Korban Jiwa</div>
+                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">1,240</div>
+                </div>
+                <div style="background: transparent; border-left: 3px solid var(--accent-blue); padding-left: 16px;">
+                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Pengungsi</div>
+                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">12.5K</div>
+                </div>
+                <div style="background: transparent; border-left: 3px solid var(--accent-green); padding-left: 16px;">
+                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kerugian</div>
+                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">8.4T</div>
+                </div>
+            </div>
+
+            <!-- ROW 2: FILTER BAR -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-card); padding: 16px 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 13px; color: var(--text-muted); line-height: 28px; margin-right: 8px;">Filter:</span>
+                    <button class="filter-pill">Semua Tahun ▼</button>
+                    <button class="filter-pill">Jenis Bencana ▼</button>
+                    <button class="filter-pill">Kecamatan ▼</button>
+                    <button class="filter-pill">Tingkat Risiko ▼</button>
+                </div>
+                <button style="background: transparent; border: none; color: var(--accent-gold); font-size: 13px; cursor: pointer; text-decoration: underline;">Reset Filter</button>
+            </div>
+
+            <!-- ROW 3: GRAFIK UTAMA -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
+                    <h3 style="font-size: 15px; margin-bottom: 20px; color: var(--text-primary); font-weight: 600;">Tren Kejadian & Korban per Tahun</h3>
+                    <div style="position: relative; height: 300px;"><canvas id="reportChartTrend"></canvas></div>
+                </div>
+                <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
+                    <h3 style="font-size: 15px; margin-bottom: 20px; color: var(--text-primary); font-weight: 600;">Total Kerugian Material (Rp Miliar)</h3>
+                    <div style="position: relative; height: 300px;"><canvas id="reportChartLoss"></canvas></div>
+                </div>
+            </div>
+
+            <!-- ROW 4: TIMELINE -->
+            <div style="margin-bottom: 48px;">
+                <h3 style="font-size: 18px; margin-bottom: 24px; color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">Riwayat Bencana</h3>
+                
+                <div class="timeline-container" style="position: relative; padding-left: 24px; border-left: 2px solid var(--border-card);">
+                    
+                    <!-- Timeline Item 1 -->
+                    <div style="position: relative; margin-bottom: 32px;">
+                        <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); border: 2px solid var(--bg-primary);"></div>
+                        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent-gold); margin-bottom: 4px;">12 Mar 2024 • 14:30 WIB</div>
+                                    <h4 style="font-size: 16px; color: var(--text-primary); margin: 0 0 4px 0;">Erupsi Freatik Gunung Merapi</h4>
+                                    <div style="font-size: 13px; color: var(--text-muted);">Kecamatan Cangkringan, Kabupaten Sleman</div>
+                                </div>
+                                <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.2);">Siaga Aktif</span>
+                            </div>
+                            <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">Telah terjadi erupsi freatik dengan tinggi kolom abu mencapai 2.500 meter di atas puncak. Angin bertiup ke arah barat daya. Hujan abu vulkanik melanda beberapa desa di kawasan KRB III.</p>
+                            
+                            <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Korban Jiwa</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Luka-luka</span><strong style="font-size: 15px; color: var(--text-primary);">12</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Pengungsi</span><strong style="font-size: 15px; color: var(--text-primary);">450</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Kerugian</span><strong style="font-size: 15px; color: var(--text-primary);">Rp 2.5 M</strong></div>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="color: var(--text-muted);">Kapasitas Barak Pengungsian (Balai Desa Glagaharjo)</span>
+                                    <span style="color: var(--text-secondary);">450 / 800</span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 56%; height: 100%; background: var(--accent-gold);"></div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 16px; margin-top: 16px;">
+                                <div style="font-size: 13px; color: var(--text-muted);">Kontak Darurat: <strong style="color: var(--text-secondary);">BPBD Sleman (0274-869902)</strong></div>
+                                <button class="btn-primary" style="background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer;">Lihat di Peta</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div style="position: relative;">
+                        <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-green); border: 2px solid var(--bg-primary);"></div>
+                        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent-gold); margin-bottom: 4px;">05 Jan 2024 • 02:15 WIB</div>
+                                    <h4 style="font-size: 16px; color: var(--text-primary); margin: 0 0 4px 0;">Banjir Genangan Hujan Ekstrem</h4>
+                                    <div style="font-size: 13px; color: var(--text-muted);">Kecamatan Gamping, Kabupaten Sleman</div>
+                                </div>
+                                <span style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.2);">Selesai</span>
+                            </div>
+                            <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">Curah hujan dengan intensitas tinggi menyebabkan meluapnya Sungai Bedog. Genangan air mencapai 50-80 cm merendam 4 pedukuhan di wilayah Gamping.</p>
+                            
+                            <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Korban Jiwa</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Luka-luka</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Pengungsi</span><strong style="font-size: 15px; color: var(--text-primary);">85</strong></div>
+                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Kerugian</span><strong style="font-size: 15px; color: var(--text-primary);">Rp 120 Jt</strong></div>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="color: var(--text-muted);">Kapasitas Pengungsian (Masjid Patukan)</span>
+                                    <span style="color: var(--text-secondary);">0 / 150</span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--accent-green);"></div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 16px; margin-top: 16px;">
+                                <div style="font-size: 13px; color: var(--text-muted);">Kontak Darurat: <strong style="color: var(--text-secondary);">Polsek Gamping (0274-798221)</strong></div>
+                                <button class="btn-primary" style="background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer;">Lihat di Peta</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ROW 5: EMERGENCY CONTACTS -->
+            <div>
+                <h3 style="font-size: 18px; margin-bottom: 24px; color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">Pusat Kontak Darurat</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #ef4444; padding: 20px; border-radius: 8px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">BPBD DIY</h4>
+                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">(0274) 555584</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Pusdalops PB DIY<br>Jl. Kenari No.14, Semaki<br>Layanan 24 Jam</div>
+                    </div>
+                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #f97316; padding: 20px; border-radius: 8px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">Basarnas (Kantor SAR)</h4>
+                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">115 / (0274) 4333604</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Kantor Pencarian dan Pertolongan<br>Jl. Wates Km 11, Sedayu<br>Layanan 24 Jam</div>
+                    </div>
+                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">PMI DIY</h4>
+                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">(0274) 372474</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Markas Daerah<br>Jl. Siliwangi No.3, Gamping<br>Layanan 24 Jam</div>
+                    </div>
+                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #22c55e; padding: 20px; border-radius: 8px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">Dinas Pemadam Kebakaran</h4>
+                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">113 / (0274) 587101</div>
+                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Mako Damkar Kota<br>Jl. Mayor Suryotomo<br>Layanan 24 Jam</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <style>
+            .filter-pill {
+                background: var(--bg-elevated); border: 1px solid var(--border-glass); 
+                color: var(--text-primary); padding: 6px 16px; border-radius: 20px; 
+                font-size: 13px; cursor: pointer; transition: all 0.2s;
+            }
+            .filter-pill:hover { border-color: var(--accent-gold); }
+        </style>
+    `;
+
+    setTimeout(initReportCharts, 100);
 }
 
-function renderLaporan(disasterType) {
-    const content = document.getElementById('laporan-content');
-    if (!content) return;
-    const hist = DISASTER_HISTORY[disasterType] || [];
-    const totalKorban    = hist.reduce((s, h) => s + (h.korban_jiwa      || 0), 0);
-    const totalPengungsi = hist.reduce((s, h) => s + (h.pengungsi        || 0), 0);
-    const accentMap = { erupsi: '#ef4444', banjir: '#3b82f6', gempa: '#ea580c', longsor: '#ca8a04' };
-    const accentColor = accentMap[disasterType] || '#ef4444';
+function initReportCharts() {
+    if (typeof Chart === 'undefined') return;
 
-    content.innerHTML = `
-    <div style="display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:start;">
-        <div style="display:flex;flex-direction:column;gap:14px;position:sticky;top:80px;">
-            <div style="background:#161b22;border-left:3px solid ${accentColor};border-radius:8px;padding:16px;">
-                <div style="font-size:30px;font-weight:700;color:${accentColor};">${totalKorban.toLocaleString()}</div>
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-top:4px;">Korban Jiwa</div>
-            </div>
-            <div style="background:#161b22;border-left:3px solid ${accentColor};border-radius:8px;padding:16px;">
-                <div style="font-size:30px;font-weight:700;color:${accentColor};">${totalPengungsi.toLocaleString()}</div>
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-top:4px;">Total Pengungsi</div>
-            </div>
-            <div style="background:#161b22;border-left:3px solid ${accentColor};border-radius:8px;padding:16px;">
-                <div style="font-size:22px;font-weight:700;color:${accentColor};">${hist[0] ? hist[0].kerugian_material : '-'}</div>
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-top:4px;">Kerugian (Terkini)</div>
-            </div>
-        </div>
-        <div style="border-left:1px solid #30363d;padding-left:24px;display:flex;flex-direction:column;gap:20px;">
-            ${hist.length === 0
-                ? '<p style="color:var(--text-muted)">Belum ada data riwayat tercatat.</p>'
-                : hist.map(h => `
-                <div style="position:relative;background:rgba(30,41,59,0.3);border:1px solid var(--border-glass);border-radius:12px;padding:20px;transition:all 0.25s;" onmouseover="this.style.background='#1c2128';this.style.transform='translateX(4px)'" onmouseout="this.style.background='rgba(30,41,59,0.3)';this.style.transform='translateX(0)'">
-                    <div style="position:absolute;left:-29px;top:24px;width:10px;height:10px;border-radius:50%;background:${accentColor};border:2px solid #0a0e1a;"></div>
-                    <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">${h.tanggal}</div>
-                    <div style="font-size:17px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">${h.jenis} <span style="font-size:11px;padding:2px 8px;background:rgba(255,255,255,0.1);border-radius:10px;margin-left:6px;vertical-align:middle;">${h.skala || h.wilayah}</span></div>
-                    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">${h.korban_jiwa ? h.korban_jiwa + ' korban · ' : ''}${h.pengungsi ? h.pengungsi.toLocaleString() + ' mengungsi · ' : ''}${h.kerugian_material || ''}</div>
-                    <p style="font-size:13px;line-height:1.6;color:var(--text-muted);">${h.deskripsi}</p>
-                </div>`).join('')}
-        </div>
-    </div>`;
+    // Line Chart (Tren Kejadian & Korban) - Dual Axis
+    new Chart(document.getElementById('reportChartTrend'), {
+        type: 'line',
+        data: {
+            labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [
+                {
+                    label: 'Kejadian',
+                    data: [42, 38, 45, 55, 48, 62, 50],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    yAxisID: 'y',
+                    tension: 0.4
+                },
+                {
+                    label: 'Korban Jiwa',
+                    data: [15, 8, 22, 30, 12, 45, 18],
+                    borderColor: '#ef4444',
+                    backgroundColor: '#ef4444',
+                    yAxisID: 'y1',
+                    type: 'bar',
+                    borderRadius: 4,
+                    barPercentage: 0.5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10 } } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } },
+                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+
+    // Bar Chart (Kerugian Material)
+    new Chart(document.getElementById('reportChartLoss'), {
+        type: 'bar',
+        data: {
+            labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'Kerugian (Miliar Rp)',
+                data: [120, 85, 210, 150, 190, 320, 180],
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+        }
+    });
 }
