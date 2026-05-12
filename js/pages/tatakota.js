@@ -1,5 +1,5 @@
-import { openDetailPanel } from '../detail-panel.js';
-import { State, CATEGORIES } from '../state.js';
+import { State, CATEGORIES, CONFIG } from '../state.js';
+import { renderTataKotaDetailInto } from './tatakota-detail.js';
 
 const TATA_KEYS = [
     'pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank',
@@ -24,10 +24,102 @@ function hashPick(str, mod) {
     return h % mod;
 }
 
-function cardImageUrl(catKey, name) {
+export function stableTataKotaId(cat, name, lng, lat) {
+    const s = `${cat}|${name}|${lng}|${lat}`;
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return `tk${h.toString(36)}`;
+}
+
+function cardImageUrl(catKey, name, props) {
+    const foto = props.foto || props.photo || props.image;
+    if (typeof foto === 'string' && /^https?:\/\//i.test(foto)) {
+        return foto;
+    }
     const bank = PHOTO_BANK[catKey] || PHOTO_BANK.pariwisata;
     const id = bank[hashPick(`${catKey}|${name}`, bank.length)];
     return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&h=320&q=82`;
+}
+
+function propsSummaryHtml(props) {
+    const rows = Object.entries(props).filter(
+        ([k, v]) => typeof v === 'string' || typeof v === 'number'
+    );
+    return rows
+        .slice(0, 6)
+        .map(([k, v]) => `<div><strong>${esc(k)}:</strong> ${esc(String(v).slice(0, 80))}</div>`)
+        .join('');
+}
+
+function parseDetailIdFromHash() {
+    const m = /^#tatakota\/detail\/(.+)$/.exec(location.hash);
+    return m ? decodeURIComponent(m[1]) : null;
+}
+
+function showEmbedMapModal(name, lat, lng) {
+    const existing = document.getElementById('tatakota-embed-modal');
+    if (existing) existing.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'tatakota-embed-modal';
+    wrap.className = 'tatakota-embed-modal';
+    wrap.innerHTML = `
+        <div class="tatakota-embed-modal__backdrop" data-close="1"></div>
+        <div class="tatakota-embed-modal__card" role="dialog" aria-modal="true" aria-label="Peta lokasi">
+            <div class="tatakota-embed-modal__head">
+                <strong class="tatakota-embed-modal__title">${esc(name)}</strong>
+                <button type="button" class="tatakota-embed-modal__x" data-close="1" aria-label="Tutup">×</button>
+            </div>
+            <div id="tatakota-embed-modal-map" class="tatakota-embed-modal__map"></div>
+        </div>`;
+    document.body.appendChild(wrap);
+
+    const close = () => wrap.remove();
+    wrap.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', close));
+
+    const mapDiv = wrap.querySelector('#tatakota-embed-modal-map');
+    if (mapDiv && typeof L !== 'undefined') {
+        const tile = L.tileLayer(CONFIG.tileUrl, {
+            attribution: CONFIG.tileAttribution,
+            maxZoom: 19
+        });
+        const map = L.map(mapDiv, { zoomControl: true, scrollWheelZoom: true }).setView([lat, lng], 15);
+        tile.addTo(map);
+        L.marker([lat, lng]).bindPopup(esc(name)).addTo(map);
+        setTimeout(() => map.invalidateSize(), 80);
+    }
+}
+
+function openTataKotaDetail(feat, cat) {
+    const featCopy = JSON.parse(JSON.stringify(feat));
+    const props = featCopy.properties || {};
+    const name = props.name || props.nama || 'Lokasi';
+    let lat = -7.7956;
+    let lng = 110.3695;
+    if (featCopy.geometry?.type === 'Point') {
+        lng = featCopy.geometry.coordinates[0];
+        lat = featCopy.geometry.coordinates[1];
+    } else if (featCopy.geometry?.type === 'Polygon' && featCopy.geometry.coordinates?.[0]?.length) {
+        const ring = featCopy.geometry.coordinates[0];
+        let sx = 0;
+        let sy = 0;
+        ring.forEach(([x, y]) => {
+            sx += x;
+            sy += y;
+        });
+        lng = sx / ring.length;
+        lat = sy / ring.length;
+    }
+    const id = stableTataKotaId(cat, name, lng, lat);
+    try {
+        sessionStorage.setItem(`tatakotaDetail:${id}`, JSON.stringify({ cat, feature: featCopy }));
+    } catch (e) {
+        console.warn('sessionStorage penuh atau ditolak', e);
+    }
+    const h = `#tatakota/detail/${encodeURIComponent(id)}`;
+    if (location.hash !== h) {
+        history.pushState(null, '', h);
+    }
+    initTataKotaPage();
 }
 
 function collectFeatures(activeCat) {
@@ -45,18 +137,42 @@ function collectFeatures(activeCat) {
 
 let _activeCat = 'all';
 let _visibleCount = 24;
+let _hashListenerBound = false;
+
+function bindHashOnce() {
+    if (_hashListenerBound) return;
+    _hashListenerBound = true;
+    window.addEventListener('hashchange', () => {
+        const page = document.getElementById('tatakota-page');
+        if (!page || page.classList.contains('hidden')) return;
+        initTataKotaPage();
+    });
+}
 
 export function initTataKotaPage() {
     const root = document.getElementById('tatakota-content');
     if (!root) return;
+    bindHashOnce();
+
+    const detailId = parseDetailIdFromHash();
+    if (detailId) {
+        renderTataKotaDetailInto(root, detailId, {
+            onBack: () => {
+                history.pushState(null, '', '#tatakota');
+                initTataKotaPage();
+            }
+        });
+        return;
+    }
 
     root.innerHTML = `
         <div class="tatakota-rail">
             <header class="tatakota-rail-head">
                 <h1 class="tatakota-rail-title">Tata Kelola</h1>
-                <p class="tatakota-rail-lead">Semua fitur dari GeoJSON per kategori. Pilih filter atau muat lebih banyak kartu.</p>
+                <p class="tatakota-rail-lead">Data GeoJSON per kategori. Detail dibuka di halaman ini; peta utama tidak digunakan.</p>
             </header>
             <div class="tatakota-spa-pills" id="tatakota-pills"></div>
+            <div id="tatakota-counter" class="tatakota-counter" aria-live="polite"></div>
             <div id="tatakota-grid-host"></div>
             <button type="button" class="tatakota-loadmore" id="tatakota-loadmore">Tampilkan semua data</button>
         </div>`;
@@ -84,7 +200,7 @@ export function initTataKotaPage() {
     });
 
     loadMore.addEventListener('click', () => {
-        _visibleCount += 48;
+        _visibleCount = 50_000;
         renderGrid(host);
     });
 
@@ -96,6 +212,11 @@ function renderGrid(host) {
     const slice = all.slice(0, _visibleCount);
     const grid = document.createElement('div');
     grid.className = 'tatakota-grid';
+
+    const counterEl = document.getElementById('tatakota-counter');
+    if (counterEl) {
+        counterEl.textContent = `Menampilkan ${slice.length} dari ${all.length} lokasi`;
+    }
 
     slice.forEach(({ feature, cat }) => {
         const props = feature.properties || {};
@@ -110,16 +231,19 @@ function renderGrid(host) {
         }
 
         const rating = Number(props.rating) || 4.2 + hashPick(name, 8) / 10;
-        const img = cardImageUrl(cat, name);
+        const img = cardImageUrl(cat, name, props);
+        const propsBlock = propsSummaryHtml(props);
 
         const card = document.createElement('article');
         card.className = 'tatakota-card tw-opacity-0 tw-translate-y-5 tw-transition-all tw-duration-500';
+        const safeImg = String(img).replace(/"/g, '&quot;').replace(/'/g, '%27');
         card.innerHTML = `
-            <div class="tatakota-card-photo" style="background-image:url('${img}')"></div>
+            <div class="tatakota-card-photo" style="background-image:url('${safeImg}')"></div>
             <div class="tatakota-card-body">
                 <h3 class="tatakota-card-title">${esc(name)}</h3>
                 <span class="tatakota-card-sub">${esc(sub)}</span>
                 <p class="tatakota-card-addr">${esc(addr)}</p>
+                <div class="tatakota-card-props">${propsBlock}</div>
                 <div class="tatakota-card-meta">
                     <span class="tatakota-rating-num">${rating.toFixed(1)} ★</span>
                 </div>
@@ -133,17 +257,19 @@ function renderGrid(host) {
         if (!feat.properties) feat.properties = {};
         if (!feat.properties.foto) feat.properties.foto = img;
 
+        const open = () => openTataKotaDetail(feat, cat);
+
         card.querySelector('.js-detail').addEventListener('click', (e) => {
             e.stopPropagation();
-            openDetailPanel(feat, cat);
+            open();
         });
         card.querySelector('.js-map').addEventListener('click', (e) => {
             e.stopPropagation();
-            if (State.map) State.map.flyTo([lat, lng], 16, { duration: 1.2 });
+            showEmbedMapModal(name, lat, lng);
         });
         card.addEventListener('click', (e) => {
             if (e.target.closest('button')) return;
-            openDetailPanel(feat, cat);
+            open();
         });
 
         grid.appendChild(card);

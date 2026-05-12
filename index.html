@@ -17,7 +17,17 @@
     <script>
         tailwind.config = {
             prefix: 'tw-',
-            corePlugins: { preflight: false }
+            corePlugins: { preflight: false },
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['var(--font-display)'],
+                        body: ['var(--font-body)'],
+                        ui: ['var(--font-ui)'],
+                        mono: ['var(--font-mono)']
+                    }
+                }
+            }
         };
     </script>
 
@@ -144,9 +154,9 @@
         </div>
         <div id="nav-tabs" class="tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
             <button class="top-nav-tab active" data-page="map">Peta Kebencanaan</button>
+            <button class="top-nav-tab" data-page="tatakota">Tata Kelola</button>
             <button class="top-nav-tab" data-page="laporan">Laporan Bencana</button>
             <button class="top-nav-tab" data-page="statistik">Statistika</button>
-            <button class="top-nav-tab" data-page="tatakota">Tata Kelola</button>
             <button class="top-nav-tab" data-page="tentang">Tentang</button>
         </div>
     </nav>
@@ -162,11 +172,16 @@
             <div class="sidebar-inner">
                 <button type="button" class="sidebar-close-fab" id="sidebar-toggle" aria-label="Tutup panel">×</button>
                 <div class="sidebar-header">
-                    <div class="sidebar-logo">JOGJA SIAGA
-                        <div class="sidebar-logo-sub">Sistem Informasi Geografis</div>
+                    <div class="sidebar-logo">Panel kontrol
+                        <div class="sidebar-logo-sub">Peta kebencanaan</div>
                     </div>
                 </div>
                 <div class="sidebar-scroll">
+                    <div class="sidebar-section sidebar-section--header">
+                        <div class="sidebar-app-title">Jogja Siaga</div>
+                        <p class="sidebar-app-sub">WebGIS kebencanaan &amp; tata kelola DIY</p>
+                    </div>
+                    <hr class="sidebar-gold-rule" />
                     <div class="sidebar-section">
                         <div class="sidebar-section-label">Pencarian</div>
                         <div class="sidebar-search-wrap">
@@ -176,30 +191,40 @@
                             <div id="search-results" class="hidden"></div>
                         </div>
                     </div>
+                    <hr class="sidebar-gold-rule" />
                     <div class="sidebar-section sidebar-section--layers">
                         <div class="sidebar-section-label">Layer &amp; zona</div>
                         <div id="sidebar-mode-panel"></div>
                     </div>
+                    <hr class="sidebar-gold-rule" />
                     <div class="sidebar-section">
                         <div class="sidebar-section-label">Ringkasan peta</div>
                         <div id="stats-grid"></div>
                     </div>
-                    <div class="sb-stat-card">
-                        <div class="sb-stat-row">
-                            <span class="sb-stat-label">Status Merapi</span>
-                            <span class="sb-stat-value sb-stat-value--amber">Siaga (Lv III)</span>
-                        </div>
-                        <div class="sb-stat-row sb-stat-row--spaced">
-                            <span class="sb-stat-label">Cuaca DIY</span>
-                            <span class="sb-stat-value sb-stat-value--green">Cerah Berawan</span>
+                    <hr class="sidebar-gold-rule" />
+                    <div class="sidebar-section sidebar-section--status">
+                        <div class="sidebar-section-label">Status terkini</div>
+                        <div class="sb-stat-card">
+                            <div class="sb-stat-row">
+                                <span class="sb-stat-label">Status Merapi</span>
+                                <span class="sb-stat-value sb-stat-value--amber">Siaga (Lv III)</span>
+                            </div>
+                            <div class="sb-stat-row sb-stat-row--spaced">
+                                <span class="sb-stat-label">Cuaca DIY</span>
+                                <span class="sb-stat-value sb-stat-value--green">Cerah Berawan</span>
+                            </div>
                         </div>
                     </div>
-                    <button type="button" id="btn-open-stats" class="sb-see-all">Buka Dashboard Statistika</button>
+                    <hr class="sidebar-gold-rule" />
+                    <div class="sidebar-section">
+                        <button type="button" id="btn-open-stats" class="sb-ghost-btn">Buka Dashboard Statistika</button>
+                    </div>
                     <div id="recent-events-widget" class="sidebar-recent-wrap" style="display:none">
-                        <div class="sb-section-label">KEJADIAN TERKINI</div>
+                        <div class="sidebar-section-label">Kejadian terkini</div>
                         <div id="rew-list"></div>
-                        <button type="button" class="sb-see-all" id="rew-see-all">Lihat Semua Kejadian</button>
+                        <button type="button" class="sb-ghost-btn" id="rew-see-all">Lihat semua kejadian</button>
                     </div>
+                    <hr class="sidebar-gold-rule" />
                     <div class="sidebar-footer">
                         Data: OpenStreetMap via HOTOSM<br>
                         Boundary: GADM v4.1 · Wilayah DIY<br>
@@ -209,72 +234,84 @@
             </div>
         </aside>
 
-        <!-- Sidebar open button (when closed) -->
-        <button type="button" id="sidebar-open-btn" class="sidebar-fab-open" aria-label="Buka panel layer">Menu</button>
-
-        <!-- ============ DISASTER FILTERS (TAB 1) ============ -->
-        <div id="disaster-filters" class="hidden">
-            <button class="d-filter-btn active" data-filter="Zona Bencana">Zona Bencana</button>
-            <button class="d-filter-btn" data-filter="Tempat Pengungsian">Tempat Pengungsian</button>
+        <!-- Top-left map chrome: Menu + disaster filters (scroll + fade) -->
+        <div id="map-top-left-chrome" class="map-top-left-chrome hidden">
+            <button type="button" id="sidebar-open-btn" class="sidebar-fab-open" aria-label="Buka panel layer">Menu</button>
+            <div class="map-top-left-chrome-scroll">
+                <div id="disaster-filters" class="disaster-filters-inner">
+                    <button type="button" class="d-filter-btn active" data-filter="Zona Bencana">Zona Bencana</button>
+                    <button type="button" class="d-filter-btn" data-filter="Tempat Pengungsian">Tempat Pengungsian</button>
+                </div>
+            </div>
         </div>
 
-        <!-- ============ CATEGORY TABS (TAB 3) ============ -->
-        <div id="category-tabs" class="hidden" role="tablist">
-            <!-- Filled by JS -->
-        </div>
-
-        <!-- ============ SUBCATEGORY CHIPS ============ -->
-        <div id="subcategory-chips" class="hidden">
-            <!-- Filled by JS -->
-        </div>
-
-        <!-- ============ MAP CONTROLS (basemap + zoom) ============ -->
-        <div id="map-controls-stack" class="map-controls-stack">
-            <button type="button" class="bm-btn active" data-bm="dark" title="Peta gelap (Carto)">Peta</button>
-            <button type="button" class="bm-btn" data-bm="satellite" title="Citra satelit">Satelit</button>
-            <button type="button" class="bm-btn" data-bm="terrain" title="Relief topografi">Terrain</button>
-            <span class="map-controls-sep" aria-hidden="true"></span>
-            <button type="button" class="map-zoom-btn" id="map-zoom-in" title="Perbesar">+</button>
-            <button type="button" class="map-zoom-btn" id="map-zoom-out" title="Perkecil">−</button>
-        </div>
-
-        <!-- ============ RISK LEGEND (floating on map) ============ -->
-        <div id="risk-legend" class="hidden">
-            <div class="legend-title">Tingkat risiko (titik)</div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#c0392b"></div>Sangat tinggi
+        <!-- Right map UI: controls + centered legend + bottom row (8px gaps) -->
+        <div id="map-right-stack" class="map-right-stack hidden">
+            <div class="map-right-stack-top">
+                <div id="map-controls-stack" class="map-controls-stack">
+                    <div class="map-controls-basemap-row">
+                        <button type="button" class="bm-btn active" data-bm="dark" title="Peta gelap (Carto)">Peta</button>
+                        <button type="button" class="bm-btn" data-bm="satellite" title="Citra satelit">Satelit</button>
+                        <button type="button" class="bm-btn" data-bm="terrain" title="Relief topografi">Terrain</button>
+                    </div>
+                    <span class="map-controls-sep" aria-hidden="true"></span>
+                    <div class="map-controls-zoom-row">
+                        <button type="button" class="map-zoom-btn" id="map-zoom-in" title="Perbesar">+</button>
+                        <button type="button" class="map-zoom-btn" id="map-zoom-out" title="Perkecil">−</button>
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#e67e22"></div>Tinggi
+            <div class="map-right-stack-mid">
+                <div id="risk-legend" class="hidden risk-legend--floating">
+                    <div class="legend-title">Tingkat risiko (titik)</div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#c0392b"></div>Sangat tinggi
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#e67e22"></div>Tinggi
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#f39c12"></div>Sedang
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#27ae60"></div>Rendah
+                    </div>
+                    <div class="legend-title legend-title--spaced">Jenis zona</div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#dc2626"></div>Erupsi / Merapi
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#2563eb"></div>Banjir
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#ea580c"></div>Gempa
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#92400e"></div>Longsor
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#ca8a04"></div>Kekeringan
+                    </div>
+                    <div class="legend-title legend-title--spaced">Infrastruktur</div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#22c55e;border-radius:50%"></div>Jalur evakuasi
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#2980b9;border-radius:50%"></div>Pengungsian
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#f39c12"></div>Sedang
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#27ae60"></div>Rendah
-            </div>
-            <div class="legend-title legend-title--spaced">Jenis zona</div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#dc2626"></div>Erupsi / Merapi
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#2563eb"></div>Banjir
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#ea580c"></div>Gempa
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#92400e"></div>Longsor
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#ca8a04"></div>Kekeringan
-            </div>
-            <div class="legend-title legend-title--spaced">Infrastruktur</div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#22c55e;border-radius:50%"></div>Jalur evakuasi
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:#2980b9;border-radius:50%"></div>Pengungsian
+            <div class="map-right-stack-bottom">
+                <div id="map-br-bottom-row" class="map-br-bottom-row">
+                    <div id="bgm-youtube-host" class="bgm-youtube-host" aria-hidden="true"></div>
+                    <button type="button" class="bgm-toggle" id="bgm-toggle" aria-pressed="false"
+                        data-tooltip="Putar atau jeda — Yogyakarta (KLA Project)"
+                        title="Musik: Sesuatu di Yogyakarta — KLA Project">
+                        <span class="bgm-toggle-inner"><span class="bgm-icon-play" aria-hidden="true">▶</span><span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="bgm-label">Sesuatu di Yogyakarta — KLA Project</span></span>
+                    </button>
+                    <button type="button" class="chatbot-toggle" id="chatbot-toggle" data-tooltip="Asisten SIGAJOG"
+                        title="Tanya SIGAJOG — asisten informasi kebencanaan">Tanya SIGAJOG</button>
+                </div>
             </div>
         </div>
 
@@ -334,96 +371,7 @@
         </div>
 
         <div id="tentang-page" class="spa-page hidden">
-            <div class="tentang-hero">
-                <div class="tentang-hero-title">JOGJA SIAGA</div>
-                <p class="tentang-hero-sub">Hamemayu Hayuning Bawana — Menjaga Keselamatan Tanah Jogja</p>
-            </div>
-            <div class="tentang-section">
-                <div class="tentang-section-title">Tentang Sistem</div>
-                <p>JOGJA SIAGA adalah platform Sistem Informasi Geografis (SIG) yang dirancang khusus untuk mendukung
-                    kesiapsiagaan dan penanggulangan bencana di Daerah Istimewa Yogyakarta. Sistem ini menyajikan data
-                    spasial kebencanaan secara interaktif dan informatif untuk membantu pemangku kepentingan dalam
-                    pengambilan keputusan berbasis data.</p>
-                <p style="margin-top:12px">Dikembangkan dengan semangat filosofi Jawa Hamemayu Hayuning Bawana —
-                    memperindah dan menjaga keselamatan dunia — sistem ini hadir sebagai wujud komitmen nyata melindungi
-                    warga Yogyakarta dari ancaman bencana.</p>
-            </div>
-            <div class="tentang-section">
-                <div class="tentang-section-title">Fitur Unggulan</div>
-                <div class="fitur-grid">
-                    <div class="fitur-card">
-                        <div class="fitur-name">Peta Risiko Interaktif</div>
-                        <div class="fitur-desc">Visualisasi zona risiko bencana dengan gradasi warna tingkat bahaya dan
-                            filter layer dinamis.</div>
-                    </div>
-                    <div class="fitur-card">
-                        <div class="fitur-name">Panel Detail Terintegrasi</div>
-                        <div class="fitur-desc">Panel analitik dengan tab informasi, dampak, fasilitas, dan grafik tren
-                            kejadian.</div>
-                    </div>
-                    <div class="fitur-card">
-                        <div class="fitur-name">Dashboard Statistika</div>
-                        <div class="fitur-desc">Lima jenis visualisasi data mencakup distribusi, tren historis,
-                            komposisi, dan indeks kerentanan.</div>
-                    </div>
-                    <div class="fitur-card">
-                        <div class="fitur-name">Timeline Laporan</div>
-                        <div class="fitur-desc">Dokumentasi kronologis kejadian bencana dengan data dampak dan kontak
-                            darurat.</div>
-                    </div>
-                    <div class="fitur-card">
-                        <div class="fitur-name">Tata Kelola Fasilitas</div>
-                        <div class="fitur-desc">Direktori fasilitas publik dengan sistem filter kategori dan subkategori
-                            terintegrasi.</div>
-                    </div>
-                    <div class="fitur-card">
-                        <div class="fitur-name">Asisten SIGAJOG</div>
-                        <div class="fitur-desc">Asisten jawaban singkat berbasis pencocokan kata kunci lokal di
-                            peramban, untuk pertanyaan seputar kebencanaan dan fasilitas DIY.</div>
-                    </div>
-                </div>
-            </div>
-            <div class="tentang-section">
-                <div class="tentang-section-title">Sumber Data</div>
-                <div class="sumber-grid"
-                    style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px">
-                    <div
-                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
-                        <div
-                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
-                            BPBD DIY</div>
-                        <div style="font-size:11px;color:var(--text-muted)">Data kebencanaan</div>
-                    </div>
-                    <div
-                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
-                        <div
-                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
-                            BMKG</div>
-                        <div style="font-size:11px;color:var(--text-muted)">Meteorologi</div>
-                    </div>
-                    <div
-                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
-                        <div
-                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
-                            BIG</div>
-                        <div style="font-size:11px;color:var(--text-muted)">Peta dasar</div>
-                    </div>
-                    <div
-                        style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius-md);padding:14px;text-align:center">
-                        <div
-                            style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">
-                            OSM/HOT</div>
-                        <div style="font-size:11px;color:var(--text-muted)">Geometri</div>
-                    </div>
-                </div>
-                <div class="disclaimer" style="margin-top:20px">Disclaimer: Data yang ditampilkan merupakan data
-                    estimasi dan historis dari instansi resmi. Sistem ini tidak dimaksudkan sebagai satu-satunya acuan
-                    dalam kedaruratan. Selalu hubungi BPBD DIY untuk informasi terkini.</div>
-            </div>
-            <div
-                style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-card);font-size:11px;color:var(--text-muted)">
-                Versi 2.0 · Terakhir diperbarui: Januari 2025 · Dikembangkan oleh Jihan Nabilah Rahman
-            </div>
+            <div class="tentang-container"></div>
         </div>
 
     </div><!-- end #main-content -->
@@ -441,22 +389,20 @@
     <!-- ============ AMBIENT AUDIO (optional file: audio/jogja-ambient.mp3) ============ -->
     <audio id="bgm-audio" loop playsinline preload="metadata">
         <source src="audio/jogja-ambient.mp3" type="audio/mpeg">
-        <!-- Fallback demo (short scale sample, Wikimedia Commons — see audio/README.md) -->
         <source src="https://upload.wikimedia.org/wikipedia/commons/8/87/C_scale_single_channel.ogg" type="audio/ogg">
     </audio>
-    <button type="button" class="bgm-toggle" id="bgm-toggle" aria-pressed="false"
-        title="Musik latar: lokal jogja-ambient.mp3 atau fallback OGG dari Wikimedia">Musik</button>
+
+    <div id="chatbot-backdrop" class="chatbot-backdrop" aria-hidden="true"></div>
 
     <!-- ============ CHATBOT WIDGET ============ -->
-    <button type="button" class="chatbot-toggle" id="chatbot-toggle">Tanya SIGAJOG</button>
-    <div class="chatbot-panel hidden" id="chatbot-panel">
+    <div class="chatbot-panel" id="chatbot-panel" aria-hidden="true">
         <div class="chatbot-header">
+            <button type="button" class="chatbot-back-btn" id="chatbot-back" aria-label="Tutup panel">←</button>
             <div class="chatbot-header-info">
                 <div class="chatbot-title">SIGAJOG</div>
                 <div class="chatbot-subtitle">Asisten Informasi Kebencanaan Yogyakarta</div>
             </div>
             <div class="chatbot-status"><span class="status-dot"></span> Online</div>
-            <button class="chatbot-close-btn" id="chatbot-close">&#x2715;</button>
         </div>
         <div class="chatbot-messages" id="chatbot-messages">
             <div class="chat-msg bot">

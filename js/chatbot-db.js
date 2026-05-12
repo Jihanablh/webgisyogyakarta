@@ -3,6 +3,8 @@
 // Sistem tanya-jawab lokal berbasis keyword matching
 // ============================================================
 
+import { queryGeoKnowledge } from './geo-index.js';
+
 export const CHATBOT_DB = {
 
   kebencanaan: [
@@ -93,6 +95,11 @@ export class ChatbotEngine {
   constructor(db) {
     this.db = db;
     this.allEntries = this._flattenDB(db);
+    this._geoIndex = null;
+  }
+
+  setGeoIndex(index) {
+    this._geoIndex = index;
   }
 
   _flattenDB(db) {
@@ -122,6 +129,10 @@ export class ChatbotEngine {
   }
 
   search(userInput) {
+    if (this._geoIndex) {
+      const g = queryGeoKnowledge(this._geoIndex, userInput);
+      if (g) return g;
+    }
     const tokens = this._tokenize(userInput);
     if (!tokens.length) return this.db.fallback[0].answer;
     let bestScore = 0, bestEntry = null;

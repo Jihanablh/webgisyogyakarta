@@ -5,6 +5,8 @@ export const CONFIG = {
     maxZoom: 18,
     tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     tileAttribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    /** Isi dengan 11 karakter ID video YouTube (embed). Kosong = hanya audio lokal + fallback sintesis. */
+    bgmYoutubeVideoId: '',
 };
 
 export const CATEGORIES = {

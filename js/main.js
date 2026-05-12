@@ -1,5 +1,5 @@
 import { initMap } from './map.js';
-import { loadLayer, hideLayer, showOnlyKebencanaan, showOnlyCategory, fitMapToCategory, showAllLayers } from './layers.js';
+import { loadLayer, showOnlyKebencanaan } from './layers.js';
 import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
@@ -10,6 +10,7 @@ import { initAboutPage }      from './pages/about.js';
 import { initTataKotaPage }   from './pages/tatakota.js';
 import { State, CATEGORIES, CONFIG }  from './state.js';
 import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js';
+import { buildGeoKnowledgeIndex } from './geo-index.js';
 import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js';
 import { initWelcomeCinematic } from './welcome-cinematic.js';
 
@@ -17,6 +18,13 @@ window.State = State;
 window.CATEGORIES = CATEGORIES;
 
 async function init() {
+    const sp = new URLSearchParams(window.location.search);
+    const legacyId = sp.get('tatakotaId');
+    if (sp.get('view') === 'detail' && legacyId) {
+        const h = `${location.pathname}#tatakota/detail/${encodeURIComponent(legacyId)}`;
+        history.replaceState(null, '', h);
+    }
+
     const map    = initMap();
     const router = new Router();
     const loader = new LoadingManager(10);
@@ -37,21 +45,11 @@ async function init() {
             router.navigate(page);
 
             if (page === 'map') {
-                document.getElementById('disaster-filters')?.classList.remove('hidden');
-                document.getElementById('category-tabs')?.classList.add('hidden');
-                document.getElementById('subcategory-chips')?.classList.add('hidden');
+                document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
                 showOnlyKebencanaan();
                 if (State.map) setTimeout(() => State.map.invalidateSize(), 50);
-            } else if (page === 'tatakota') {
-                document.getElementById('disaster-filters')?.classList.add('hidden');
-                document.getElementById('category-tabs')?.classList.remove('hidden');
-                document.getElementById('subcategory-chips')?.classList.remove('hidden');
-                showAllLayers();
-                if (State.map) setTimeout(() => State.map.invalidateSize(), 80);
             } else {
-                document.getElementById('disaster-filters')?.classList.add('hidden');
-                document.getElementById('category-tabs')?.classList.add('hidden');
-                document.getElementById('subcategory-chips')?.classList.add('hidden');
+                document.getElementById('map-top-left-chrome')?.classList.add('hidden');
             }
         });
     });
@@ -60,7 +58,6 @@ async function init() {
     initDetailPanel();
     initBgm();
     initWelcomeCinematic();
-    initCategoryTabs();
     initDisasterFilters();
 
     // ── Default state: only kebencanaan on startup ────────────────────────────
@@ -79,8 +76,7 @@ async function init() {
             setTimeout(() => { overlay.style.display = 'none'; }, 750);
             document.body.classList.add('app-started');
             document.getElementById('top-nav')?.classList.add('is-visible');
-            document.getElementById('disaster-filters').classList.remove('hidden');
-            document.getElementById('category-tabs').classList.add('hidden');
+            document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
             showOnlyKebencanaan();
             document.getElementById('risk-legend')?.classList.remove('hidden');
             tryResumeBgmFromWelcomeGesture();
@@ -174,13 +170,21 @@ async function init() {
     const chatEngine = new ChatbotEngine(CHATBOT_DB);
     const chatToggle  = document.getElementById('chatbot-toggle');
     const chatPanel   = document.getElementById('chatbot-panel');
-    const chatCloseEl = document.getElementById('chatbot-close');
-    const chatInput   = document.getElementById('chatbot-input');
+    const chatBack = document.getElementById('chatbot-back');
+    const chatBackdrop = document.getElementById('chatbot-backdrop');
+
+    function setChatOpen(open) {
+        chatPanel?.classList.toggle('chatbot-panel--open', open);
+        chatBackdrop?.classList.toggle('is-on', open);
+        chatPanel?.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (chatBackdrop) chatBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    // Render suggestion chips
     const chatSend    = document.getElementById('chatbot-send');
     const chatMsgs    = document.getElementById('chatbot-messages');
     const suggestEl   = document.getElementById('chatbot-suggestions');
 
-    // Render suggestion chips
     if (suggestEl) {
         chatEngine.getSuggestions().forEach(q => {
             const chip = document.createElement('button');
@@ -194,8 +198,16 @@ async function init() {
         });
     }
 
-    if (chatToggle) chatToggle.addEventListener('click', () => chatPanel.classList.toggle('hidden'));
-    if (chatCloseEl) chatCloseEl.addEventListener('click', () => chatPanel.classList.add('hidden'));
+    if (chatToggle) {
+        chatToggle.addEventListener('click', () => {
+            const open = !chatPanel?.classList.contains('chatbot-panel--open');
+            setChatOpen(open);
+        });
+    }
+    if (chatBack) chatBack.addEventListener('click', () => setChatOpen(false));
+    if (chatBackdrop) chatBackdrop.addEventListener('click', () => setChatOpen(false));
+
+    const chatInput   = document.getElementById('chatbot-input');
 
     function appendChatMsg(role, text, isLoading = false) {
         const id = 'msg-' + Date.now() + Math.floor(Math.random()*1000);
@@ -256,102 +268,13 @@ async function init() {
         await loadLayer(cat);
         if (CATEGORIES[cat]) loader.tick(CATEGORIES[cat].label);
     }));
-}
 
+    const geoIdx = buildGeoKnowledgeIndex(State);
+    chatEngine.setGeoIndex(geoIdx);
 
-function initCategoryTabs() {
-    const tabsContainer = document.getElementById('category-tabs');
-    const chipsContainer = document.getElementById('subcategory-chips');
-    if (!tabsContainer || !chipsContainer) return;
-
-    // Filter categories to show as tabs (e.g., exclude some if needed, but here we show all main ones)
-    const mainCats = [
-        { id: 'pariwisata', label: 'Pariwisata' },
-        { id: 'mobilitas', label: 'Mobilitas' },
-        { id: 'kesehatan_darurat', label: 'Kesehatan' },
-        { id: 'kebutuhan', label: 'Kebutuhan' },
-        { id: 'tempat_tinggal', label: 'Penginapan' },
-        { id: 'atm_bank', label: 'Keuangan' },
-        { id: 'sosial_tugas', label: 'Sosial' },
-        { id: 'akademik', label: 'Pendidikan' },
-        { id: 'lingkungan', label: 'Lingkungan' }
-    ];
-
-    tabsContainer.innerHTML = mainCats.map(cat => 
-        `<button class="cat-btn" data-category="${cat.id}">${cat.label}</button>`
-    ).join('');
-
-    const buttons = tabsContainer.querySelectorAll('.cat-btn');
-    
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Exclusive active state
-            buttons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const catId = btn.dataset.category;
-            
-            // 1. Show only this category
-            showOnlyCategory(catId);
-            
-            // 2. Fit map bounds to this category
-            fitMapToCategory(catId);
-            
-            // 3. Render subcategory chips
-            renderSubcategoryChips(catId, chipsContainer);
-        });
-    });
-
-    // Initialize with pariwisata active
-    const defaultBtn = tabsContainer.querySelector('[data-category="pariwisata"]');
-    if (defaultBtn) {
-        defaultBtn.click();
+    if (/^#tatakota\/detail\//.test(location.hash)) {
+        router.navigate('tatakota');
     }
-}
-
-function renderSubcategoryChips(categoryId, container) {
-    const meta = State.categoryMeta[categoryId];
-    if (!meta || !meta.subcategories) {
-        container.innerHTML = '';
-        container.classList.add('hidden');
-        return;
-    }
-
-    const subcats = Object.keys(meta.subcategories).sort();
-    if (subcats.length === 0) {
-        container.innerHTML = '';
-        container.classList.add('hidden');
-        return;
-    }
-
-    container.innerHTML = subcats.map(sc => 
-        `<button class="sub-chip active" data-sub="${sc}">${sc}</button>`
-    ).join('');
-    
-    container.classList.remove('hidden');
-
-    // Handle subcategory toggle
-    container.querySelectorAll('.sub-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            chip.classList.toggle('active');
-            const isActive = chip.classList.contains('active');
-            const subName = chip.dataset.sub;
-            
-            if (!State.activeSubcats[categoryId]) {
-                State.activeSubcats[categoryId] = new Set();
-            }
-            
-            if (isActive) {
-                State.activeSubcats[categoryId].add(subName);
-            } else {
-                State.activeSubcats[categoryId].delete(subName);
-            }
-            
-            
-            // Rebuild layer after changing subcategory filter
-            import('./layers.js').then(m => m.rebuildCategoryLayer(categoryId));
-        });
-    });
 }
 
 function initDisasterFilters() {

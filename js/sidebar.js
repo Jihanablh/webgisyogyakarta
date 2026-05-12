@@ -249,7 +249,7 @@ function _applyExclusivePillStyle(el, color, isActive) {
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s ease;
-        font-family: var(--font-body, sans-serif);
+        font-family: var(--font-ui);
         background: ${isActive ? color : 'transparent'};
         border: 1px solid ${isActive ? color : color + '55'};
         color: ${isActive ? '#fff' : '#64748b'};
@@ -262,7 +262,7 @@ function _lihatSemuaStyle(isActive, color) {
         display:flex;align-items:center;gap:8px;
         width:100%;padding:9px 14px;border-radius:10px;
         cursor:pointer;transition:all 0.2s ease;
-        font-family:var(--font-body,sans-serif);font-size:12px;font-weight:700;
+        font-family:var(--font-ui);font-size:12px;font-weight:700;
         background:${isActive ? color + 'cc' : 'rgba(255,255,255,0.04)'};
         border:1px solid ${isActive ? color : 'rgba(255,255,255,0.1)'};
         color:${isActive ? '#fff' : '#94a3b8'};
@@ -387,7 +387,8 @@ function renderRecentEventsWidget() {
     list.innerHTML = events.map(e => `
         <div class="rew-item">
             <div class="rew-info">
-                <div class="rew-event-title">${e.title} <span class="rew-status ${e.statusClass}">→ ${e.status}</span></div>
+                <div class="rew-event-title">${e.title}</div>
+                <span class="rew-badge ${e.statusClass}">${e.status}</span>
                 <div class="rew-time">Terakhir: ${e.time}</div>
             </div>
         </div>`).join('');
