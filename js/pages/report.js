@@ -3,176 +3,183 @@ export function initReportPage() {
     if (!container) return;
 
     container.innerHTML = `
-        <div class="report-dashboard" style="padding: 24px; max-width: 1200px; margin: 0 auto; color: var(--text-primary);">
-            
-            <!-- ROW 1: HEADER SUMMARY -->
-                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.65; margin: 0 0 20px;">Ringkasan kejadian bencana di DIY (data contoh untuk tata letak dashboard). Gunakan filter untuk menyempitkan rentang waktu saat laporan resmi tersedia.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
-                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-gold); padding-left: 16px;">
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kejadian</div>
-                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">452</div>
+        <div class="report-dashboard tw-mx-auto tw-max-w-6xl tw-px-4 tw-py-6 tw-text-[var(--text-primary)] md:tw-px-6">
+            <p class="tw-mb-6 tw-max-w-3xl tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
+                Ringkasan kejadian bencana di DIY (data contoh untuk tata letak dashboard). Gunakan filter untuk menyempitkan rentang waktu saat laporan resmi tersedia.
+            </p>
+
+            <div class="tw-mb-8 tw-grid tw-grid-cols-2 tw-gap-4 md:tw-grid-cols-4">
+                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-amber-500 tw-pl-4">
+                    <div class="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Kejadian</div>
+                    <div class="report-font-mono tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl">452</div>
                 </div>
-                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-red); padding-left: 16px;">
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Korban Jiwa</div>
-                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">1,240</div>
+                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-red-500 tw-pl-4">
+                    <div class="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Korban Jiwa</div>
+                    <div class="report-font-mono tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl">1,240</div>
                 </div>
-                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-blue); padding-left: 16px;">
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Pengungsi</div>
-                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">12.5K</div>
+                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-sky-500 tw-pl-4">
+                    <div class="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Pengungsi</div>
+                    <div class="report-font-mono tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl">12.5K</div>
                 </div>
-                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-green); padding-left: 16px;">
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kerugian</div>
-                    <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">8.4T</div>
+                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-emerald-500 tw-pl-4">
+                    <div class="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Kerugian</div>
+                    <div class="report-font-mono tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl">8.4T</div>
                 </div>
             </div>
 
-            <!-- ROW 2: FILTER BAR -->
-            <div style="background: var(--bg-card); border: 1px solid var(--border-card); padding: 16px 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <span style="font-size: 13px; color: var(--text-muted); line-height: 28px; margin-right: 8px;">Filter:</span>
-                    <button class="filter-pill">Semua Tahun ▼</button>
-                    <button class="filter-pill">Jenis Bencana ▼</button>
-                    <button class="filter-pill">Kecamatan ▼</button>
-                    <button class="filter-pill">Tingkat Risiko ▼</button>
+            <div class="tw-mb-8 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-4 md:tw-p-5">
+                <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                    <span class="tw-mr-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">Filter</span>
+                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-white/10 tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60">Semua Tahun ▼</button>
+                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-white/10 tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60">Jenis Bencana ▼</button>
+                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-white/10 tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60">Kecamatan ▼</button>
+                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-white/10 tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60">Tingkat Risiko ▼</button>
                 </div>
-                <button style="background: transparent; border: none; color: var(--accent-gold); font-size: 13px; cursor: pointer; text-decoration: underline;">Reset Filter</button>
+                <button type="button" class="tw-text-sm tw-text-amber-500 tw-underline tw-underline-offset-2 hover:tw-text-amber-400">Reset Filter</button>
             </div>
 
-            <!-- ROW 3: GRAFIK UTAMA -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 40px;">
-                <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
-                    <h3 style="font-size: 15px; margin-bottom: 20px; color: var(--text-primary); font-weight: 600;">Tren Kejadian & Korban per Tahun</h3>
-                    <div style="position: relative; height: 300px;"><canvas id="reportChartTrend"></canvas></div>
+            <div class="tw-mb-10 tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
+                <div class="tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
+                    <h3 class="tw-mb-4 tw-text-[15px] tw-font-semibold tw-text-[var(--text-primary)]">Tren Kejadian & Korban per Tahun</h3>
+                    <div class="tw-relative tw-h-[300px]"><canvas id="reportChartTrend"></canvas></div>
                 </div>
-                <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
-                    <h3 style="font-size: 15px; margin-bottom: 20px; color: var(--text-primary); font-weight: 600;">Total Kerugian Material (Rp Miliar)</h3>
-                    <div style="position: relative; height: 300px;"><canvas id="reportChartLoss"></canvas></div>
+                <div class="tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
+                    <h3 class="tw-mb-4 tw-text-[15px] tw-font-semibold tw-text-[var(--text-primary)]">Total Kerugian Material (Rp Miliar)</h3>
+                    <div class="tw-relative tw-h-[300px]"><canvas id="reportChartLoss"></canvas></div>
                 </div>
             </div>
 
-            <!-- ROW 4: TIMELINE -->
-            <div style="margin-bottom: 48px;">
-                <h3 style="font-size: 18px; margin-bottom: 24px; color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">Riwayat Bencana</h3>
-                
-                <div class="timeline-container" style="position: relative; padding-left: 24px; border-left: 2px solid var(--border-card);">
-                    
-                    <!-- Timeline Item 1 -->
-                    <div class="report-tl-item" style="position: relative; margin-bottom: 32px;">
-                        <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); border: 2px solid var(--bg-primary);"></div>
-                        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div class="tw-mb-12">
+                <h3 class="tw-mb-6 tw-border-b tw-border-[var(--border-card)] tw-pb-3 tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Riwayat Bencana</h3>
+
+                <div class="tw-relative tw-pl-6 tw-border-l-2 tw-border-red-500/35 md:tw-pl-8">
+                    <div class="report-tl-item report-tl-slide-from-left tw-relative tw-mb-8">
+                        <div class="tw-absolute tw-left-[-29px] tw-top-1 tw-h-3 tw-w-3 tw-rounded-full tw-border-2 tw-border-[var(--bg-primary)] tw-bg-red-500 md:tw-left-[-33px]"></div>
+                        <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
+                            <div class="tw-mb-3 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
                                 <div>
-                                    <div style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent-gold); margin-bottom: 4px;">12 Mar 2024 • 14:30 WIB</div>
-                                    <h4 style="font-size: 16px; color: var(--text-primary); margin: 0 0 4px 0;">Erupsi Freatik Gunung Merapi</h4>
-                                    <div style="font-size: 13px; color: var(--text-muted);">Kecamatan Cangkringan, Kabupaten Sleman</div>
+                                    <div class="tw-mb-1 report-font-mono tw-text-[13px] tw-text-amber-500">12 Mar 2024 • 14:30 WIB</div>
+                                    <h4 class="tw-mb-1 report-font-display tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Erupsi Freatik Gunung Merapi</h4>
+                                    <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kecamatan Cangkringan, Kabupaten Sleman</div>
                                 </div>
-                                <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.2);">Siaga Aktif</span>
+                                <span class="tw-rounded tw-border tw-border-red-500/25 tw-bg-red-500/10 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-text-red-400">Siaga Aktif</span>
                             </div>
-                            <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">Telah terjadi erupsi freatik dengan tinggi kolom abu mencapai 2.500 meter di atas puncak. Angin bertiup ke arah barat daya. Hujan abu vulkanik melanda beberapa desa di kawasan KRB III.</p>
-                            
-                            <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Korban Jiwa</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Luka-luka</span><strong style="font-size: 15px; color: var(--text-primary);">12</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Pengungsi</span><strong style="font-size: 15px; color: var(--text-primary);">450</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Kerugian</span><strong style="font-size: 15px; color: var(--text-primary);">Rp 2.5 M</strong></div>
+                            <p class="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
+                                Telah terjadi erupsi freatik dengan tinggi kolom abu mencapai 2.500 meter di atas puncak. Angin bertiup ke arah barat daya. Hujan abu vulkanik melanda beberapa desa di kawasan KRB III.
+                            </p>
+                            <div class="tw-mb-4 tw-flex tw-flex-wrap tw-gap-6">
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Korban Jiwa</span><strong class="report-font-mono tw-text-[15px]">0</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Luka-luka</span><strong class="report-font-mono tw-text-[15px]">12</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Pengungsi</span><strong class="report-font-mono tw-text-[15px]">450</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Kerugian</span><strong class="report-font-mono tw-text-[15px]">Rp 2.5 M</strong></div>
                             </div>
-                            
-                            <div style="margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                                    <span style="color: var(--text-muted);">Kapasitas Barak Pengungsian (Balai Desa Glagaharjo)</span>
-                                    <span style="color: var(--text-secondary);">450 / 800</span>
+                            <div class="tw-mb-4">
+                                <div class="tw-mb-1 tw-flex tw-justify-between tw-text-xs">
+                                    <span class="tw-text-[var(--text-muted)]">Kapasitas barak (Balai Desa Glagaharjo)</span>
+                                    <span class="tw-text-[var(--text-secondary)]">450 / 800</span>
                                 </div>
-                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                                    <div style="width: 56%; height: 100%; background: var(--accent-gold);"></div>
+                                <div class="tw-h-1.5 tw-overflow-hidden tw-rounded-full tw-bg-white/10">
+                                    <div class="tw-h-full tw-w-[56%] tw-rounded-full tw-bg-amber-500"></div>
                                 </div>
                             </div>
-
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 16px; margin-top: 16px;">
-                                <div style="font-size: 13px; color: var(--text-muted);">Kontak Darurat: <strong style="color: var(--text-secondary);">BPBD Sleman (0274-869902)</strong></div>
-                                <button class="btn-primary" style="background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer;">Lihat di Peta</button>
+                            <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-t tw-border-[var(--border-card)] tw-pt-4">
+                                <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kontak: <strong class="tw-text-[var(--text-secondary)]">BPBD Sleman (0274-869902)</strong></div>
+                                <button type="button" class="btn-primary tw-rounded tw-border tw-border-sky-500 tw-bg-transparent tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-sky-400 hover:tw-bg-sky-500/10">Lihat di Peta</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Timeline Item 2 -->
-                    <div class="report-tl-item" style="position: relative;">
-                        <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-green); border: 2px solid var(--bg-primary);"></div>
-                        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div class="report-tl-item report-tl-slide-from-right tw-relative tw-mb-8">
+                        <div class="tw-absolute tw-left-[-29px] tw-top-1 tw-h-3 tw-w-3 tw-rounded-full tw-border-2 tw-border-[var(--bg-primary)] tw-bg-emerald-500 md:tw-left-[-33px]"></div>
+                        <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
+                            <div class="tw-mb-3 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
                                 <div>
-                                    <div style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent-gold); margin-bottom: 4px;">05 Jan 2024 • 02:15 WIB</div>
-                                    <h4 style="font-size: 16px; color: var(--text-primary); margin: 0 0 4px 0;">Banjir Genangan Hujan Ekstrem</h4>
-                                    <div style="font-size: 13px; color: var(--text-muted);">Kecamatan Gamping, Kabupaten Sleman</div>
+                                    <div class="tw-mb-1 report-font-mono tw-text-[13px] tw-text-amber-500">05 Jan 2024 • 02:15 WIB</div>
+                                    <h4 class="tw-mb-1 report-font-display tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Banjir Genangan Hujan Ekstrem</h4>
+                                    <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kecamatan Gamping, Kabupaten Sleman</div>
                                 </div>
-                                <span style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.2);">Selesai</span>
+                                <span class="tw-rounded tw-border tw-border-emerald-500/25 tw-bg-emerald-500/10 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-text-emerald-400">Selesai</span>
                             </div>
-                            <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">Curah hujan dengan intensitas tinggi menyebabkan meluapnya Sungai Bedog. Genangan air mencapai 50-80 cm merendam 4 pedukuhan di wilayah Gamping.</p>
-                            
-                            <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Korban Jiwa</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Luka-luka</span><strong style="font-size: 15px; color: var(--text-primary);">0</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Pengungsi</span><strong style="font-size: 15px; color: var(--text-primary);">85</strong></div>
-                                <div><span style="font-size: 12px; color: var(--text-muted); display: block;">Kerugian</span><strong style="font-size: 15px; color: var(--text-primary);">Rp 120 Jt</strong></div>
+                            <p class="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
+                                Curah hujan tinggi menyebabkan meluapnya Sungai Bedog. Genangan 50–80 cm merendam empat pedukuhan di wilayah Gamping.
+                            </p>
+                            <div class="tw-mb-4 tw-flex tw-flex-wrap tw-gap-6">
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Korban Jiwa</span><strong class="report-font-mono tw-text-[15px]">0</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Luka-luka</span><strong class="report-font-mono tw-text-[15px]">0</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Pengungsi</span><strong class="report-font-mono tw-text-[15px]">85</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Kerugian</span><strong class="report-font-mono tw-text-[15px]">Rp 120 Jt</strong></div>
                             </div>
-                            
-                            <div style="margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                                    <span style="color: var(--text-muted);">Kapasitas Pengungsian (Masjid Patukan)</span>
-                                    <span style="color: var(--text-secondary);">0 / 150</span>
+                            <div class="tw-mb-4">
+                                <div class="tw-mb-1 tw-flex tw-justify-between tw-text-xs">
+                                    <span class="tw-text-[var(--text-muted)]">Kapasitas pengungsian (Masjid Patukan)</span>
+                                    <span class="tw-text-[var(--text-secondary)]">0 / 150</span>
                                 </div>
-                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                                    <div style="width: 0%; height: 100%; background: var(--accent-green);"></div>
+                                <div class="tw-h-1.5 tw-overflow-hidden tw-rounded-full tw-bg-white/10">
+                                    <div class="tw-h-full tw-w-0 tw-rounded-full tw-bg-emerald-500"></div>
                                 </div>
                             </div>
-
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 16px; margin-top: 16px;">
-                                <div style="font-size: 13px; color: var(--text-muted);">Kontak Darurat: <strong style="color: var(--text-secondary);">Polsek Gamping (0274-798221)</strong></div>
-                                <button class="btn-primary" style="background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer;">Lihat di Peta</button>
+                            <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-t tw-border-[var(--border-card)] tw-pt-4">
+                                <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kontak: <strong class="tw-text-[var(--text-secondary)]">Polsek Gamping (0274-798221)</strong></div>
+                                <button type="button" class="btn-primary tw-rounded tw-border tw-border-sky-500 tw-bg-transparent tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-sky-400 hover:tw-bg-sky-500/10">Lihat di Peta</button>
                             </div>
                         </div>
                     </div>
 
+                    <div class="report-tl-item report-tl-slide-from-left tw-relative">
+                        <div class="tw-absolute tw-left-[-29px] tw-top-1 tw-h-3 tw-w-3 tw-rounded-full tw-border-2 tw-border-[var(--bg-primary)] tw-bg-orange-500 md:tw-left-[-33px]"></div>
+                        <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
+                            <div class="tw-mb-3 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+                                <div>
+                                    <div class="tw-mb-1 report-font-mono tw-text-[13px] tw-text-amber-500">18 Nov 2023 • 08:42 WIB</div>
+                                    <h4 class="tw-mb-1 report-font-display tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Gempa M4.8 Lokal DIY</h4>
+                                    <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kabupaten Bantul &amp; Kota Yogyakarta</div>
+                                </div>
+                                <span class="tw-rounded tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-text-amber-400">Dalam pemantauan</span>
+                            </div>
+                            <p class="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
+                                Gempa dangkal dirasakan MM IV–V di pusat kota. Sejumlah struktur retak ringan; tidak ada laporan korban jiwa. Tim cepat BPBD melakukan asesmen fasilitas vital.
+                            </p>
+                            <div class="tw-mb-4 tw-flex tw-flex-wrap tw-gap-6">
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Korban Jiwa</span><strong class="report-font-mono tw-text-[15px]">0</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Luka-luka</span><strong class="report-font-mono tw-text-[15px]">3</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Pengungsi sementara</span><strong class="report-font-mono tw-text-[15px]">42</strong></div>
+                                <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Kerugian estimasi</span><strong class="report-font-mono tw-text-[15px]">Rp 4.1 M</strong></div>
+                            </div>
+                            <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-t tw-border-[var(--border-card)] tw-pt-4">
+                                <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kontak: <strong class="tw-text-[var(--text-secondary)]">BMKG DIY (0274-511064)</strong></div>
+                                <button type="button" class="btn-primary tw-rounded tw-border tw-border-sky-500 tw-bg-transparent tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-sky-400 hover:tw-bg-sky-500/10">Lihat di Peta</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- ROW 5: EMERGENCY CONTACTS -->
             <div>
-                <h3 style="font-size: 18px; margin-bottom: 24px; color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">Pusat Kontak Darurat</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #ef4444; padding: 20px; border-radius: 8px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">BPBD DIY</h4>
-                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">(0274) 555584</div>
-                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Pusdalops PB DIY<br>Jl. Kenari No.14, Semaki<br>Layanan 24 Jam</div>
+                <h3 class="tw-mb-5 tw-border-b tw-border-[var(--border-card)] tw-pb-3 tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Pusat Kontak Darurat</h3>
+                <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+                    <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-border-l-4 tw-border-l-red-500 tw-bg-[rgba(16,22,40,0.6)] tw-p-5">
+                        <h4 class="tw-mb-2 tw-text-base tw-font-semibold">BPBD DIY</h4>
+                        <div class="tw-mb-3 report-font-mono tw-text-lg tw-text-amber-500">(0274) 555584</div>
+                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Pusdalops PB DIY<br>Jl. Kenari No.14, Semaki<br>Layanan 24 jam</p>
                     </div>
-                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #f97316; padding: 20px; border-radius: 8px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">Basarnas (Kantor SAR)</h4>
-                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">115 / (0274) 4333604</div>
-                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Kantor Pencarian dan Pertolongan<br>Jl. Wates Km 11, Sedayu<br>Layanan 24 Jam</div>
+                    <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-border-l-4 tw-border-l-orange-500 tw-bg-[rgba(16,22,40,0.6)] tw-p-5">
+                        <h4 class="tw-mb-2 tw-text-base tw-font-semibold">Basarnas (Kantor SAR)</h4>
+                        <div class="tw-mb-3 report-font-mono tw-text-lg tw-text-amber-500">115 / (0274) 4333604</div>
+                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Kantor Pencarian dan Pertolongan<br>Jl. Wates Km 11, Sedayu<br>Layanan 24 jam</p>
                     </div>
-                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">PMI DIY</h4>
-                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">(0274) 372474</div>
-                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Markas Daerah<br>Jl. Siliwangi No.3, Gamping<br>Layanan 24 Jam</div>
+                    <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-border-l-4 tw-border-l-sky-500 tw-bg-[rgba(16,22,40,0.6)] tw-p-5">
+                        <h4 class="tw-mb-2 tw-text-base tw-font-semibold">PMI DIY</h4>
+                        <div class="tw-mb-3 report-font-mono tw-text-lg tw-text-amber-500">(0274) 372474</div>
+                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Markas Daerah<br>Jl. Siliwangi No.3, Gamping<br>Layanan 24 jam</p>
                     </div>
-                    <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid var(--border-card); border-left: 4px solid #22c55e; padding: 20px; border-radius: 8px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 16px;">Dinas Pemadam Kebakaran</h4>
-                        <div style="font-family: 'Space Mono', monospace; font-size: 18px; color: var(--accent-gold); margin-bottom: 12px;">113 / (0274) 587101</div>
-                        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Mako Damkar Kota<br>Jl. Mayor Suryotomo<br>Layanan 24 Jam</div>
+                    <div class="tw-rounded-lg tw-border tw-border-[var(--border-card)] tw-border-l-4 tw-border-l-emerald-500 tw-bg-[rgba(16,22,40,0.6)] tw-p-5">
+                        <h4 class="tw-mb-2 tw-text-base tw-font-semibold">Dinas Pemadam Kebakaran</h4>
+                        <div class="tw-mb-3 report-font-mono tw-text-lg tw-text-amber-500">113 / (0274) 587101</div>
+                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Mako Damkar Kota<br>Jl. Mayor Suryotomo<br>Layanan 24 jam</p>
                     </div>
                 </div>
             </div>
-
         </div>
-
-        <style>
-            .filter-pill {
-                background: var(--bg-elevated); border: 1px solid var(--border-glass); 
-                color: var(--text-primary); padding: 6px 16px; border-radius: 20px; 
-                font-size: 13px; cursor: pointer; transition: all 0.2s;
-            }
-            .filter-pill:hover { border-color: var(--accent-gold); }
-            .filter-pill.active { border-color: var(--accent-gold); background: rgba(212, 160, 23, 0.12); color: var(--accent-gold); }
-        </style>
     `;
 
     wireReportPageAnimations(container);
@@ -213,7 +220,6 @@ function wireReportPageAnimations(container) {
 function initReportCharts() {
     if (typeof Chart === 'undefined') return;
 
-    // Line Chart (Tren Kejadian & Korban) - Dual Axis
     new Chart(document.getElementById('reportChartTrend'), {
         type: 'line',
         data: {
@@ -252,7 +258,6 @@ function initReportCharts() {
         }
     });
 
-    // Bar Chart (Kerugian Material)
     new Chart(document.getElementById('reportChartLoss'), {
         type: 'bar',
         data: {

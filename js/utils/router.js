@@ -12,35 +12,44 @@ export class Router {
         const from = this.current;
 
         // Elements that only make sense on the map view
-        const mapOnlyIds = ['category-tabs','basemap-toggle','risk-legend',
+        const mapOnlyIds = ['category-tabs','map-controls-stack','risk-legend',
                             'coord-display','disaster-sub-tabs','sidebar-open-btn'];
 
-        // Hide all spa-pages
-        document.querySelectorAll('.spa-page').forEach(el => el.classList.add('hidden'));
+        // Hide SPA full pages (tatakota is a map overlay — un-hidden below)
+        document.querySelectorAll('.spa-page').forEach((el) => {
+            if (to === 'tatakota' && el.id === 'tatakota-page') return;
+            el.classList.add('hidden');
+        });
         const mapEl = document.getElementById('map');
         
-        const isMapView = (to === 'map');
+        const isHybridMap = to === 'map' || to === 'tatakota';
 
-        if (!isMapView) {
+        if (!isHybridMap) {
             if (mapEl) mapEl.classList.add('hidden');
         } else {
             if (mapEl) mapEl.classList.remove('hidden');
         }
 
-        if (isMapView) {
+        if (isHybridMap) {
             // Show map-only elements
             mapOnlyIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = '';
             });
+            if (to === 'map') {
+                document.getElementById('risk-legend')?.classList.remove('hidden');
+            } else {
+                document.getElementById('risk-legend')?.classList.add('hidden');
+            }
             const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.style.display = '';
+            if (sidebar) sidebar.style.display = to === 'tatakota' ? 'none' : '';
         } else {
             // Hide map-only elements so they don't float over SPA pages
             mapOnlyIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
+            document.getElementById('risk-legend')?.classList.add('hidden');
             // Also close detail panel if open
             const dp = document.getElementById('detail-panel');
             if (dp) dp.classList.remove('open');
@@ -48,10 +57,18 @@ export class Router {
             if (sidebar) sidebar.style.display = 'none';
         }
 
-        if (from && this.routes[from]?.onLeave) this.routes[from].onLeave();
+        const tatakotaPage = document.getElementById('tatakota-page');
+        if (tatakotaPage) {
+            tatakotaPage.classList.toggle('tatakota-on-map', to === 'tatakota');
+        }
         if (this.routes[to]?.onEnter) this.routes[to].onEnter();
 
-        const target = isMapView ? document.getElementById('map') : document.getElementById(`${to}-page`);
+        const target =
+            to === 'map'
+                ? document.getElementById('map')
+                : to === 'tatakota'
+                    ? document.getElementById('tatakota-page')
+                    : document.getElementById(`${to}-page`);
         if (target) {
             target.classList.remove('page-enter');
             target.classList.remove('hidden');
@@ -67,7 +84,7 @@ export class Router {
 
         this.current = to;
 
-        if ((to === 'map') && typeof window !== 'undefined' && window.State?.map) {
+        if ((to === 'map' || to === 'tatakota') && typeof window !== 'undefined' && window.State?.map) {
             setTimeout(() => {
                 try {
                     window.State.map.invalidateSize();

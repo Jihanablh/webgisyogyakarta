@@ -273,9 +273,14 @@
   border-color: rgba(212, 160, 23, 0.7);
 }
 .bgm-toggle.is-playing {
-  background: rgba(212, 160, 23, 0.2);
-  color: #0a0f1e;
-  border-color: var(--accent-gold, #d4a017);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(212, 160, 23, 0.15);
+  box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.25), 0 0 20px rgba(212, 160, 23, 0.2);
+}
+.bgm-toggle.bgm-error {
+  border-color: #c0392b;
+  color: #e74c3c;
 }
 
 @media (max-width: 520px) {

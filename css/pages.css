@@ -674,8 +674,8 @@
 }
 .tatakota-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 .tatakota-card {
   background: var(--bg-card);
@@ -770,6 +770,12 @@
 }
 
 /* ── Laporan: stagger + chips ─────────────────────────────── */
+.report-font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+.report-font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
 .report-kpi-stagger {
   opacity: 0;
   transform: translateY(14px);
@@ -784,6 +790,12 @@
   transform: translateY(28px);
   transition: opacity 0.55s ease, transform 0.55s ease;
 }
+.report-tl-item.report-tl-slide-from-left {
+  transform: translate(-28px, 24px);
+}
+.report-tl-item.report-tl-slide-from-right {
+  transform: translate(28px, 24px);
+}
 .report-tl-item.report-tl-visible {
   opacity: 1;
   transform: none;
@@ -792,6 +804,34 @@
   border-color: var(--accent-gold) !important;
   background: rgba(212, 160, 23, 0.12) !important;
   color: var(--accent-gold) !important;
+}
+
+/* ── Tentang: dividers + cards (used by about.js) ─────────── */
+.ta-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 36px 0;
+}
+.ta-divider::before,
+.ta-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.2);
+}
+.ta-divider-sym {
+  color: #d4af37;
+  font-size: 16px;
+  opacity: 0.6;
+}
+.ta-card-hover {
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.ta-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(212, 175, 55, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.08);
 }
 
 /* ── Tentang: scroll reveal ───────────────────────────────── */
@@ -804,6 +844,100 @@
   opacity: 1;
   transform: none;
 }
+
+/* Subtle batik-style accent (Tentang hero) */
+.about-batik-accent {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 12px,
+      rgba(212, 160, 23, 0.15) 12px,
+      rgba(212, 160, 23, 0.15) 13px
+    ),
+    repeating-linear-gradient(
+      -135deg,
+      transparent 0,
+      transparent 18px,
+      rgba(192, 57, 43, 0.1) 18px,
+      rgba(192, 57, 43, 0.1) 19px
+    );
+}
+
+.about-hero-title {
+  font-family: var(--font-display), Georgia, serif;
+}
+.about-stat-num {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .about-hero-title {
+    animation: aboutHeroFloat 10s ease-in-out infinite alternate;
+  }
+}
+@keyframes aboutHeroFloat {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-hero-title {
+    animation: none;
+  }
+}
+
+/* Metodologi: garis progres + item */
+.about-method {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-left: 28px;
+}
+.about-method::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(212, 160, 23, 0.55), rgba(212, 160, 23, 0.08));
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.about-method.about-method--in::before {
+  transform: scaleY(1);
+}
+.about-method-step {
+  position: relative;
+  margin-bottom: 28px;
+  padding-left: 8px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.about-method-step.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.about-method-step::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 0 12px rgba(212, 160, 23, 0.35);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .about-reveal {
     opacity: 1;
@@ -816,4 +950,98 @@
     transform: none;
     transition: none;
   }
+  .about-method::before {
+    transform: scaleY(1);
+  }
+  .about-method-step {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── Tata Kelola overlay on map ───────────────────────────── */
+#tatakota-page.tatakota-on-map {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+}
+
+#tatakota-page.tatakota-on-map .tatakota-root {
+  pointer-events: auto;
+  max-width: 400px;
+  margin: 72px 0 0 12px;
+  max-height: calc(100vh - 88px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tatakota-rail {
+  background: rgba(10, 15, 30, 0.94);
+  border: 1px solid rgba(212, 160, 23, 0.28);
+  border-radius: var(--radius-lg);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.tatakota-rail-head {
+  padding: 16px 16px 8px;
+  flex-shrink: 0;
+}
+
+.tatakota-rail-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.tatakota-rail-lead {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tatakota-spa-pills {
+  padding: 0 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#tatakota-grid-host {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 10px 8px;
+}
+
+.tatakota-loadmore {
+  flex-shrink: 0;
+  margin: 8px 12px 12px;
+  padding: 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent-gold);
+  background: rgba(212, 160, 23, 0.12);
+  color: var(--accent-gold);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.tatakota-loadmore:hover {
+  background: rgba(212, 160, 23, 0.22);
+  color: var(--text-primary);
 }

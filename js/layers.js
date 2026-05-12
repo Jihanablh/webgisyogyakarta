@@ -2,6 +2,56 @@ import { State, CATEGORIES } from './state.js';
 import { createMarker } from './markers.js';
 import { loadLargeGeoJSON } from './utils/loader.js';
 
+/** Stroke / fill for disaster polygons & lines from GeoJSON properties (no file edits). */
+function disasterStyleForFeature(feature) {
+    const p = feature.properties || {};
+    const sub = String(p.subcategory || '').toLowerCase();
+    const name = String(p.name || '').toLowerCase();
+    const tl = String(p.type_layer || '');
+
+    let stroke = '#dc2626';
+    let fill = '#dc2626';
+    let weight = 2;
+    let fillOp = 0.14;
+    let dash = null;
+
+    if (sub.includes('banjir') || name.includes('banjir') || tl === 'rawan_banjir') {
+        stroke = '#2563eb';
+        fill = '#3b82f6';
+        fillOp = 0.18;
+    } else if (sub.includes('gempa') || name.includes('gempa') || sub.includes('zona gempa')) {
+        stroke = '#ea580c';
+        fill = '#f97316';
+        fillOp = 0.16;
+    } else if (sub.includes('longsor') || name.includes('longsor')) {
+        stroke = '#78350f';
+        fill = '#92400e';
+        fillOp = 0.2;
+    } else if (sub.includes('kekeringan') || name.includes('kekeringan')) {
+        stroke = '#a16207';
+        fill = '#eab308';
+        fillOp = 0.22;
+    } else if (sub.includes('erupsi') || sub.includes('merapi') || sub.includes('krb') || tl === 'zona_bahaya') {
+        stroke = '#b91c1c';
+        fill = '#dc2626';
+        fillOp = 0.16;
+    }
+
+    if (tl === 'jalur_evakuasi') {
+        stroke = '#22c55e';
+        fill = '#22c55e';
+        weight = 3;
+        fillOp = 0;
+        dash = '8 6';
+    } else if (tl === 'titik_pengungsian') {
+        stroke = '#2980b9';
+        fill = '#2980b9';
+        fillOp = 0;
+    }
+
+    return { stroke, fill, weight, fillOp, dash };
+}
+
 function buildLayerGroup(category, features) {
     const layerGroup = L.featureGroup();
     if (!features || features.length === 0) return layerGroup;
@@ -17,8 +67,32 @@ function buildLayerGroup(category, features) {
         },
         style: (feature) => {
             const cat = CATEGORIES[category];
-            const color = cat ? cat.color : '#3b82f6';
             const type = feature.geometry?.type;
+
+            if (category === 'kebencanaan') {
+                const { stroke, fill, weight, fillOp, dash } = disasterStyleForFeature(feature);
+                if (type === 'LineString' || type === 'MultiLineString') {
+                    return {
+                        color: stroke,
+                        weight,
+                        opacity: 0.9,
+                        dashArray: dash || '6 4',
+                        fillOpacity: 0
+                    };
+                }
+                if (type === 'Polygon' || type === 'MultiPolygon') {
+                    return {
+                        color: stroke,
+                        weight,
+                        opacity: 0.85,
+                        fillColor: fill,
+                        fillOpacity: fillOp
+                    };
+                }
+                return {};
+            }
+
+            const color = cat ? cat.color : '#3b82f6';
             if (type === 'LineString' || type === 'MultiLineString') {
                 return { color, weight: 3, opacity: 0.8, dashArray: '6 4' };
             }

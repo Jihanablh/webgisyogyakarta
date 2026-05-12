@@ -1,6 +1,6 @@
 ﻿/* ============================================================
    JOGJA SIAGA — detail-panel.css
-   Unified Detail Panel with Internal Tabs
+   Unified detail panel — vertical scroll (no tabs)
    ============================================================ */
 
 /* ── Panel Container ──────────────────────────────────────── */
@@ -379,6 +379,20 @@
 .dp-check-no  { background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border-card); }
 
 /* ── Chart Canvas ─────────────────────────────────────────── */
+.detail-vertical-body {
+  padding: 16px 18px 24px;
+}
+.dp-history-card {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-card);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 #detail-chart, #detail-chart-2 {
   width: 100% !important;
   height: 200px !important;
@@ -485,3 +499,25 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* Mobile: sheet-style panel so map stays visible underneath */
+@media (max-width: 768px) {
+  #detail-panel {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: min(88vh, 640px);
+    height: auto;
+    border-right: none;
+    border-top: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(110%);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
+  }
+  #detail-panel.open {
+    transform: translateY(0);
+  }
+}
+

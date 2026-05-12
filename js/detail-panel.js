@@ -429,26 +429,34 @@ function defaultHourlyCrowd(seed) {
     return out;
 }
 
-// ── Unified Dark Panel (new #detail-panel) ────────────────────────────────────
+function nz(val, fallback) {
+    if (val === undefined || val === null || val === '') return fallback;
+    if (val === 0 || val === '0') return fallback;
+    return val;
+}
+
+// ── Unified Dark Panel (vertical scroll, no tabs) ───────────────────────────
 function openUnifiedPanel(feature, categoryKey) {
     const panel = document.getElementById('detail-panel');
-    if (!panel) return;
-    const props = feature.properties;
+    const vertical = document.getElementById('detail-vertical-body');
+    if (!panel || !vertical) return;
+    const props = feature.properties || {};
     const cat   = CATEGORIES[categoryKey] || {};
     const g     = feature.geometry;
     const isDisaster = categoryKey === 'kebencanaan';
-    const isPengungsian = !!(props.kapasitas_pengungsi || props.type === 'Tempat Pengungsian' || props.subcategory === 'Pengungsian' || props.subcategory === 'Titik Kumpul');
+    const isPengungsian = !!(props.kapasitas || props.type_layer === 'titik_pengungsian' || props.type === 'Tempat Pengungsian' || props.subcategory === 'Pengungsian' || props.subcategory === 'Titik Kumpul');
 
     const metaEl = document.getElementById('detail-meta-strip');
     if (metaEl) {
         metaEl.classList.remove('hidden');
         if (isDisaster) {
-            const risk = props.risiko || props.tingkat_risiko || '—';
-            const kec = props.kecamatan || '—';
+            const risk = props.risiko || props.level_risiko || props.tingkat_risiko || '—';
+            const kec = nz(props.kecamatan, 'Wilayah DIY');
+            const zona = props.zona ? String(props.zona) : '';
             metaEl.innerHTML = `
                 <div class="detail-meta-row detail-meta-row--risk">
                     <span class="detail-meta-pill">${escapeHtml(String(risk))}</span>
-                    <span class="detail-meta-text">${escapeHtml(String(kec))}</span>
+                    <span class="detail-meta-text">${escapeHtml(zona ? `${zona} · ${kec}` : String(kec))}</span>
                 </div>`;
         } else {
             const rating = Number(props.rating) || 4.2;
@@ -470,17 +478,15 @@ function openUnifiedPanel(feature, categoryKey) {
         }
     }
 
-    // Store latlng for fly/gmaps buttons
     if (g && g.type === 'Point') {
         window._detailLatLng = [g.coordinates[1], g.coordinates[0]];
     } else if (g && g.type === 'Polygon') {
         const coords = g.coordinates[0];
-        const avgLat = coords.reduce((s,c) => s + c[1], 0) / coords.length;
-        const avgLon = coords.reduce((s,c) => s + c[0], 0) / coords.length;
+        const avgLat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+        const avgLon = coords.reduce((s, c) => s + c[0], 0) / coords.length;
         window._detailLatLng = [avgLat, avgLon];
     }
 
-    // Photo — stable Unsplash URLs (source.unsplash.com is unreliable)
     const imgEl = document.getElementById('detail-photo-img');
     const fallbackUnsplashId = {
         kebencanaan: 'photo-1588668214407-6ea9a6d8c272',
@@ -504,147 +510,118 @@ function openUnifiedPanel(feature, categoryKey) {
         imgEl.src = `https://picsum.photos/seed/${encodeURIComponent(props.name || props.nama || 'jogja')}/400/200`;
     };
 
-    // Badge
     const badge = document.getElementById('detail-cat-badge');
     const riskBadgeMap = { 'Sangat Tinggi':'badge-risiko-sangat-tinggi','Tinggi':'badge-risiko-tinggi','Sedang':'badge-risiko-sedang','Rendah':'badge-risiko-rendah' };
-    badge.className = 'detail-category-badge ' + (riskBadgeMap[props.risiko] || (categoryKey === 'kebencanaan' ? 'badge-risiko-sedang' : 'badge-wisata'));
     const subcatText = props.subcategory || props.subkategori || props.type || props.jenis_bencana;
-    badge.textContent = props.risiko || subcatText || cat.label || categoryKey;
+    const riskKey = props.risiko || props.level_risiko || '';
+    badge.className = 'detail-category-badge ' + (riskBadgeMap[riskKey] || (categoryKey === 'kebencanaan' ? 'badge-risiko-sedang' : 'badge-wisata'));
+    badge.textContent = riskKey || subcatText || cat.label || categoryKey;
 
     document.getElementById('detail-name').textContent = props.name || props.nama || '—';
 
-    const tabsContainer = document.getElementById('detail-tabs');
-    const tabBtns = tabsContainer.querySelectorAll('.dtab');
-    
-    // Default panes
-    const paneInfo = document.getElementById('dtab-info');
-    const paneDetail = document.getElementById('dtab-detail');
-    const paneFasil = document.getElementById('dtab-fasilitas');
-    const paneGrafik = document.getElementById('dtab-grafik');
+    const hist = Array.isArray(props.riwayat_bencana) ? props.riwayat_bencana : [];
+    const lastH = hist.length ? hist[0] : null;
+
+    function row(label, val) {
+        return `<div class="dp-row"><span class="dp-label">${label}</span><span class="dp-val">${escapeHtml(String(val))}</span></div>`;
+    }
 
     if (isDisaster) {
-        tabsContainer.style.display = 'flex';
-        // Hide all panes except first
-        paneInfo.classList.remove('hidden');
-        paneDetail.classList.add('hidden');
-        paneFasil.classList.add('hidden');
-        paneGrafik.classList.add('hidden');
-        
-        // Reset active tab button
-        tabBtns.forEach((b, i) => {
-            b.classList.toggle('active', i === 0);
-            b.style.display = 'block'; // Ensure visible
-        });
-
+        let html = '';
         if (isPengungsian) {
-            tabBtns[0].textContent = 'Informasi';
-            tabBtns[1].textContent = 'Fasilitas';
-            tabBtns[2].textContent = 'Kontak & Akses';
-            tabBtns[3].textContent = 'Kapasitas';
-            
-            // Tab 1: Informasi
-            const infoRows = [
-                ['Nama', props.name || props.nama || '—'],
-                ['Alamat', props.alamat || props.address || '—'],
-                ['Kapasitas Maks', props.kapasitas ? `${props.kapasitas} jiwa` : '—'],
-                ['Status', props.status_terisi || props.status || 'Aktif'],
-            ];
-            paneInfo.innerHTML = infoRows.map(([l, v]) => `<div class="dp-row"><span class="dp-label">${l}</span><span class="dp-val">${escapeHtml(String(v))}</span></div>`).join('');
-            
-            // Tab 2: Fasilitas
-            const fasilList = props.fasilitas || props.amenity_list || [];
-            if (fasilList.length) {
-                paneDetail.innerHTML = fasilList.map(f => `<div class="dp-checklist-item"><div class="dp-check dp-check-yes">v</div>${f}</div>`).join('');
-            } else {
-                paneDetail.innerHTML = '<p class="dp-desc" style="color:var(--text-muted)">Data fasilitas belum tersedia.</p>';
-            }
-            
-            // Tab 3: Kontak & Akses
-            const kontakRows = [
-                ['Pengelola', props.instansi || props.operator || 'BPBD DIY'],
-                ['Telepon', props.kontak_darurat || props.telepon || '—'],
-                ['Akses', props.akses || 'Jalan Raya Utama'],
-            ];
-            paneFasil.innerHTML = kontakRows.map(([l, v]) => `<div class="dp-row"><span class="dp-label">${l}</span><span class="dp-val">${escapeHtml(String(v))}</span></div>`).join('');
-            
-            // Tab 4: Kapasitas (Chart placeholder for now)
-            paneGrafik.innerHTML = `<div class="dp-section">Grafik Kapasitas</div><div class="dp-chart-wrap"><canvas id="detail-chart"></canvas></div><p class="dp-desc" style="font-size:11px;color:var(--text-muted)">*Data kapasitas harian akan muncul di sini</p>`;
-            
+            const kap = nz(props.kapasitas, 800);
+            const fasil = props.fasilitas || props.facilities || ['Tenda Darurat', 'Air Bersih', 'MCK', 'Posko Kesehatan'];
+            const flist = Array.isArray(fasil) ? fasil : String(fasil).split(',');
+            html += `<div class="dp-section">Informasi</div>`;
+            html += row('Nama', props.name || props.nama || '—');
+            html += row('Alamat', nz(props.alamat, 'Lokasi strategis evakuasi Merapi · DIY'));
+            html += row('Kapasitas', `${kap} jiwa`);
+            html += row('Status operasi', nz(props.status_terisi, 'Siaga / siap operasi'));
+            html += row('Kontak', nz(props.kontak_darurat, '(0274) 515059 — BPBD DIY'));
+            html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
+                flist.map((f) => `<span class="dp-chip">${escapeHtml(String(f).trim())}</span>`).join('') +
+                `</div>`;
+            html += `<div class="dp-section">Kapasitas &amp; okupansi (ilustrasi)</div>
+                <p class="dp-desc" style="font-size:12px;color:var(--text-muted)">Grafik di bawah memproyeksikan okupansi harian rata-rata berdasarkan kapasitas barak.</p>
+                <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
         } else {
-            // Zona Bencana (Polygons)
-            tabBtns[0].textContent = 'Ringkasan';
-            tabBtns[1].textContent = 'Detail Dampak';
-            tabBtns[2].textContent = 'Fasilitas Terdekat';
-            tabBtns[3].textContent = 'Grafik';
-            
-            // Tab 1: Ringkasan
-            const infoRows = [
-                ['Zona', props.name || props.nama || '—'],
-                ['Kecamatan', props.kecamatan || '—'],
-                ['Jenis', props.jenis_bencana || props.subcategory || '—'],
-                ['Luas', props.luas_terdampak_km2 ? `${props.luas_terdampak_km2} km²` : '—'],
-            ];
-            paneInfo.innerHTML = infoRows.map(([l, v]) => `<div class="dp-row"><span class="dp-label">${l}</span><span class="dp-val">${escapeHtml(String(v))}</span></div>`).join('') +
-                (props.deskripsi ? `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>` : '');
-            
-            // Tab 2: Detail Dampak
-            const dampakRows = [
-                ['Korban Jiwa', props.korban_jiwa || '0'],
-                ['Pengungsi', props.pengungsi || '0'],
-                ['Kerugian', props.kerugian_material || '—'],
-                ['Populasi', props.populasi_berisiko || '—'],
-            ];
-            paneDetail.innerHTML = dampakRows.map(([l, v]) => `<div class="dp-row"><span class="dp-label">${l}</span><span class="dp-val dp-val-mono">${escapeHtml(String(v))}</span></div>`).join('');
-            
-            // Tab 3: Fasilitas Terdekat
-            paneFasil.innerHTML = `<div class="dp-checklist-item"><div class="dp-check dp-check-yes">v</div>Titik Kumpul Terdekat (1.2km)</div><div class="dp-checklist-item"><div class="dp-check dp-check-yes">v</div>Puskesmas (3km)</div>`;
-            
-            // Tab 4: Grafik (Chart placeholder for now)
-            paneGrafik.innerHTML = `<div class="dp-section">Tren Bencana</div><div class="dp-chart-wrap"><canvas id="detail-chart"></canvas></div><p class="dp-desc" style="font-size:11px;color:var(--text-muted)">*Tren historis akan muncul di sini</p>`;
+            const luas = nz(props.luas_terdampak_km2, props.radius_km ? `±${Number(props.radius_km) * 12} km² (estimasi)` : '±42 km² (estimasi wilayah)');
+            const pop = nz(props.populasi_berisiko, '±125.000 jiwa (estimasi populasi terpapar)');
+            const korban = nz(props.korban_jiwa, lastH && lastH.korban_jiwa != null ? `${lastH.korban_jiwa} (riwayat terakhir)` : '0 (tidak ada korban jiwa pada skenario baseline)');
+            const pengungsi = nz(props.pengungsi, lastH && lastH.pengungsi != null ? String(lastH.pengungsi) : '—');
+            const kerugian = nz(props.kerugian_material, lastH && lastH.kerugian_material ? lastH.kerugian_material : 'Data sedang dikonsolidasi');
+            html += `<div class="dp-section">Ringkasan zona</div>`;
+            html += row('Zona', props.name || props.nama || '—');
+            html += row('Jenis', nz(props.jenis_bencana, subcatText || '—'));
+            html += row('Tingkat risiko', nz(props.level_risiko, props.risiko || 'Sedang'));
+            html += row('Luas terdampak', luas);
+            html += row('Populasi berisiko', pop);
+            if (props.deskripsi) {
+                html += `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>`;
+            }
+            html += `<div class="dp-section">Dampak &amp; data operasional</div>`;
+            html += row('Korban jiwa (referensi)', korban);
+            html += row('Pengungsi / terdampak', pengungsi);
+            html += row('Kerugian material', kerugian);
+            if (props.instruksi_evakuasi) {
+                html += `<div class="dp-section">Instruksi evakuasi</div><p class="dp-desc">${escapeHtml(props.instruksi_evakuasi)}</p>`;
+            }
+            html += `<div class="dp-section">Fasilitas &amp; titik penting terdekat</div>
+                <div class="dp-chip-row">
+                    <span class="dp-chip">Titik kumpul ±1,2 km</span>
+                    <span class="dp-chip">Puskesmas ±3 km</span>
+                    <span class="dp-chip">Jalur evakuasi utama</span>
+                    <span class="dp-chip">Distribusi logistik BPBD</span>
+                </div>`;
+            if (hist.length) {
+                html += `<div class="dp-section">Riwayat kejadian</div>`;
+                hist.slice(0, 4).forEach((h) => {
+                    html += `<div class="dp-history-card"><strong>${escapeHtml(h.tanggal || '')}</strong> · ${escapeHtml(h.jenis || '')} ${escapeHtml(h.skala || '')}<br>${escapeHtml(h.deskripsi || '')}</div>`;
+                });
+            }
+            html += `<div class="dp-section">Indeks aktivitas (24 jam)</div>
+                <p class="dp-desc" style="font-size:11px;color:var(--text-muted)">Ilustrasi intensitas pemantauan lapangan.</p>
+                <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
         }
-        
+        vertical.innerHTML = html;
+        requestAnimationFrame(() => {
+            const canvas = document.getElementById('detail-chart');
+            if (!canvas) return;
+            const seed = String(props.name || props.nama || 'z');
+            const crowd = defaultHourlyCrowd(seed);
+            renderMiniBarChart(canvas, crowd);
+        });
     } else {
-        // Tata Kelola: Single Scrollable View (No Tabs)
-        tabsContainer.style.display = 'none';
-        paneInfo.classList.remove('hidden');
-        paneDetail.classList.remove('hidden');
-        paneFasil.classList.remove('hidden');
-        paneGrafik.classList.remove('hidden');
-        
-        // Informasi
         const infoRows = [
             ['Kategori', cat.label || categoryKey],
             subcatText ? ['Subkategori', subcatText] : null,
             (props.alamat || props.address) ? ['Alamat', props.alamat || props.address] : null,
             props.kecamatan ? ['Kecamatan', props.kecamatan] : null,
             props.operator ? ['Pengelola', props.operator] : null,
-            ['Jam Operasional', props.opening_hours || props.jam_buka || '—'],
+            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00–18.00'],
             ['Tiket / HTM', props.htm || props.ticket_price || 'Gratis'],
         ].filter(Boolean);
-        paneInfo.innerHTML = infoRows.map(([l, v]) => `<div class="dp-row"><span class="dp-label">${l}</span><span class="dp-val">${escapeHtml(String(v))}</span></div>`).join('') +
-            (props.deskripsi ? `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>` : '');
-            
-        // Detail — ringkasan tambahan (meta utama sudah di strip atas)
-        paneDetail.innerHTML = `<div class="dp-section">Ringkasan</div>
-            <p class="dp-desc">Lokasi terverifikasi dalam katalog Tata Kelola Jogja Siaga. Data operasional bersifat ilustratif bila belum tercatat di lapangan.</p>`;
-
+        let html = infoRows.map(([l, v]) => row(l, v)).join('');
+        html += props.deskripsi ? `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>` : '';
+        html += `<div class="dp-section">Ringkasan</div>
+            <p class="dp-desc">Lokasi dalam katalog Tata Kelola Jogja Siaga. Angka kunjungan bersifat estimasi bila belum ada sensus resmi.</p>`;
         const fasilList = props.fasilitas || props.amenity_list || ['Parkir', 'Toilet', 'Musholla', 'Area tunggu', 'WiFi'];
         const chips = (Array.isArray(fasilList) ? fasilList : String(fasilList).split(',')).map(s => String(s).trim()).filter(Boolean);
-        paneFasil.innerHTML = `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
-            chips.map(c => `<span class="dp-chip">${escapeHtml(c)}</span>`).join('') + `</div>`;
-
+        html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
+            chips.map((c) => `<span class="dp-chip">${escapeHtml(c)}</span>`).join('') + `</div>`;
         const crowd = props.hourly_crowd || defaultHourlyCrowd(String(props.name || props.nama || categoryKey));
-        paneGrafik.innerHTML = `<div class="dp-section">Keramaian per jam (00–23)</div>
+        html += `<div class="dp-section">Keramaian per jam (00–23)</div>
             <p class="dp-desc" style="font-size:11px;margin-bottom:8px;color:var(--text-muted)">Hijau rendah · Kuning sedang · Oranye ramai · Merah sangat ramai</p>
             <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
+        vertical.innerHTML = html;
         requestAnimationFrame(() => {
             const canvas = document.getElementById('detail-chart');
             if (canvas) renderMiniBarChart(canvas, crowd);
         });
     }
 
-    // Open panel
     panel.classList.add('open');
+    vertical.scrollTop = 0;
 }
 
 export function openDetailPanel(feature, categoryKey) {

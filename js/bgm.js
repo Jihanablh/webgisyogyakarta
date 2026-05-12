@@ -9,6 +9,7 @@ export function initBgm() {
         btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
         btn.setAttribute('aria-label', playing ? 'Matikan musik latar' : 'Putar musik latar');
         btn.classList.toggle('is-playing', playing);
+        if (playing) btn.classList.remove('bgm-error');
         btn.textContent = playing ? 'Matikan musik' : 'Musik Jogja';
         btn.title = playing
             ? 'Klik untuk menjeda musik latar'
@@ -16,6 +17,12 @@ export function initBgm() {
     };
 
     setUi(false);
+
+    audio.addEventListener('error', () => {
+        btn.classList.add('bgm-error');
+        btn.title = 'Audio tidak dapat dimuat — periksa file atau jaringan.';
+    });
+    audio.addEventListener('playing', () => btn.classList.remove('bgm-error'));
 
     btn.addEventListener('click', async () => {
         try {
@@ -34,6 +41,8 @@ export function initBgm() {
                 'Musik latar: pemutaran gagal (periksa audio/jogja-ambient.mp3 atau sumber fallback di README).',
                 e?.message || e
             );
+            btn.classList.add('bgm-error');
+            btn.title = 'Pemutaran ditolak atau file tidak ditemukan.';
             setUi(false);
             localStorage.setItem(BGM_PREF_KEY, '0');
         }
@@ -49,6 +58,7 @@ export function tryResumeBgmFromWelcomeGesture() {
     audio.volume = 0.26;
     audio.play()
         .then(() => {
+            btn.classList.remove('bgm-error');
             btn.setAttribute('aria-pressed', 'true');
             btn.setAttribute('aria-label', 'Matikan musik latar');
             btn.classList.add('is-playing');

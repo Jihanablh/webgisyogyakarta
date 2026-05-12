@@ -39,7 +39,12 @@ export function createMarker(feature, latlng, categoryKey) {
     const cat = categoryKey || feature.properties.category || 'kebencanaan';
     const baseCat = CATEGORIES[cat] ? cat : 'kebencanaan';
     const subcat = feature.properties.subcategory || feature.properties.type || '';
-    const baseColor = CATEGORIES[baseCat].color;
+    const typeLayer = feature.properties.type_layer || '';
+    let baseColor = CATEGORIES[baseCat].color;
+    if (baseCat === 'kebencanaan') {
+        if (typeLayer === 'titik_pengungsian') baseColor = '#2980b9';
+        else if (typeLayer === 'jalur_evakuasi') baseColor = '#22c55e';
+    }
     const color = subcat ? getSubcatColor(baseColor, subcat) : baseColor;
     const colorLight = lightenHex(color, 55);
 

@@ -29,24 +29,23 @@
   background-size: 200% 100%;
   animation: jogjaGoldShimmer 4s ease-in-out infinite;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
   opacity: 0.55;
 }
 .welcome-cta span {
   position: relative;
-  z-index: 2;
+  z-index: 4;
 }
 .welcome-cta:hover::after {
-  opacity: 0.15;
-}
-
-.welcome-silhouette svg {
-  animation: jogjaSilhouetteDrift 14s ease-in-out infinite;
+  opacity: 0.08;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .welcome-cta::after,
-  .welcome-silhouette svg {
+  .welcome-silhouette svg .welcome-sil-layer {
     animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

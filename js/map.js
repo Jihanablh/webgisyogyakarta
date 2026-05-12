@@ -11,16 +11,6 @@ export function initMap() {
         renderer: L.canvas()
     });
 
-    L.control.zoom({ position: 'bottomright' }).addTo(State.map);
-
-    L.tileLayer(CONFIG.tileUrl, {
-        attribution: CONFIG.tileAttribution,
-        maxZoom: 19,
-        keepBuffer: 4,
-        updateWhenIdle: false,
-        updateWhenZooming: false
-    }).addTo(State.map);
-
     (async () => {
         try {
             const response = await fetch('data/yogyakarta_boundary.geojson');

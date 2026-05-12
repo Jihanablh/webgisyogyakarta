@@ -1,5 +1,5 @@
 import { initMap } from './map.js';
-import { loadLayer, hideLayer, showOnlyKebencanaan, showOnlyCategory, fitMapToCategory } from './layers.js';
+import { loadLayer, hideLayer, showOnlyKebencanaan, showOnlyCategory, fitMapToCategory, showAllLayers } from './layers.js';
 import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
@@ -8,7 +8,7 @@ import { initReportPage }     from './pages/report.js';
 import { initStatisticsPage } from './pages/statistics.js';
 import { initAboutPage }      from './pages/about.js';
 import { initTataKotaPage }   from './pages/tatakota.js';
-import { State, CATEGORIES }  from './state.js';
+import { State, CATEGORIES, CONFIG }  from './state.js';
 import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js';
 import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js';
 import { initWelcomeCinematic } from './welcome-cinematic.js';
@@ -40,19 +40,18 @@ async function init() {
                 document.getElementById('disaster-filters')?.classList.remove('hidden');
                 document.getElementById('category-tabs')?.classList.add('hidden');
                 document.getElementById('subcategory-chips')?.classList.add('hidden');
-                document.getElementById('sidebar-risk-legend')?.classList.remove('hidden');
                 showOnlyKebencanaan();
                 if (State.map) setTimeout(() => State.map.invalidateSize(), 50);
             } else if (page === 'tatakota') {
                 document.getElementById('disaster-filters')?.classList.add('hidden');
-                document.getElementById('category-tabs')?.classList.add('hidden');
-                document.getElementById('subcategory-chips')?.classList.add('hidden');
-                document.getElementById('sidebar-risk-legend')?.classList.add('hidden');
+                document.getElementById('category-tabs')?.classList.remove('hidden');
+                document.getElementById('subcategory-chips')?.classList.remove('hidden');
+                showAllLayers();
+                if (State.map) setTimeout(() => State.map.invalidateSize(), 80);
             } else {
                 document.getElementById('disaster-filters')?.classList.add('hidden');
                 document.getElementById('category-tabs')?.classList.add('hidden');
                 document.getElementById('subcategory-chips')?.classList.add('hidden');
-                document.getElementById('sidebar-risk-legend')?.classList.add('hidden');
             }
         });
     });
@@ -82,8 +81,8 @@ async function init() {
             document.getElementById('top-nav')?.classList.add('is-visible');
             document.getElementById('disaster-filters').classList.remove('hidden');
             document.getElementById('category-tabs').classList.add('hidden');
-            document.getElementById('sidebar-risk-legend')?.classList.remove('hidden');
             showOnlyKebencanaan();
+            document.getElementById('risk-legend')?.classList.remove('hidden');
             tryResumeBgmFromWelcomeGesture();
             if (State.map) setTimeout(() => State.map.invalidateSize(), 100);
         });
@@ -108,37 +107,54 @@ async function init() {
         });
     }
 
-    // ── Basemap toggle ────────────────────────────────────────────────────────
+    // ── Basemap + zoom (single stack, top-right) ─────────────────────────────
     const basemaps = {
-        osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '\u00a9 OpenStreetMap contributors', maxZoom: 19 }),
-        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '\u00a9 Esri', maxZoom: 19 }),
-        terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '\u00a9 OpenTopoMap', maxZoom: 17 })
+        dark: L.tileLayer(CONFIG.tileUrl, {
+            attribution: CONFIG.tileAttribution,
+            maxZoom: 19,
+            keepBuffer: 4,
+            updateWhenIdle: false,
+            updateWhenZooming: false
+        }),
+        osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '\u00a9 OpenStreetMap contributors',
+            maxZoom: 19
+        }),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '\u00a9 Esri',
+            maxZoom: 19
+        }),
+        terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: '\u00a9 OpenTopoMap',
+            maxZoom: 17
+        })
     };
     let activeBasemap = null;
     function switchBasemap(key) {
+        const layer = basemaps[key];
+        if (!layer || !State.map) return;
         if (activeBasemap) State.map.removeLayer(activeBasemap);
-        activeBasemap = basemaps[key];
+        activeBasemap = layer;
         State.map.addLayer(activeBasemap);
         activeBasemap.bringToBack();
     }
-    document.querySelectorAll('.bm-btn').forEach(btn => {
+    document.querySelectorAll('#map-controls-stack .bm-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#map-controls-stack .bm-btn').forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
             switchBasemap(btn.dataset.bm);
         });
     });
+    const firstBm = document.querySelector('#map-controls-stack .bm-btn.active')?.dataset.bm || 'dark';
+    switchBasemap(firstBm);
 
-    // ── Detail panel tabs ─────────────────────────────────────────────────────
-    document.querySelectorAll('.dtab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const key = tab.dataset.dtab;
-            document.querySelectorAll('.dtab').forEach(t => t.classList.toggle('active', t === tab));
-            document.querySelectorAll('.dtab-pane').forEach(p => {
-                p.id === 'dtab-' + key ? p.classList.remove('hidden') : p.classList.add('hidden');
-            });
-        });
+    document.getElementById('map-zoom-in')?.addEventListener('click', () => {
+        State.map?.zoomIn(0.5);
     });
+    document.getElementById('map-zoom-out')?.addEventListener('click', () => {
+        State.map?.zoomOut(0.5);
+    });
+
     const detailClose = document.getElementById('detail-panel-close');
     if (detailClose) {
         detailClose.addEventListener('click', () => {
