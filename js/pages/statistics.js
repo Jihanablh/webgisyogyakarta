@@ -1,12 +1,22 @@
-import { State } from '../state.js';
+
+let _statCharts = [];
+
+function destroyStatCharts() {
+    _statCharts.forEach(c => { try { c.destroy(); } catch (_) {} });
+    _statCharts = [];
+}
 
 export function initStatisticsPage() {
-    const container = document.getElementById('statistics-content');
+    const container = document.getElementById('statistik-content');
     if (!container) return;
+    destroyStatCharts();
 
     container.innerHTML = `
         <div class="stat-dashboard" style="padding: 24px; max-width: 1400px; margin: 0 auto; color: var(--text-primary);">
-            
+            <p class="tw-mb-6 tw-max-w-3xl tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
+                Ringkasan agregat data kebencanaan wilayah DIY berbasis sampel operasional untuk keperluan demonstrasi dashboard.
+                Angka dan grafik bersifat ilustratif dan tidak menggantikan laporan resmi BPBD.
+            </p>
             <!-- ROW 1: KPI CARDS -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px;">
                 <div style="background: var(--bg-card); padding: 24px; border-radius: 12px; border: 1px solid var(--border-card);">
@@ -125,7 +135,18 @@ export function initStatisticsPage() {
         </div>
     `;
 
-    setTimeout(initCharts, 100);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            initCharts();
+            const dash = container.querySelector('.stat-dashboard');
+            if (dash) {
+                Array.from(dash.children).forEach((row, i) => {
+                    row.classList.add('tw-opacity-0', 'tw-translate-y-8', 'tw-transition-all', 'tw-duration-700', 'tw-ease-out');
+                    setTimeout(() => row.classList.add('tw-opacity-100', 'tw-translate-y-0'), 50 + i * 100);
+                });
+            }
+        });
+    });
 }
 
 function initCharts() {
@@ -136,8 +157,15 @@ function initCharts() {
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 41, 0.9)';
     Chart.defaults.plugins.tooltip.titleColor = '#d4a017';
 
+    const mk = (id, cfg) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const c = new Chart(el, cfg);
+        _statCharts.push(c);
+    };
+
     // 1. Bar Chart Horizontal (Distribusi Bencana)
-    new Chart(document.getElementById('statChartDist'), {
+    mk('statChartDist', {
         type: 'bar',
         data: {
             labels: ['Cangkringan', 'Ngemplak', 'Pakem', 'Turi', 'Prambanan', 'Depok', 'Gamping'],
@@ -161,7 +189,7 @@ function initCharts() {
     });
 
     // 2. Donut Chart (Komposisi)
-    new Chart(document.getElementById('statChartComp'), {
+    mk('statChartComp', {
         type: 'doughnut',
         data: {
             labels: ['Erupsi', 'Banjir Lahar', 'Gempa Bumi', 'Tanah Longsor', 'Kekeringan'],
@@ -183,7 +211,7 @@ function initCharts() {
     });
 
     // 3. Line Chart (Tren)
-    new Chart(document.getElementById('statChartTrend'), {
+    mk('statChartTrend', {
         type: 'line',
         data: {
             labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
@@ -209,7 +237,7 @@ function initCharts() {
     });
 
     // 4. Bar Chart Grouped (Frekuensi per Bulan)
-    new Chart(document.getElementById('statChartFreq'), {
+    mk('statChartFreq', {
         type: 'bar',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
@@ -230,7 +258,7 @@ function initCharts() {
     });
 
     // 5. Radar Chart (Indeks Kerentanan)
-    new Chart(document.getElementById('statChartRadar'), {
+    mk('statChartRadar', {
         type: 'radar',
         data: {
             labels: ['Fisik', 'Sosial', 'Ekonomi', 'Infrastruktur', 'Lingkungan'],

@@ -1,5 +1,3 @@
-import { State } from '../state.js';
-
 export function initReportPage() {
     const container = document.getElementById('laporan-content');
     if (!container) return;
@@ -8,20 +6,21 @@ export function initReportPage() {
         <div class="report-dashboard" style="padding: 24px; max-width: 1200px; margin: 0 auto; color: var(--text-primary);">
             
             <!-- ROW 1: HEADER SUMMARY -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
-                <div style="background: transparent; border-left: 3px solid var(--accent-gold); padding-left: 16px;">
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.65; margin: 0 0 20px;">Ringkasan kejadian bencana di DIY (data contoh untuk tata letak dashboard). Gunakan filter untuk menyempitkan rentang waktu saat laporan resmi tersedia.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-gold); padding-left: 16px;">
                     <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kejadian</div>
                     <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">452</div>
                 </div>
-                <div style="background: transparent; border-left: 3px solid var(--accent-red); padding-left: 16px;">
+                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-red); padding-left: 16px;">
                     <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Korban Jiwa</div>
                     <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">1,240</div>
                 </div>
-                <div style="background: transparent; border-left: 3px solid var(--accent-blue); padding-left: 16px;">
+                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-blue); padding-left: 16px;">
                     <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Pengungsi</div>
                     <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">12.5K</div>
                 </div>
-                <div style="background: transparent; border-left: 3px solid var(--accent-green); padding-left: 16px;">
+                <div class="report-kpi-stagger" style="background: transparent; border-left: 3px solid var(--accent-green); padding-left: 16px;">
                     <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Kerugian</div>
                     <div style="font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text-primary); line-height: 1.1;">8.4T</div>
                 </div>
@@ -58,7 +57,7 @@ export function initReportPage() {
                 <div class="timeline-container" style="position: relative; padding-left: 24px; border-left: 2px solid var(--border-card);">
                     
                     <!-- Timeline Item 1 -->
-                    <div style="position: relative; margin-bottom: 32px;">
+                    <div class="report-tl-item" style="position: relative; margin-bottom: 32px;">
                         <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); border: 2px solid var(--bg-primary);"></div>
                         <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
@@ -96,7 +95,7 @@ export function initReportPage() {
                     </div>
 
                     <!-- Timeline Item 2 -->
-                    <div style="position: relative;">
+                    <div class="report-tl-item" style="position: relative;">
                         <div style="position: absolute; left: -31px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-green); border: 2px solid var(--bg-primary);"></div>
                         <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 8px; padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
@@ -172,10 +171,43 @@ export function initReportPage() {
                 font-size: 13px; cursor: pointer; transition: all 0.2s;
             }
             .filter-pill:hover { border-color: var(--accent-gold); }
+            .filter-pill.active { border-color: var(--accent-gold); background: rgba(212, 160, 23, 0.12); color: var(--accent-gold); }
         </style>
     `;
 
+    wireReportPageAnimations(container);
     setTimeout(initReportCharts, 100);
+}
+
+function wireReportPageAnimations(container) {
+    requestAnimationFrame(() => {
+        container.querySelectorAll('.report-kpi-stagger').forEach((el, i) => {
+            el.style.transitionDelay = `${i * 70}ms`;
+            requestAnimationFrame(() => el.classList.add('report-kpi-visible'));
+        });
+    });
+
+    const tl = container.querySelectorAll('.report-tl-item');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        tl.forEach((el) => el.classList.add('report-tl-visible'));
+    } else {
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((e) => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('report-tl-visible');
+                        io.unobserve(e.target);
+                    }
+                });
+            },
+            { threshold: 0.12, rootMargin: '0px 0px -20px 0px' }
+        );
+        tl.forEach((el) => io.observe(el));
+    }
+
+    container.querySelectorAll('.filter-pill').forEach((btn) => {
+        btn.addEventListener('click', () => btn.classList.toggle('active'));
+    });
 }
 
 function initReportCharts() {

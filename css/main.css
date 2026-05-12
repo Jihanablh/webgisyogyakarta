@@ -3,6 +3,19 @@
    CSS Variables, Reset, Layout, Navbar, Map, Category Tabs
    ============================================================ */
 
+/*
+  Z-index stack (highest first) — keep fixed layers predictable:
+  #welcome-overlay (welcome.css)     9999
+  #loading-overlay                   8000
+  .chatbot-toggle / .chatbot-panel   1100 (components.css)
+  .top-nav / navbar                  1000
+  #detail-panel                      920
+  #sidebar                           880
+  .map-ui / category rail            ~750–800
+  #coord-display, map ornaments      700
+  .spa-page                          500 (under map chrome when map tab hidden)
+*/
+
 /* ── Google Fonts ─────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Noto+Serif:wght@400;600&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -458,8 +471,9 @@ body.app-started #main-content {
   border-color: var(--border-glass);
 }
 
-/* ── RISK LEGEND ─────────────────────────────────────────── */
+/* ── RISK LEGEND (floating — disabled; legend lives in sidebar) ─ */
 #risk-legend {
+  display: none !important;
   position: absolute;
   bottom: 30px;
   right: 16px;

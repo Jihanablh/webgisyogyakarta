@@ -37,6 +37,8 @@
 
     <!-- ============ WELCOME OVERLAY ============ -->
     <div id="welcome-overlay">
+        <div class="welcome-curtain" aria-hidden="true"></div>
+        <canvas id="welcome-particles" class="welcome-particles-canvas" aria-hidden="true"></canvas>
         <!-- Decorative frame -->
         <div class="welcome-frame">
             <svg viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -111,7 +113,8 @@
         <div class="welcome-content">
             <div class="welcome-pretitle">Pemerintah Daerah Istimewa Yogyakarta</div>
             <div class="welcome-divider"></div>
-            <h1 class="welcome-title">JOGJA SIAGA</h1>
+            <div class="welcome-title-line" aria-hidden="true"></div>
+            <h1 class="welcome-title" id="welcome-title-display"><span id="welcome-title-typed"></span></h1>
             <p class="welcome-subtitle">Sistem Informasi Geografis Kebencanaan<br>Daerah Istimewa Yogyakarta</p>
             <div class="welcome-tagline">Hamemayu Hayuning Bawana</div>
             <div class="welcome-stats">
@@ -159,49 +162,62 @@
 
         <!-- ============ SIDEBAR ============ -->
         <aside id="sidebar">
-            <button class="sidebar-close" id="sidebar-toggle" aria-label="Tutup sidebar">x</button>
-            <div class="sidebar-header">
-                <div class="sidebar-logo">JOGJA SIAGA
-                    <div class="sidebar-logo-sub">Sistem Informasi Geografis</div>
-                </div>
-            </div>
-            <div class="sidebar-body">
-                <!-- Search -->
-                <div class="sidebar-search-wrap">
-                    <span class="search-icon">&#128269;</span>
-                    <input type="text" id="search-input" class="table-search" style="width:100%;padding-left:32px"
-                        placeholder="Cari nama tempat..." autocomplete="off">
-                    <div id="search-results" class="hidden"></div>
-                </div>
-                <!-- Layer panel filled by JS -->
-                <div id="sidebar-mode-panel"></div>
-                <!-- Stats -->
-                <div id="stats-grid"></div>
-                <!-- Status info -->
-                <div class="sb-stat-card" style="margin-top:12px">
-                    <div class="sb-stat-row">
-                        <span class="sb-stat-label">Status Merapi</span>
-                        <span style="font-size:11px;font-weight:700;color:#f39c12">Siaga (Lv III)</span>
-                    </div>
-                    <div class="sb-stat-row" style="margin-top:6px">
-                        <span class="sb-stat-label">Cuaca DIY</span>
-                        <span style="font-size:11px;font-weight:700;color:#27ae60">Cerah Berawan</span>
+            <div class="sidebar-inner">
+                <button type="button" class="sidebar-close-fab" id="sidebar-toggle" aria-label="Tutup panel">×</button>
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">JOGJA SIAGA
+                        <div class="sidebar-logo-sub">Sistem Informasi Geografis</div>
                     </div>
                 </div>
-                <button id="btn-open-stats" class="sb-see-all" style="margin-top:10px">Buka Dashboard
-                    Statistika</button>
-                <!-- Recent events (kebencanaan) -->
-                <div id="recent-events-widget" style="display:none">
-                    <div class="sb-section-label">KEJADIAN TERKINI</div>
-                    <div id="rew-list"></div>
-                    <button class="sb-see-all" id="rew-see-all">Lihat Semua Kejadian</button>
-                </div>
-                <!-- Footer -->
-                <div
-                    style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border-card);font-size:10px;color:var(--text-muted);line-height:1.6">
-                    Data: OpenStreetMap via HOTOSM<br>
-                    Boundary: GADM v4.1 · Wilayah DIY<br>
-                    Jihan Nabilah Rahman
+                <div class="sidebar-scroll">
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Pencarian</div>
+                        <div class="sidebar-search-wrap">
+                            <span class="search-icon" aria-hidden="true">&#128269;</span>
+                            <input type="text" id="search-input" class="table-search"
+                                placeholder="Cari nama tempat..." autocomplete="off">
+                            <div id="search-results" class="hidden"></div>
+                        </div>
+                    </div>
+                    <div class="sidebar-section sidebar-section--layers">
+                        <div class="sidebar-section-label">Layer &amp; zona</div>
+                        <div id="sidebar-mode-panel"></div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Ringkasan peta</div>
+                        <div id="stats-grid"></div>
+                    </div>
+                    <div class="sb-stat-card">
+                        <div class="sb-stat-row">
+                            <span class="sb-stat-label">Status Merapi</span>
+                            <span class="sb-stat-value sb-stat-value--amber">Siaga (Lv III)</span>
+                        </div>
+                        <div class="sb-stat-row sb-stat-row--spaced">
+                            <span class="sb-stat-label">Cuaca DIY</span>
+                            <span class="sb-stat-value sb-stat-value--green">Cerah Berawan</span>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-open-stats" class="sb-see-all">Buka Dashboard Statistika</button>
+                    <div id="recent-events-widget" class="sidebar-recent-wrap" style="display:none">
+                        <div class="sb-section-label">KEJADIAN TERKINI</div>
+                        <div id="rew-list"></div>
+                        <button type="button" class="sb-see-all" id="rew-see-all">Lihat Semua Kejadian</button>
+                    </div>
+                    <div id="sidebar-risk-legend" class="sidebar-risk-legend hidden">
+                        <div class="sidebar-section-label">Legenda risiko</div>
+                        <div class="legend-title">Tingkat Risiko</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#c0392b"></div>Sangat Tinggi</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#e67e22"></div>Tinggi</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div>Sedang</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#27ae60"></div>Rendah</div>
+                        <div class="legend-title legend-title--spaced">Infrastruktur</div>
+                        <div class="legend-item"><div class="legend-dot legend-dot--round" style="background:#2980b9"></div>Pengungsian</div>
+                    </div>
+                    <div class="sidebar-footer">
+                        Data: OpenStreetMap via HOTOSM<br>
+                        Boundary: GADM v4.1 · Wilayah DIY<br>
+                        Jihan Nabilah Rahman
+                    </div>
                 </div>
             </div>
         </aside>
@@ -264,6 +280,7 @@
                     <h2 class="detail-name" id="detail-name"></h2>
                 </div>
             </div>
+            <div id="detail-meta-strip" class="detail-meta-strip" aria-live="polite"></div>
             <div class="detail-tabs" id="detail-tabs">
                 <button class="dtab active" data-dtab="info">Informasi</button>
                 <button class="dtab" data-dtab="detail">Detail</button>
@@ -279,8 +296,8 @@
                 </div>
             </div>
             <div class="detail-actions">
-                <button id="detail-btn-fly">Arahkan</button>
-                <button id="detail-btn-gmaps">Google Maps</button>
+                <button type="button" id="detail-btn-fly">Arahkan ke Sini</button>
+                <button type="button" id="detail-btn-gmaps">Buka di Google Maps</button>
             </div>
         </div>
 
@@ -292,15 +309,7 @@
 
         <!-- ============ SPA PAGES ============ -->
         <div id="tatakota-page" class="spa-page hidden">
-            <div class="page-header">
-                <h1 class="page-title">Tata Kelola Kota</h1>
-                <p class="page-subtitle">Lingkungan dan Mobilitas Wilayah DIY</p>
-                <div class="page-tabs" id="tatakota-tabs">
-                    <button class="laporan-pill-tab active" data-sub="lingkungan">Lingkungan</button>
-                    <button class="laporan-pill-tab" data-sub="mobilitas">Mobilitas</button>
-                </div>
-            </div>
-            <div id="tatakota-content"></div>
+            <div id="tatakota-content" class="tatakota-root"></div>
         </div>
 
         <div id="laporan-page" class="spa-page hidden">
@@ -435,9 +444,11 @@
     <!-- ============ AMBIENT AUDIO (optional file: audio/jogja-ambient.mp3) ============ -->
     <audio id="bgm-audio" loop playsinline preload="metadata">
         <source src="audio/jogja-ambient.mp3" type="audio/mpeg">
+        <!-- Fallback demo (short scale sample, Wikimedia Commons — see audio/README.md) -->
+        <source src="https://upload.wikimedia.org/wikipedia/commons/8/87/C_scale_single_channel.ogg" type="audio/ogg">
     </audio>
     <button type="button" class="bgm-toggle" id="bgm-toggle" aria-pressed="false"
-        title="Musik latar (letakkan audio/jogja-ambient.mp3)">Musik</button>
+        title="Musik latar: lokal jogja-ambient.mp3 atau fallback OGG dari Wikimedia">Musik</button>
 
     <!-- ============ CHATBOT WIDGET ============ -->
     <button type="button" class="chatbot-toggle" id="chatbot-toggle">Tanya SIGAJOG</button>

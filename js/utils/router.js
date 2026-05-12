@@ -19,7 +19,7 @@ export class Router {
         document.querySelectorAll('.spa-page').forEach(el => el.classList.add('hidden'));
         const mapEl = document.getElementById('map');
         
-        const isMapView = (to === 'map' || to === 'tatakota');
+        const isMapView = (to === 'map');
 
         if (!isMapView) {
             if (mapEl) mapEl.classList.add('hidden');
@@ -33,9 +33,8 @@ export class Router {
                 const el = document.getElementById(id);
                 if (el) el.style.display = '';
             });
-            // Except sidebar which is only for map (Kebencanaan)
             const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.style.display = (to === 'map') ? '' : 'none';
+            if (sidebar) sidebar.style.display = '';
         } else {
             // Hide map-only elements so they don't float over SPA pages
             mapOnlyIds.forEach(id => {
@@ -68,7 +67,7 @@ export class Router {
 
         this.current = to;
 
-        if ((to === 'map' || to === 'tatakota') && typeof window !== 'undefined' && window.State?.map) {
+        if ((to === 'map') && typeof window !== 'undefined' && window.State?.map) {
             setTimeout(() => {
                 try {
                     window.State.map.invalidateSize();

@@ -7,8 +7,12 @@ export function initBgm() {
 
     const setUi = (playing) => {
         btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        btn.setAttribute('aria-label', playing ? 'Matikan musik latar' : 'Putar musik latar');
         btn.classList.toggle('is-playing', playing);
         btn.textContent = playing ? 'Matikan musik' : 'Musik Jogja';
+        btn.title = playing
+            ? 'Klik untuk menjeda musik latar'
+            : 'Klik untuk memutar musik (file lokal atau fallback Wikimedia — lihat audio/README.md)';
     };
 
     setUi(false);
@@ -26,7 +30,10 @@ export function initBgm() {
                 localStorage.setItem(BGM_PREF_KEY, '0');
             }
         } catch (e) {
-            console.warn('Musik latar: berkas tidak ditemukan atau pemutaran ditolak. Tambahkan audio/jogja-ambient.mp3 (lihat audio/README.md).', e?.message || e);
+            console.warn(
+                'Musik latar: pemutaran gagal (periksa audio/jogja-ambient.mp3 atau sumber fallback di README).',
+                e?.message || e
+            );
             setUi(false);
             localStorage.setItem(BGM_PREF_KEY, '0');
         }
@@ -43,8 +50,10 @@ export function tryResumeBgmFromWelcomeGesture() {
     audio.play()
         .then(() => {
             btn.setAttribute('aria-pressed', 'true');
+            btn.setAttribute('aria-label', 'Matikan musik latar');
             btn.classList.add('is-playing');
             btn.textContent = 'Matikan musik';
+            btn.title = 'Klik untuk menjeda musik latar';
         })
         .catch(() => {
             /* Missing file or policy — silent */

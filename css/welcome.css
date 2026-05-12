@@ -237,10 +237,11 @@
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.25s ease;
+  z-index: 1;
 }
 .welcome-cta:hover { color: #0a0f1e; box-shadow: var(--shadow-gold); animation: none; }
 .welcome-cta:hover::before { transform: scaleX(1); }
-.welcome-cta span { position: relative; z-index: 1; }
+.welcome-cta span { position: relative; z-index: 3; }
 
 /* ── Keyframes ────────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -261,4 +262,136 @@
   .welcome-content { padding: 24px 20px; }
   .welcome-stats { gap: 16px; }
   .welcome-stat-num { font-size: 18px; }
+}
+
+/* ── Cinematic layers ─────────────────────────────────────── */
+.welcome-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #020308;
+  pointer-events: none;
+  transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-curtain .welcome-curtain {
+  opacity: 1;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-dawn .welcome-curtain {
+  opacity: 0;
+}
+
+.welcome-particles-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-silhouette .welcome-particles-canvas {
+  opacity: 1;
+}
+
+/* Dawn sky: deep blue to amber horizon */
+#welcome-overlay.welcome-cinematic .welcome-sky {
+  background: linear-gradient(
+    to bottom,
+    #020308 0%,
+    #0a1630 45%,
+    rgba(212, 160, 23, 0.12) 88%,
+    transparent 100%
+  );
+  opacity: 0.35;
+  transition: opacity 2s ease, background 2.4s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-dawn .welcome-sky {
+  opacity: 1;
+}
+
+#welcome-overlay.welcome-cinematic .welcome-silhouette {
+  opacity: 0;
+  transition: opacity 2.2s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-silhouette .welcome-silhouette {
+  opacity: 1;
+}
+
+/* Gold line expands from center */
+.welcome-title-line {
+  width: min(280px, 70vw);
+  height: 2px;
+  margin: 0 auto 20px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-line .welcome-title-line {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Cinematic: reset auto keyframe entrances */
+#welcome-overlay.welcome-cinematic .welcome-pretitle,
+#welcome-overlay.welcome-cinematic .welcome-divider,
+#welcome-overlay.welcome-cinematic .welcome-title,
+#welcome-overlay.welcome-cinematic .welcome-subtitle,
+#welcome-overlay.welcome-cinematic .welcome-tagline,
+#welcome-overlay.welcome-cinematic .welcome-stats,
+#welcome-overlay.welcome-cinematic .welcome-cta {
+  animation: none;
+  opacity: 0;
+  transform: none;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-dawn .welcome-pretitle,
+#welcome-overlay.welcome-cinematic.welcome-phase-dawn .welcome-divider {
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-line .welcome-title {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-sub .welcome-subtitle,
+#welcome-overlay.welcome-cinematic.welcome-phase-sub .welcome-tagline {
+  opacity: 1;
+  transition: opacity 0.7s ease 0.1s;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-stats .welcome-stats {
+  opacity: 1;
+  transition: opacity 0.7s ease;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-cta .welcome-cta {
+  opacity: 1;
+  animation: goldPulse 2.6s ease 0.4s infinite;
+}
+
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-pretitle,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-divider,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-title,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-subtitle,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-tagline,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-stats,
+#welcome-overlay.welcome-cinematic.welcome-phase-ready .welcome-cta {
+  opacity: 1;
+  animation: none;
+}
+
+#welcome-overlay.welcome-cinematic #welcome-title-typed {
+  display: inline-block;
+  min-height: 1em;
+  text-shadow: 0 0 28px rgba(212, 160, 23, 0.35);
 }

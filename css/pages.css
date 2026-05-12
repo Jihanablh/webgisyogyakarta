@@ -616,3 +616,204 @@
   .kontak-grid,.fitur-grid,.tim-grid { grid-template-columns: 1fr; }
   .tentang-hero { padding: 28px 20px; }
 }
+
+/* ── Tata Kelola (SPA) ───────────────────────────────────── */
+.tatakota-root {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.tatakota-hero {
+  text-align: center;
+  padding-bottom: 8px;
+}
+.tatakota-page-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+.tatakota-page-lead {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto;
+}
+.tatakota-spa-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+  padding-bottom: 4px;
+}
+.tatakota-spa-pill {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.tatakota-spa-pill:hover {
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+}
+.tatakota-spa-pill.is-active {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(212, 160, 23, 0.1);
+  box-shadow: var(--shadow-gold);
+}
+.tatakota-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.tatakota-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition-base), border-color var(--transition-fast), box-shadow var(--transition-base);
+}
+.tatakota-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(212, 160, 23, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 24px rgba(212, 160, 23, 0.12);
+}
+.tatakota-card-photo {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+}
+.tatakota-card-body {
+  padding: 16px 18px 18px;
+}
+.tatakota-card-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.tatakota-card-sub {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-gold);
+}
+.tatakota-card-addr {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 10px 0 12px;
+  line-height: 1.45;
+}
+.tatakota-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.tatakota-stars {
+  color: var(--accent-gold);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.tatakota-rating-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.tatakota-card-actions {
+  display: flex;
+  gap: 8px;
+}
+.tatakota-btn {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.tatakota-btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.tatakota-btn--ghost:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+.tatakota-btn--gold {
+  background: var(--accent-gold);
+  color: #0a0f1e;
+  border: none;
+}
+.tatakota-btn--gold:hover {
+  filter: brightness(1.08);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ── Laporan: stagger + chips ─────────────────────────────── */
+.report-kpi-stagger {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.report-kpi-stagger.report-kpi-visible {
+  opacity: 1;
+  transform: none;
+}
+.report-tl-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.report-tl-item.report-tl-visible {
+  opacity: 1;
+  transform: none;
+}
+.filter-pill.active {
+  border-color: var(--accent-gold) !important;
+  background: rgba(212, 160, 23, 0.12) !important;
+  color: var(--accent-gold) !important;
+}
+
+/* ── Tentang: scroll reveal ───────────────────────────────── */
+.about-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.about-reveal.about-reveal--in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .report-kpi-stagger,
+  .report-tl-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

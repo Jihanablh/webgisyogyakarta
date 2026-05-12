@@ -1,6 +1,6 @@
 import { initMap } from './map.js';
 import { loadLayer, hideLayer, showOnlyKebencanaan, showOnlyCategory, fitMapToCategory } from './layers.js';
-import { initSidebar, setSidebarMode, hideTataKotaLayers } from './sidebar.js';
+import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
 import { LoadingManager } from './utils/loader.js';
@@ -11,11 +11,10 @@ import { initTataKotaPage }   from './pages/tatakota.js';
 import { State, CATEGORIES }  from './state.js';
 import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js';
 import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js';
+import { initWelcomeCinematic } from './welcome-cinematic.js';
 
 window.State = State;
 window.CATEGORIES = CATEGORIES;
-
-let _isTataKotaActive = false;
 
 async function init() {
     const map    = initMap();
@@ -34,14 +33,6 @@ async function init() {
         tab.addEventListener('click', (e) => {
             const page = e.currentTarget.dataset.page;
 
-            // ── Any tab navigation ─────────────────────────────────────────────
-            if (_isTataKotaActive && page !== 'tatakota') {
-                // Coming FROM Tata Kota sidebar mode: reset sidebar
-                hideTataKotaLayers();
-                setSidebarMode('kebencanaan');
-                _isTataKotaActive = false;
-            }
-
             // Route using the generic router
             router.navigate(page);
 
@@ -49,23 +40,19 @@ async function init() {
                 document.getElementById('disaster-filters')?.classList.remove('hidden');
                 document.getElementById('category-tabs')?.classList.add('hidden');
                 document.getElementById('subcategory-chips')?.classList.add('hidden');
+                document.getElementById('sidebar-risk-legend')?.classList.remove('hidden');
                 showOnlyKebencanaan();
                 if (State.map) setTimeout(() => State.map.invalidateSize(), 50);
             } else if (page === 'tatakota') {
                 document.getElementById('disaster-filters')?.classList.add('hidden');
-                document.getElementById('category-tabs')?.classList.remove('hidden');
-                
-                // Set first category active if none
-                const tabs = document.getElementById('category-tabs');
-                if (tabs && !tabs.querySelector('.active')) {
-                    tabs.querySelector('.cat-btn[data-category="pariwisata"]')?.click();
-                }
-                if (State.map) setTimeout(() => State.map.invalidateSize(), 50);
+                document.getElementById('category-tabs')?.classList.add('hidden');
+                document.getElementById('subcategory-chips')?.classList.add('hidden');
+                document.getElementById('sidebar-risk-legend')?.classList.add('hidden');
             } else {
-                // Other pages don't need map overlay UI
                 document.getElementById('disaster-filters')?.classList.add('hidden');
                 document.getElementById('category-tabs')?.classList.add('hidden');
                 document.getElementById('subcategory-chips')?.classList.add('hidden');
+                document.getElementById('sidebar-risk-legend')?.classList.add('hidden');
             }
         });
     });
@@ -73,6 +60,7 @@ async function init() {
     initSidebar({ map, router, onCategoryToggle: (cat) => loadLayer(cat) });
     initDetailPanel();
     initBgm();
+    initWelcomeCinematic();
     initCategoryTabs();
     initDisasterFilters();
 
@@ -94,7 +82,7 @@ async function init() {
             document.getElementById('top-nav')?.classList.add('is-visible');
             document.getElementById('disaster-filters').classList.remove('hidden');
             document.getElementById('category-tabs').classList.add('hidden');
-            document.getElementById('risk-legend').classList.remove('hidden');
+            document.getElementById('sidebar-risk-legend')?.classList.remove('hidden');
             showOnlyKebencanaan();
             tryResumeBgmFromWelcomeGesture();
             if (State.map) setTimeout(() => State.map.invalidateSize(), 100);

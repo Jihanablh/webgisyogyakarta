@@ -40,7 +40,7 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     const sidebar   = document.getElementById('sidebar');
     const closeBtn  = document.getElementById('sidebar-toggle-close');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.remove('open'));
     if (closeBtn)  closeBtn.addEventListener('click',  () => sidebar.classList.remove('open'));
 
     // Panel close buttons

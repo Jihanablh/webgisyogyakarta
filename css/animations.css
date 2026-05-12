@@ -12,7 +12,8 @@
   50% { transform: translateY(-4px); }
 }
 
-.welcome-cta span::after {
+/* Shimmer on button itself so text span stays readable on hover */
+.welcome-cta::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -29,7 +30,14 @@
   animation: jogjaGoldShimmer 4s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.85;
+  opacity: 0.55;
+}
+.welcome-cta span {
+  position: relative;
+  z-index: 2;
+}
+.welcome-cta:hover::after {
+  opacity: 0.15;
 }
 
 .welcome-silhouette svg {
@@ -37,7 +45,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .welcome-cta span::after,
+  .welcome-cta::after,
   .welcome-silhouette svg {
     animation: none !important;
   }

@@ -24,7 +24,7 @@ export function initAboutPage() {
     </style>
 
     <!-- HERO -->
-    <div style="text-align:center; padding: 20px 0 48px; position:relative; overflow:hidden;">
+    <div class="about-reveal" style="text-align:center; padding: 20px 0 48px; position:relative; overflow:hidden;">
         <!-- Kawung SVG pattern background (very subtle) -->
         <div style="position:absolute;inset:0;opacity:0.03;pointer-events:none;">
             <svg width="100%" height="100%">
@@ -56,7 +56,7 @@ export function initAboutPage() {
     <div class="ta-divider"><span class="ta-divider-sym">&#9670;</span></div>
 
     <!-- PILLARS -->
-    <div style="margin-bottom:8px;">
+    <div class="about-reveal" style="margin-bottom:8px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#4b5568;margin-bottom:20px;text-align:center;">Tiga Pilar Utama</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
             ${[
@@ -74,7 +74,7 @@ export function initAboutPage() {
     <div class="ta-divider"><span class="ta-divider-sym">&#9670;</span></div>
 
     <!-- DATA SOURCES -->
-    <div>
+    <div class="about-reveal">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#4b5568;margin-bottom:20px;text-align:center;">Sumber Data</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
             ${[
@@ -95,7 +95,7 @@ export function initAboutPage() {
     <div class="ta-divider"><span class="ta-divider-sym">&#9670;</span></div>
 
     <!-- TECH STACK -->
-    <div>
+    <div class="about-reveal">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#4b5568;margin-bottom:20px;text-align:center;">Teknologi</div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
             ${['Leaflet.js', 'GeoJSON', 'ES6 Modules', 'CSS Custom Properties',
@@ -108,7 +108,7 @@ export function initAboutPage() {
     <div class="ta-divider"><span class="ta-divider-sym">&#9670;</span></div>
 
     <!-- STAT SUMMARY -->
-    <div>
+    <div class="about-reveal">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#4b5568;margin-bottom:20px;text-align:center;">Ringkasan Statistik</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
             ${[
@@ -126,6 +126,25 @@ export function initAboutPage() {
 
     <!-- FOOTER -->
     <div style="text-align:center;padding-top:48px;margin-top:48px;border-top:1px solid rgba(148,163,184,0.08);color:#4b5568;font-size:12px;line-height:1.8;">
-        JogjaMap v2.0 &nbsp;&middot;&nbsp; Data diperbarui Januari 2025 &nbsp;&middot;&nbsp; Jihan Nabilah Rahman
+        JogjaMap v2.0 &nbsp;&middot;&nbsp; Data diperbarui Januari 2026 &nbsp;&middot;&nbsp; Jihan Nabilah Rahman
     </div>`;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reveals = container.querySelectorAll('.about-reveal');
+    if (reduced) {
+        reveals.forEach((el) => el.classList.add('about-reveal--in'));
+    } else {
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((e) => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('about-reveal--in');
+                        io.unobserve(e.target);
+                    }
+                });
+            },
+            { threshold: 0.12, rootMargin: '0px 0px -36px 0px' }
+        );
+        reveals.forEach((el) => io.observe(el));
+    }
 }
