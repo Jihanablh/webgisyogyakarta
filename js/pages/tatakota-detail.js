@@ -72,7 +72,7 @@ export function renderTataKotaDetailInto(container, id, opts) {
                 <button type="button" class="tatakota-btn tatakota-btn--ghost js-tk-back" aria-label="Kembali ke daftar">← Kembali</button>
                 <span class="tw-font-ui tw-text-[10px] tw-uppercase tw-tracking-widest tw-text-[var(--text-muted)]">Detail lokasi</span>
             </header>
-            <div class="tatakota-detail-hero tw-relative tw-h-[min(42vh,360px)] tw-w-full tw-overflow-hidden">
+            <div class="tatakota-detail-hero tw-relative tw-h-[40vh] tw-w-full tw-overflow-hidden">
                 <img src="${esc(hero)}" alt="" class="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover" />
                 <div class="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-[#0a0f1e] tw-via-[#0a0f1e]/55 tw-to-transparent"></div>
                 <div class="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-p-6 md:tw-p-10">
@@ -80,19 +80,24 @@ export function renderTataKotaDetailInto(container, id, opts) {
                     <p class="tw-mt-2 tw-font-ui tw-text-xs tw-uppercase tw-tracking-wider tw-text-amber-400/90">${esc(cat)}</p>
                 </div>
             </div>
-            <div class="tw-mx-auto tw-max-w-3xl tw-space-y-8 tw-px-4 tw-py-8 md:tw-px-8">
-                <section>
-                    <h2 class="tw-mb-3 tw-font-display tw-text-lg tw-text-amber-500">Informasi</h2>
+            <div class="tw-mx-auto tw-max-w-6xl tw-space-y-8 tw-px-4 tw-py-8 md:tw-px-8">
+                <div class="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-2">
+                <section class="about-io-card">
+                    <h2 class="tw-mb-3 tw-font-display tw-text-lg tw-text-amber-500">Informasi utama</h2>
                     <div class="tw-overflow-hidden tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)]">
                         <table class="tw-w-full tw-border-collapse tw-text-left">${rows || '<tr><td class="tw-p-4 tw-font-body tw-text-[var(--text-muted)]">Tidak ada properti teks.</td></tr>'}</table>
                     </div>
                 </section>
-                <section>
-                    <h2 class="tw-mb-3 tw-font-display tw-text-lg tw-text-amber-500">Peta lokasi</h2>
-                    <p class="tw-mb-3 tw-font-body tw-text-xs tw-text-[var(--text-muted)]">Hanya basemap + penanda lokasi (tanpa layer kebencanaan utama).</p>
+                <section class="about-io-card">
+                    <h2 class="tw-mb-3 tw-font-display tw-text-lg tw-text-amber-500">Peta & aksi</h2>
+                    <p class="tw-mb-3 tw-font-body tw-text-xs tw-text-[var(--text-muted)]">Peta internal hanya preview. Gunakan tombol untuk membuka halaman peta bersih satu marker.</p>
                     <div id="tatakota-embed-map" class="tw-h-[280px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-amber-500/20 tw-shadow-lg"></div>
-                    <button type="button" id="tatakota-embed-zoom" class="tw-mt-4 tw-rounded-full tw-border tw-border-amber-500/50 tw-bg-amber-500/10 tw-px-5 tw-py-2 tw-font-ui tw-text-sm tw-font-semibold tw-text-amber-400 hover:tw-bg-amber-500/20">Perbesar ke lokasi</button>
+                    <div class="tw-mt-4 tw-flex tw-gap-3">
+                      <button type="button" id="tatakota-open-clean-map" class="tatakota-btn tatakota-btn--gold">Lihat di Peta</button>
+                      <button type="button" id="tatakota-embed-zoom" class="tatakota-btn tatakota-btn--ghost">Arahkan ke Sini</button>
+                    </div>
                 </section>
+                </div>
             </div>
         </div>`;
 
@@ -112,6 +117,11 @@ export function renderTataKotaDetailInto(container, id, opts) {
             map.setView([lat, lng], 17, { animate: true });
         });
     }
+    container.querySelector('#tatakota-open-clean-map')?.addEventListener('click', () => {
+        const sid = `single-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+        sessionStorage.setItem(`singleMap:${sid}`, JSON.stringify({ name, lat, lng }));
+        window.open(`${location.pathname}#map/single/${encodeURIComponent(sid)}`, '_blank', 'noopener,noreferrer');
+    });
 }
 
 /** Deep link lama (?view=detail&tatakotaId=) — tetap didukung lewat redirect hash di main.js */

@@ -17,6 +17,44 @@ import { initWelcomeCinematic } from './welcome-cinematic.js';
 window.State = State;
 window.CATEGORIES = CATEGORIES;
 
+function parseSingleMapHash() {
+    const m = /^#map\/single\/(.+)$/.exec(location.hash || '');
+    return m ? decodeURIComponent(m[1]) : null;
+}
+
+function openSingleMapMode(map, id) {
+    const raw = sessionStorage.getItem(`singleMap:${id}`);
+    if (!raw) return false;
+    let data = null;
+    try {
+        data = JSON.parse(raw);
+    } catch (_) {
+        return false;
+    }
+    const { name, lat, lng } = data || {};
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+
+    document.getElementById('top-nav')?.classList.add('is-visible');
+    document.getElementById('map-top-left-chrome')?.classList.add('hidden');
+    document.getElementById('map-right-stack')?.classList.add('hidden');
+    document.getElementById('sidebar')?.classList.add('hidden');
+    document.getElementById('detail-panel')?.classList.remove('open');
+    document.querySelectorAll('.spa-page').forEach((el) => el.classList.add('hidden'));
+    document.body.classList.add('app-started');
+
+    if (State.map) {
+        Object.values(State.layerCache || {}).forEach((layer) => {
+            try {
+                State.map.removeLayer(layer);
+            } catch (_) {}
+        });
+    }
+    const marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup(`<strong>${String(name || 'Lokasi')}</strong>`).openPopup();
+    map.setView([lat, lng], 16, { animate: true });
+    return true;
+}
+
 async function init() {
     const sp = new URLSearchParams(window.location.search);
     const legacyId = sp.get('tatakotaId');
@@ -28,6 +66,12 @@ async function init() {
     const map    = initMap();
     const router = new Router();
     const loader = new LoadingManager(10);
+
+    const singleId = parseSingleMapHash();
+    if (singleId) {
+        openSingleMapMode(map, singleId);
+        return;
+    }
 
     // Register SPA routes
     router.register('map',       {});
@@ -85,20 +129,12 @@ async function init() {
     }
 
     // ── Sidebar toggle ────────────────────────────────────────────────────────
-    const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
     const sidebarCloseBtn = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
-    if (sidebarOpenBtn) {
-        sidebarOpenBtn.addEventListener('click', () => {
-            sidebar.classList.add('open');
-            sidebarOpenBtn.style.display = 'none';
-            if (State.map) setTimeout(() => State.map.invalidateSize(), 350);
-        });
-    }
+    sidebar?.classList.add('open');
     if (sidebarCloseBtn) {
         sidebarCloseBtn.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            sidebarOpenBtn.style.display = 'flex';
+            sidebar.classList.toggle('hidden');
             if (State.map) setTimeout(() => State.map.invalidateSize(), 350);
         });
     }
@@ -144,12 +180,31 @@ async function init() {
     const firstBm = document.querySelector('#map-controls-stack .bm-btn.active')?.dataset.bm || 'dark';
     switchBasemap(firstBm);
 
-    document.getElementById('map-zoom-in')?.addEventListener('click', () => {
+    const zoomInBtn = document.getElementById('map-zoom-in');
+    const zoomOutBtn = document.getElementById('map-zoom-out');
+    const updateZoomState = () => {
+        const z = State.map?.getZoom?.() ?? 0;
+        const min = State.map?.getMinZoom?.() ?? 0;
+        const max = State.map?.getMaxZoom?.() ?? 18;
+        if (zoomOutBtn) {
+            zoomOutBtn.disabled = z <= min;
+            zoomOutBtn.title = z <= min ? 'Sudah di zoom minimum' : 'Perkecil';
+        }
+        if (zoomInBtn) {
+            zoomInBtn.disabled = z >= max;
+            zoomInBtn.title = z >= max ? 'Sudah di zoom maksimum' : 'Perbesar';
+        }
+    };
+    zoomInBtn?.addEventListener('click', () => {
         State.map?.zoomIn(0.5);
+        setTimeout(updateZoomState, 60);
     });
-    document.getElementById('map-zoom-out')?.addEventListener('click', () => {
+    zoomOutBtn?.addEventListener('click', () => {
         State.map?.zoomOut(0.5);
+        setTimeout(updateZoomState, 60);
     });
+    State.map?.on('zoomend', updateZoomState);
+    updateZoomState();
 
     const detailClose = document.getElementById('detail-panel-close');
     if (detailClose) {
@@ -170,7 +225,7 @@ async function init() {
     const chatEngine = new ChatbotEngine(CHATBOT_DB);
     const chatToggle  = document.getElementById('chatbot-toggle');
     const chatPanel   = document.getElementById('chatbot-panel');
-    const chatBack = document.getElementById('chatbot-back');
+    const chatBack = document.getElementById('chatbot-close');
     const chatBackdrop = document.getElementById('chatbot-backdrop');
 
     function setChatOpen(open) {

@@ -8,7 +8,7 @@
   left: 0;
   top: 60px;
   bottom: 0;
-  width: 300px;
+  width: 360px;
   z-index: 880;
   display: flex;
   flex-direction: column;
@@ -17,13 +17,16 @@
   -webkit-backdrop-filter: blur(28px);
   border-right: 1px solid rgba(212, 160, 23, 0.3);
   box-shadow: 4px 0 32px rgba(0, 0, 0, 0.45);
-  transform: translateX(-100%);
+  transform: translateX(0);
   transition: transform var(--transition-slow);
   overflow: hidden;
 }
 
 #sidebar.open {
   transform: translateX(0);
+}
+#sidebar.hidden {
+  display: none !important;
 }
 
 #sidebar::before {
@@ -462,30 +465,7 @@
   margin-top: 2px;
 }
 
-/* ── Sidebar Toggle Button (on map) ──────────────────────── */
-#sidebar-toggle {
-  position: absolute;
-  top: 72px;
-  left: 16px;
-  z-index: 700;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: rgba(10,15,30,0.88);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  color: var(--text-secondary);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-#sidebar-toggle:hover {
-  color: var(--accent-gold);
-  border-color: var(--border-glass);
-}
+/* Close button is inside sidebar corner */
 
 /* ── Filter Exclusive Buttons ─────────────────────────────── */
 .sb-filter-group {

@@ -31,4 +31,4 @@ Contoh sumber bebas royalti: cari di [Pixabay Music — gamelan Indonesia](https
 
 ## Tombol kontrol
 
-Tombol BGM memakai `aria-pressed`, kelas `.is-playing`, judul trek pada label (mis. **Sesuatu di Yogyakarta — KLA Project**), status **Putar/Jeda**, dan equalizer CSS (tiga bar) saat aktif.
+Tombol BGM memakai `aria-pressed`, kelas `.is-playing`, judul trek pada label (mis. **Sesuatu di Jogja — KLA Project**), status **Putar/Jeda**, dan equalizer CSS (tiga bar) saat aktif.

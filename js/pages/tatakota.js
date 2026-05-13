@@ -1,27 +1,45 @@
-import { State, CATEGORIES, CONFIG } from '../state.js';
+import { State, CATEGORIES } from '../state.js';
 import { renderTataKotaDetailInto } from './tatakota-detail.js';
 
-const TATA_KEYS = [
-    'pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank',
-    'kebutuhan', 'tempat_tinggal', 'sosial_tugas', 'lingkungan'
+const TATA_KEYS = ['pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank', 'sosial_tugas'];
+const CATEGORY_CARDS = [
+    { key: 'pariwisata', title: 'Pariwisata', desc: 'Destinasi, budaya, dan rekreasi kota' },
+    { key: 'mobilitas', title: 'Mobilitas', desc: 'Terminal, stasiun, akses transportasi' },
+    { key: 'kesehatan_darurat', title: 'Kesehatan', desc: 'Rumah sakit, klinik, layanan darurat' },
+    { key: 'akademik', title: 'Pendidikan', desc: 'Kampus, sekolah, pusat pembelajaran' },
+    { key: 'atm_bank', title: 'Keuangan', desc: 'ATM, bank, layanan transaksi' },
+    { key: 'sosial_tugas', title: 'Pemerintahan', desc: 'Layanan publik dan fasilitas sosial' }
 ];
 
 const PHOTO_BANK = {
-    pariwisata: ['photo-1584810359583-96fc3448beaa', 'photo-1548013146-72479768bada', 'photo-1566073771259-6a8506099945'],
-    mobilitas: ['photo-1570125909232-e0963dc1758e', 'photo-1558618666-fcd25c85cd64', 'photo-1449824913935-59a10b8d2000'],
-    kesehatan_darurat: ['photo-1519494026892-80bbd2d6fd0d', 'photo-1576091160399-112ba8d25d1d', 'photo-1586773860416-d37aa17d6e2d'],
-    akademik: ['photo-1523050854058-8df90110c9f1', 'photo-1523240795612-9a054b055db6', 'photo-1509062522246-94559798e544'],
-    atm_bank: ['photo-1563013544-824ae1b704d3', 'photo-1554224155-6726b3ff858f', 'photo-1579621970563-ebec7560ff3e'],
-    kebutuhan: ['photo-1555529669-e69e7aa0ba9a', 'photo-1533777857889-4d38cbfc3113', 'photo-1542838132-92c53300491e'],
-    tempat_tinggal: ['photo-1566073771259-6a8506099945', 'photo-1520250497591-112f2f40a3f4', 'photo-1566665797739-1674de7a421a'],
-    sosial_tugas: ['photo-1450101499163-a353f31ffcc4', 'photo-1544027993-37dbfe43562a', 'photo-1517248135467-4c7edcad34c4'],
-    lingkungan: ['photo-1448375240586-882707db888b', 'photo-1470071459604-3b5ec3a0fe12', 'photo-1500530855697-b586d89ba3ee']
+    pariwisata: ['landmark-yogyakarta', 'candi-prambanan,yogyakarta', 'malioboro,jogja'],
+    mobilitas: ['transport-hub-jogja', 'train-station-yogyakarta', 'terminal-jogja'],
+    kesehatan_darurat: ['hospital-yogyakarta', 'emergency-clinic-jogja', 'medical-center-indonesia'],
+    akademik: ['university-yogyakarta', 'campus-jogja', 'education-institute-indonesia'],
+    atm_bank: ['bank-branch-yogyakarta', 'atm-machine-indonesia', 'finance-office-jogja'],
+    sosial_tugas: ['government-office-yogyakarta', 'public-service-office-jogja', 'city-hall-yogyakarta']
 };
+const LOCATION_IMAGE_MAP = new Map([
+    ['candi prambanan', 'candi-prambanan,yogyakarta'],
+    ['malioboro', 'malioboro,jogja'],
+    ['kraton yogyakarta', 'kraton-yogyakarta-palace'],
+    ['tugu yogyakarta', 'tugu-jogja-monument'],
+    ['stasiun tugu', 'stasiun-tugu-yogyakarta'],
+    ['rsup dr sardjito', 'hospital-yogyakarta-sardjito']
+]);
 
 function hashPick(str, mod) {
     let h = 0;
     for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
     return h % mod;
+}
+
+function normalizeName(v) {
+    return String(v || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 export function stableTataKotaId(cat, name, lng, lat) {
@@ -36,9 +54,11 @@ function cardImageUrl(catKey, name, props) {
     if (typeof foto === 'string' && /^https?:\/\//i.test(foto)) {
         return foto;
     }
+    const n = normalizeName(name);
+    const mapped = LOCATION_IMAGE_MAP.get(n);
     const bank = PHOTO_BANK[catKey] || PHOTO_BANK.pariwisata;
-    const id = bank[hashPick(`${catKey}|${name}`, bank.length)];
-    return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=520&h=320&q=82`;
+    const query = mapped || bank[hashPick(`${catKey}|${name}`, bank.length)];
+    return `https://source.unsplash.com/featured/800x500?${encodeURIComponent(query)}`;
 }
 
 function propsSummaryHtml(props) {
@@ -56,37 +76,10 @@ function parseDetailIdFromHash() {
     return m ? decodeURIComponent(m[1]) : null;
 }
 
-function showEmbedMapModal(name, lat, lng) {
-    const existing = document.getElementById('tatakota-embed-modal');
-    if (existing) existing.remove();
-    const wrap = document.createElement('div');
-    wrap.id = 'tatakota-embed-modal';
-    wrap.className = 'tatakota-embed-modal';
-    wrap.innerHTML = `
-        <div class="tatakota-embed-modal__backdrop" data-close="1"></div>
-        <div class="tatakota-embed-modal__card" role="dialog" aria-modal="true" aria-label="Peta lokasi">
-            <div class="tatakota-embed-modal__head">
-                <strong class="tatakota-embed-modal__title">${esc(name)}</strong>
-                <button type="button" class="tatakota-embed-modal__x" data-close="1" aria-label="Tutup">×</button>
-            </div>
-            <div id="tatakota-embed-modal-map" class="tatakota-embed-modal__map"></div>
-        </div>`;
-    document.body.appendChild(wrap);
-
-    const close = () => wrap.remove();
-    wrap.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', close));
-
-    const mapDiv = wrap.querySelector('#tatakota-embed-modal-map');
-    if (mapDiv && typeof L !== 'undefined') {
-        const tile = L.tileLayer(CONFIG.tileUrl, {
-            attribution: CONFIG.tileAttribution,
-            maxZoom: 19
-        });
-        const map = L.map(mapDiv, { zoomControl: true, scrollWheelZoom: true }).setView([lat, lng], 15);
-        tile.addTo(map);
-        L.marker([lat, lng]).bindPopup(esc(name)).addTo(map);
-        setTimeout(() => map.invalidateSize(), 80);
-    }
+function openSingleMapPage(name, lat, lng) {
+    const id = `single-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+    sessionStorage.setItem(`singleMap:${id}`, JSON.stringify({ name, lat, lng }));
+    window.open(`${location.pathname}#map/single/${encodeURIComponent(id)}`, '_blank', 'noopener,noreferrer');
 }
 
 function openTataKotaDetail(feat, cat) {
@@ -135,7 +128,7 @@ function collectFeatures(activeCat) {
     return out;
 }
 
-let _activeCat = 'all';
+let _activeCat = null;
 let _visibleCount = 24;
 let _hashListenerBound = false;
 
@@ -165,38 +158,49 @@ export function initTataKotaPage() {
         return;
     }
 
+    if (!_activeCat) {
+        root.innerHTML = `
+        <div class="page-header">
+            <h1 class="page-title">Tata Kelola</h1>
+            <p class="page-subtitle">Pilih kategori utama untuk melihat daftar lokasi secara terfokus.</p>
+        </div>
+        <div id="tatakota-category-grid" class="tatakota-category-grid"></div>`;
+        const catGrid = root.querySelector('#tatakota-category-grid');
+        CATEGORY_CARDS.forEach((c) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'tatakota-category-card';
+            card.innerHTML = `<h3>${esc(c.title)}</h3><p>${esc(c.desc)}</p>`;
+            card.addEventListener('click', () => {
+                _activeCat = c.key;
+                _visibleCount = 24;
+                initTataKotaPage();
+            });
+            catGrid.appendChild(card);
+        });
+        return;
+    }
+
     root.innerHTML = `
         <div class="tatakota-rail">
-            <header class="tatakota-rail-head">
-                <h1 class="tatakota-rail-title">Tata Kelola</h1>
-                <p class="tatakota-rail-lead">Data GeoJSON per kategori. Detail dibuka di halaman ini; peta utama tidak digunakan.</p>
+            <header class="page-header tatakota-rail-head">
+                <h1 class="page-title">Tata Kelola</h1>
+                <p class="page-subtitle">Kategori aktif: ${esc(CATEGORIES[_activeCat]?.label || _activeCat)}</p>
             </header>
-            <div class="tatakota-spa-pills" id="tatakota-pills"></div>
+            <div class="tatakota-spa-pills">
+                <button type="button" class="tatakota-btn tatakota-btn--ghost" id="tatakota-back-cats">← Kembali ke kategori</button>
+            </div>
             <div id="tatakota-counter" class="tatakota-counter" aria-live="polite"></div>
             <div id="tatakota-grid-host"></div>
             <button type="button" class="tatakota-loadmore" id="tatakota-loadmore">Tampilkan semua data</button>
         </div>`;
 
-    const pills = root.querySelector('#tatakota-pills');
     const host = root.querySelector('#tatakota-grid-host');
     const loadMore = root.querySelector('#tatakota-loadmore');
-
-    const pillDefs = [{ key: 'all', label: 'Semua' }, ...TATA_KEYS.map((k) => ({ key: k, label: CATEGORIES[k]?.label || k }))];
-
-    pillDefs.forEach((c, idx) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'tatakota-spa-pill' + (c.key === _activeCat ? ' is-active' : '');
-        b.textContent = c.label;
-        b.dataset.cat = c.key;
-        b.style.transitionDelay = `${idx * 25}ms`;
-        b.addEventListener('click', () => {
-            _activeCat = c.key;
-            _visibleCount = 24;
-            pills.querySelectorAll('.tatakota-spa-pill').forEach((p) => p.classList.toggle('is-active', p.dataset.cat === c.key));
-            renderGrid(host);
-        });
-        pills.appendChild(b);
+    root.querySelector('#tatakota-back-cats')?.addEventListener('click', () => {
+        _activeCat = null;
+        history.pushState(null, '', '#tatakota');
+        initTataKotaPage();
     });
 
     loadMore.addEventListener('click', () => {
@@ -208,7 +212,7 @@ export function initTataKotaPage() {
 }
 
 function renderGrid(host) {
-    const all = collectFeatures(_activeCat);
+    const all = collectFeatures(_activeCat || 'all');
     const slice = all.slice(0, _visibleCount);
     const grid = document.createElement('div');
     grid.className = 'tatakota-grid';
@@ -265,7 +269,7 @@ function renderGrid(host) {
         });
         card.querySelector('.js-map').addEventListener('click', (e) => {
             e.stopPropagation();
-            showEmbedMapModal(name, lat, lng);
+            openSingleMapPage(name, lat, lng);
         });
         card.addEventListener('click', (e) => {
             if (e.target.closest('button')) return;

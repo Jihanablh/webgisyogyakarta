@@ -131,10 +131,10 @@ export class ChatbotEngine {
   search(userInput) {
     if (this._geoIndex) {
       const g = queryGeoKnowledge(this._geoIndex, userInput);
-      if (g) return g;
+      if (g) return this._humanize(g);
     }
     const tokens = this._tokenize(userInput);
-    if (!tokens.length) return this.db.fallback[0].answer;
+    if (!tokens.length) return this._humanize(this.db.fallback[0].answer);
     let bestScore = 0, bestEntry = null;
     for (const entry of this.allEntries) {
       let score = 0;
@@ -147,8 +147,18 @@ export class ChatbotEngine {
       if (tokens.some(t => entry.category && entry.category.includes(t))) score += 2;
       if (score > bestScore) { bestScore = score; bestEntry = entry; }
     }
-    if (bestScore < 1 || !bestEntry) return this.db.fallback[0].answer;
-    return bestEntry.answer;
+    if (bestScore < 1 || !bestEntry) return this._humanize(this.db.fallback[0].answer);
+    return this._humanize(bestEntry.answer);
+  }
+
+  _humanize(answer) {
+    const openers = [
+      'Siap, ini informasi yang paling relevan:',
+      'Boleh, ini ringkasan yang bisa kamu pakai:',
+      'Oke, aku bantu jelaskan ya:'
+    ];
+    const idx = Math.floor(Math.random() * openers.length);
+    return `${openers[idx]}\n${answer}`;
   }
 
   getSuggestions() {

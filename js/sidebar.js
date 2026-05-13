@@ -38,10 +38,8 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     _map = map;
 
     const sidebar   = document.getElementById('sidebar');
-    const closeBtn  = document.getElementById('sidebar-toggle-close');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.remove('open'));
-    if (closeBtn)  closeBtn.addEventListener('click',  () => sidebar.classList.remove('open'));
+    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('hidden'));
 
     // Panel close buttons
     const icClose = document.getElementById('info-card-close');
@@ -320,7 +318,7 @@ function initSearch() {
         if (input.value.trim().length >= 2) resultsDiv.classList.remove('hidden');
     });
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-container')) resultsDiv.classList.add('hidden');
+        if (!e.target.closest('.sidebar-search-wrap')) resultsDiv.classList.add('hidden');
     });
 }
 

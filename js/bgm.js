@@ -3,7 +3,7 @@ import { startAmbientSynth, stopAmbientSynth } from './bgm-synth.js';
 
 const BGM_PREF_KEY = 'jogja-siaga-bgm-on';
 
-const TITLE_SHORT = 'Sesuatu di Yogyakarta — KLA Project';
+const TITLE_SHORT = 'Sesuatu di Jogja — KLA Project';
 
 let _usingSynth = false;
 let _ytPlayer = null;

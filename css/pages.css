@@ -622,6 +622,32 @@
   max-width: 1120px;
   margin: 0 auto;
 }
+.tatakota-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.tatakota-category-card {
+  text-align: left;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  transition: transform .25s ease, border-color .25s ease;
+}
+.tatakota-category-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(212, 160, 23, 0.48);
+}
+.tatakota-category-card h3 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.tatakota-category-card p {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
 .tatakota-hero {
   text-align: center;
   padding-bottom: 8px;

@@ -95,7 +95,7 @@ export function queryGeoKnowledge(index, userQuestion) {
             const hits = arr.filter((x) => /pengungs|kumpul|posko|shelter|evakuasi/i.test(`${x.sub} ${x.name}`));
             if (hits.length) {
                 const list = hits.slice(0, 12).map((h) => `• ${h.name} (${h.sub || h.catLabel})`);
-                return `Berdasarkan data GeoJSON di aplikasi, contoh titik terkait di kecamatan ${kec}:\n${list.join('\n')}\n\n(Tampilkan di peta: buka Peta Kebencanaan dan cari nama lokasi.)`;
+                return `Di sekitar ${kec}, saya menemukan beberapa titik yang relevan:\n${list.join('\n')}\n\nKalau mau, buka peta lalu cari salah satu namanya agar langsung terlihat posisinya.`;
             }
         }
     }
@@ -107,7 +107,7 @@ export function queryGeoKnowledge(index, userQuestion) {
             const hits = arr.filter((x) => /wisata|pariwisata|candi|museum|alam|pantai/i.test(`${x.sub} ${x.name} ${x.catLabel}`));
             if (hits.length) {
                 const list = hits.slice(0, 12).map((h) => `• ${h.name} (${h.sub || h.catLabel})`);
-                return `Objek / lokasi terkait di ${kab} (dari data yang dimuat):\n${list.join('\n')}`;
+                return `Untuk area ${kab}, ini beberapa lokasi yang bisa kamu cek:\n${list.join('\n')}`;
             }
         }
     }
@@ -126,5 +126,5 @@ export function queryGeoKnowledge(index, userQuestion) {
     if (!top.length) return null;
 
     const out = top.map((x) => `• ${x.row.text}`);
-    return `Jawaban berdasarkan data lokasi di WebGIS (cuplikan):\n${out.join('\n')}`;
+    return `Aku menemukan beberapa lokasi yang paling relevan dengan pertanyaanmu:\n${out.join('\n')}`;
 }

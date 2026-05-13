@@ -180,14 +180,14 @@ function renderChoroLegend(el, maxVal) {
     if (!el) return;
     const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(t * maxVal));
     el.innerHTML = `
-        <div class="stat-choro-legend-title">Intensitas (jumlah fitur)</div>
+        <div class="stat-choro-legend-title">Intensitas heatmap</div>
         <div class="stat-choro-legend-scale" aria-hidden="true"></div>
         <div class="stat-choro-legend-ticks">${ticks.map((x) => `<span>${x}</span>`).join('')}</div>
-        <p class="stat-choro-legend-note">Warna dari hijau muda (rendah) ke merah tua (tinggi), relatif terhadap kecamatan di sampel kotak.</p>`;
+        <p class="stat-choro-legend-note">Gradien biru dingin hingga merah terang. Area panas menunjukkan konsentrasi titik kebencanaan lebih tinggi.</p>`;
     const scale = el.querySelector('.stat-choro-legend-scale');
     if (scale) {
         scale.style.background =
-            'linear-gradient(90deg,#14532d 0%,#22c55e 18%,#84cc16 36%,#eab308 55%,#f97316 72%,#991b1b 100%)';
+            'linear-gradient(90deg,#1d4ed8 0%,#22d3ee 24%,#fde047 58%,#fb923c 80%,#ef4444 100%)';
     }
 }
 
@@ -218,51 +218,26 @@ function initStatChoropleth() {
     if (!Array.isArray(features) || !features.length) {
         features = [];
     }
-    const counts = buildKecamatanCounts(features);
-    const maxC = Math.max(1, ...Object.values(counts));
-
-    const fc = {
-        type: 'FeatureCollection',
-        features: KECAMATAN_BOXES.map((b) => ({
-            type: 'Feature',
-            properties: { name: b.name, count: counts[b.name] || 0 },
-            geometry: {
-                type: 'Polygon',
-                coordinates: [
-                    [
-                        [b.w, b.s],
-                        [b.e, b.s],
-                        [b.e, b.n],
-                        [b.w, b.n],
-                        [b.w, b.s]
-                    ]
-                ]
-            }
-        }))
-    };
-
-    _statChoroLayer = L.geoJSON(fc, {
-        style: (feat) => {
-            const c = feat.properties?.count || 0;
-            const t = c / maxC;
-            return {
-                color: 'rgba(10,15,30,0.85)',
-                weight: 1,
-                fillColor: getChoroColor(t),
-                fillOpacity: 0.72
-            };
-        },
-        onEachFeature: (feat, layer) => {
-            const n = feat.properties?.name;
-            const c = feat.properties?.count || 0;
-            layer.bindPopup(`<strong>${n}</strong><br/>${c} fitur kebencanaan (agregasi titik/centroid dalam kotak perkiraan)`);
+    const heatPoints = [];
+    features.forEach((f) => {
+        const c = featureCentroid(f);
+        if (!c) return;
+        heatPoints.push([c[0], c[1], 0.9]);
+    });
+    const maxC = Math.max(1, heatPoints.length);
+    _statChoroLayer = L.heatLayer(heatPoints, {
+        radius: 34,
+        blur: 28,
+        maxZoom: 14,
+        minOpacity: 0.45,
+        gradient: {
+            0.1: '#1d4ed8',
+            0.35: '#22d3ee',
+            0.6: '#fde047',
+            0.8: '#fb923c',
+            1.0: '#ef4444'
         }
     }).addTo(m);
-
-    try {
-        m.fitBounds(_statChoroLayer.getBounds(), { padding: [18, 18] });
-    } catch (_) {}
-
     renderChoroLegend(legendEl, maxC);
 
     _statChoroMap = m;
@@ -347,9 +322,9 @@ export function initStatisticsPage() {
             </div>
 
             <div class="stat-io-section stat-choro-section tw-mb-6 tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
-                <h3 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Choropleth kecamatan (agregasi data kebencanaan)</h3>
+                <h3 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Heatmap konsentrasi kebencanaan</h3>
                 <p class="tw-mb-4 tw-max-w-3xl tw-font-body tw-text-xs tw-leading-relaxed tw-text-[var(--text-muted)]">
-                    Jumlah fitur GeoJSON kebencanaan yang centroid-nya jatuh pada kotak perkiraan per wilayah (bukan batas administrasi resmi).
+                    Visualisasi konsentrasi titik kebencanaan dengan intensitas warna kuat untuk area prioritas mitigasi.
                 </p>
                 <div class="stat-choro-row tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row">
                     <div id="stat-choro-map" class="stat-choro-map tw-min-h-[320px] tw-flex-1 tw-overflow-hidden tw-rounded-lg tw-border tw-border-[var(--border-card)]"></div>
