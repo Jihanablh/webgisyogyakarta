@@ -148,6 +148,7 @@ export function initTataKotaPage() {
     bindHashOnce();
 
     const detailId = parseDetailIdFromHash();
+    document.getElementById('tatakota-page')?.classList.toggle('tatakota-detail-active', Boolean(detailId));
     if (detailId) {
         renderTataKotaDetailInto(root, detailId, {
             onBack: () => {
@@ -215,20 +216,22 @@ function _renderCardList(root) {
 
     root.innerHTML = `
     <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-px-6 lg:tw-px-10 tw-py-8">
-        <div class="tw-mb-6 tw-pb-6 tw-border-b tw-border-white/10">
-            <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+        <div class="page-header tw-flex tw-items-end tw-justify-between tw-gap-4">
+            <div>
                 <button type="button" id="tatakota-back-cats"
-                    class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-border tw-border-amber-500/50 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
+                    class="tw-mb-4 tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-border tw-border-amber-500/50 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Kembali ke Kategori
                 </button>
+                <h1 class="page-title">Tata Kelola</h1>
+                <p class="page-subtitle">Kategori: <span class="tw-text-amber-400 tw-font-semibold">${esc(catInfo?.title || _activeCat)}</span></p>
+            </div>
+            <div class="tw-shrink-0">
                 <button type="button" id="tatakota-btn-lihat-peta"
                     class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-bg-amber-500/15 tw-text-amber-400 hover:tw-bg-amber-500/25 tw-border tw-border-amber-500/30 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
                     Lihat Semua di Peta
                 </button>
             </div>
-            <h1 class="tw-font-display tw-text-[clamp(22px,3vw,32px)] tw-font-extrabold tw-text-slate-100 tw-tracking-tight tw-mb-1">Tata Kelola</h1>
-            <p class="tw-font-ui tw-text-sm tw-text-slate-400">Kategori: <span class="tw-text-amber-400 tw-font-semibold">${esc(catInfo?.title || _activeCat)}</span></p>
         </div>
         <div id="tatakota-counter" class="tw-font-mono tw-text-xs tw-text-slate-500 tw-mb-4" aria-live="polite"></div>
         <div id="tatakota-grid-host" class="tw-w-full"></div>

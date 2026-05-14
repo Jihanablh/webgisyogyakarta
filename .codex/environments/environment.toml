@@ -9,3 +9,8 @@ script = ""
 name = "Run"
 icon = "run"
 command = "npm run"
+
+[[actions]]
+name = "run py"
+icon = "run"
+command = "python -m http.server 8000"
