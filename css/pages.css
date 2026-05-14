@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    JOGJA SIAGA — pages.css
    Statistik, Laporan Bencana, Tentang
    ============================================================ */
@@ -799,6 +799,71 @@
 .report-font-mono {
   font-family: var(--font-mono), ui-monospace, monospace;
 }
+
+/* ── Tatakota Detail SPA ───────────────────────────────────── */
+.tatakota-detail-spa {
+  position: relative;
+  min-height: 100%;
+  background: var(--bg-primary);
+}
+
+.tatakota-detail-spa .detail-entrance {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Stat IO sections animate in */
+.stat-io-section {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.stat-io-section.stat-io-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Choro legend note */
+.stat-choro-legend-title {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-choro-legend-scale {
+  height: 10px;
+  border-radius: 5px;
+  margin-bottom: 4px;
+}
+
+.stat-choro-legend-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-choro-legend-note {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.stat-choro-map {
+  min-height: 320px;
+}
+
+/* ── tatakota card transition ─────────────────────────────── */
+.tatakota-card {
+  transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.25s ease, box-shadow 0.35s ease;
+}
+
 .report-font-display {
   font-family: var(--font-display), serif;
 }

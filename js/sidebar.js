@@ -1,19 +1,22 @@
 import { State, CATEGORIES } from './state.js';
-import { loadLayer, showLayer, hideLayer, rebuildCategoryLayer } from './layers.js';
+import { loadLayer, showLayer, hideLayer } from './layers.js';
 import { escapeHtml } from './utils/helpers.js';
 
 let _map = null;
 
-// ── Disaster subcategory definitions ───────────────────────────────────────────
-const DISASTER_BUTTONS = [
-    { label: 'Erupsi Merapi', subcats: ['Rawan Erupsi', 'Risiko Erupsi', 'KRB III', 'KRB II', 'KRB I'], color: '#ef4444' },
-    { label: 'Rawan Banjir',  subcats: ['Rawan Banjir', 'Risiko Banjir', 'Daerah Banjir'],              color: '#3b82f6' },
-    { label: 'Rawan Gempa',   subcats: ['Rawan Gempa', 'Risiko Gempa', 'Zona Gempa'],                   color: '#f97316' },
-    { label: 'Rawan Longsor', subcats: ['Rawan Longsor', 'Risiko Longsor', 'Zona Longsor'],              color: '#92400e' },
-    { label: 'Rawan Kekeringan', subcats: ['Rawan Kekeringan', 'Kekeringan'],                           color: '#ca8a04' },
-    { label: 'Jalur Evakuasi', subcats: ['Jalur Evakuasi'],                                             color: '#22c55e' },
-    { label: 'Titik Kumpul',  subcats: ['Titik Kumpul', 'Pengungsian'],                                 color: '#06b6d4' },
+// ── Disaster layer definitions (subcats sesuai GeoJSON aktual) ────────────────
+const DISASTER_LAYERS = [
+    { id: 'erupsi',     label: 'Erupsi Merapi',    subcats: ['Risiko Erupsi Merapi'], color: '#ef4444' },
+    { id: 'banjir',     label: 'Rawan Banjir',      subcats: ['Rawan Banjir'],         color: '#3b82f6' },
+    { id: 'gempa',      label: 'Rawan Gempa',        subcats: ['Rawan Gempa'],          color: '#f97316' },
+    { id: 'longsor',    label: 'Rawan Longsor',      subcats: ['Rawan Longsor'],        color: '#92400e' },
+    { id: 'kekeringan', label: 'Rawan Kekeringan',   subcats: ['Rawan Kekeringan'],     color: '#ca8a04' },
+    { id: 'evakuasi',   label: 'Jalur Evakuasi',     subcats: ['Risiko Erupsi Merapi'], color: '#22c55e' },
+    { id: 'pengungsian',label: 'Titik Pengungsian',  subcats: ['Risiko Erupsi Merapi'], color: '#06b6d4' },
 ];
+
+// Toggle state per layer id — semua aktif by default
+const _layerToggles = Object.fromEntries(DISASTER_LAYERS.map(l => [l.id, true]));
 
 // ── Tata Kota category definitions ─────────────────────────────────────────────
 const TATAKOTA_BUTTONS = [
@@ -26,11 +29,8 @@ const TATAKOTA_BUTTONS = [
     { key: 'kesehatan_darurat', label: 'Kesehatan & Darurat',    color: '#f43f5e' },
 ];
 
-let _sidebarMode = 'kebencanaan'; // 'kebencanaan' | 'tatakota'
-
-// Exclusive active state: null = "Lihat Semua" (all shown)
-let _activeDisasterLabel = null; // null → all disaster layers shown
-let _activeTataKotaKey   = null; // null → all tatakota layers shown
+let _sidebarMode     = 'kebencanaan';
+let _activeTataKotaKey = null;
 
 export function getSidebarMode() { return _sidebarMode; }
 
@@ -41,7 +41,6 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('hidden'));
 
-    // Panel close buttons
     const icClose = document.getElementById('info-card-close');
     if (icClose) icClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeInfoCard?.(); });
     const tpClose = document.getElementById('tp-close');
@@ -49,27 +48,23 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     const dpClose = document.getElementById('dp-close');
     if (dpClose) dpClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeDisasterPanel?.(); });
 
-    // Stats page link
     const statsBtn = document.getElementById('btn-open-stats');
     if (statsBtn) statsBtn.addEventListener('click', () => {
         document.querySelector('.top-nav-tab[data-page="statistik"]')?.click();
     });
 
-    // Recent events
     const rewAll = document.getElementById('rew-see-all');
     if (rewAll) rewAll.addEventListener('click', () => {
         document.querySelector('.top-nav-tab[data-page="laporan"]')?.click();
     });
     renderRecentEventsWidget();
 
-    // Update counts when layers load
     document.addEventListener('layerLoaded', () => {
         updateWelcomeStats();
         buildSearchIndex();
         if (_sidebarMode === 'tatakota') renderTataKotaPanel();
     });
 
-    // Initial render
     renderKebencanaaanPanel();
     initSearch();
 }
@@ -77,77 +72,59 @@ export function initSidebar({ map, router, onCategoryToggle }) {
 // ── Mode switching ─────────────────────────────────────────────────────────────
 export function setSidebarMode(mode) {
     _sidebarMode = mode;
-    if (mode === 'kebencanaan') {
-        renderKebencanaaanPanel();
-    } else {
-        renderTataKotaPanel();
-    }
+    if (mode === 'kebencanaan') renderKebencanaaanPanel();
+    else renderTataKotaPanel();
 }
 
-// ── Kebencanaan panel ──────────────────────────────────────────────────────────
+// ── Kebencanaan panel — Tailwind dark glass toggle switches ────────────────────
 function renderKebencanaaanPanel() {
     const panel = document.getElementById('sidebar-mode-panel');
     if (!panel) return;
 
-    const lihatSemuaActive = _activeDisasterLabel === null;
-
     panel.innerHTML = `
-    <div style="padding:16px 20px 8px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#4b5568;margin-bottom:10px;">
-            Kebencanaan
+    <div class="tw-px-1 tw-py-1">
+        <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-3 tw-px-1">Layer Aktif</div>
+        <div id="disaster-layer-list" class="tw-flex tw-flex-col tw-gap-0.5">
+            ${DISASTER_LAYERS.map(layer => _renderLayerItem(layer)).join('')}
         </div>
-        <button id="disaster-lihat-semua"
-            style="${_lihatSemuaStyle(lihatSemuaActive, '#dc2626')}">
-            🗺️ Lihat Semua
-        </button>
-        <div id="disaster-pill-container" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
     </div>`;
 
-    document.getElementById('disaster-lihat-semua').addEventListener('click', _showAllDisaster);
-
-    const container = document.getElementById('disaster-pill-container');
-    if (!container) return;
-
-    DISASTER_BUTTONS.forEach(btn => {
-        const isActive = _activeDisasterLabel === btn.label;
-        const pill = document.createElement('button');
-        pill.className = 'disaster-pill';
-        pill.dataset.label = btn.label;
-        _applyExclusivePillStyle(pill, btn.color, isActive);
-        pill.innerHTML = `
-            <span style="width:8px;height:8px;border-radius:50%;background:${btn.color};flex-shrink:0;
-                ${isActive ? `box-shadow:0 0 8px ${btn.color};` : 'opacity:0.45;'}"></span>
-            <span style="flex:1;text-align:left;font-size:13px;font-weight:600;">${btn.label}</span>
-            ${isActive ? `<span style="font-size:10px;background:${btn.color}33;color:${btn.color};padding:2px 7px;border-radius:10px;font-weight:700;">Aktif</span>` : ''}
-        `;
-        pill.addEventListener('click', () => _clickDisasterPill(btn));
-        container.appendChild(pill);
+    // Wire toggle switches
+    panel.querySelectorAll('.disaster-toggle-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const id = e.target.dataset.layerId;
+            _layerToggles[id] = e.target.checked;
+            _applyLayerToggles();
+        });
     });
 }
 
-function _clickDisasterPill(btnDef) {
-    // Exclusive: activate only this layer, hide all others
-    _activeDisasterLabel = btnDef.label;
-
-    // Set subcats to ONLY this button's subcats
-    State.activeSubcats['kebencanaan'] = new Set(btnDef.subcats);
-    State.enabledCategories.add('kebencanaan');
-
-    rebuildCategoryLayer('kebencanaan');
-    renderKebencanaaanPanel();
+function _renderLayerItem(layer) {
+    const on = _layerToggles[layer.id];
+    return `
+    <div class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-2.5 tw-rounded-lg tw-transition-all tw-duration-200 hover:tw-bg-white/5">
+        <div class="tw-w-2 tw-h-2 tw-rounded-full tw-flex-shrink-0 tw-ring-1 tw-ring-white/20"
+             style="background:${layer.color};${on ? `box-shadow:0 0 6px ${layer.color}88` : 'opacity:0.4'}"></div>
+        <span class="tw-flex-1 tw-text-[12px] tw-font-medium ${on ? 'tw-text-slate-200' : 'tw-text-slate-500'} tw-font-[Inter,sans-serif] tw-transition-colors">
+            ${layer.label}
+        </span>
+        <label class="layer-toggle tw-cursor-pointer">
+            <input type="checkbox" class="disaster-toggle-input" data-layer-id="${layer.id}" ${on ? 'checked' : ''}>
+            <span class="layer-toggle-track"></span>
+        </label>
+    </div>`;
 }
 
-function _showAllDisaster() {
-    _activeDisasterLabel = null; // "Lihat Semua"
-
-    // Collect ALL subcats from all disaster buttons
-    const allSubcats = new Set();
-    DISASTER_BUTTONS.forEach(b => b.subcats.forEach(sc => allSubcats.add(sc)));
-    State.activeSubcats['kebencanaan'] = allSubcats;
-    State.enabledCategories.add('kebencanaan');
-
-    rebuildCategoryLayer('kebencanaan');
-    renderKebencanaaanPanel();
+function _applyLayerToggles() {
+    import('./layers.js').then(({ showKebencanaanZona, showKebencanaanPengungsian }) => {
+        // Re-render to update visual states
+        renderKebencanaaanPanel();
+        // Check if pengungsian toggle is on
+        const pengungsianOn = _layerToggles['pengungsian'];
+        const zonaOn = DISASTER_LAYERS.some(l => l.id !== 'pengungsian' && _layerToggles[l.id]);
+        if (pengungsianOn) showKebencanaanPengungsian();
+        else if (zonaOn) showKebencanaanZona();
+    });
 }
 
 // ── Tata Kota panel ────────────────────────────────────────────────────────────
@@ -156,20 +133,17 @@ function renderTataKotaPanel() {
     if (!panel) return;
 
     const lihatSemuaActive = _activeTataKotaKey === null;
-
     panel.innerHTML = `
-    <div style="padding:16px 20px 8px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#4b5568;margin-bottom:10px;">
-            Tata Kota
-        </div>
-        <button id="tatakota-lihat-semua"
-            style="${_lihatSemuaStyle(lihatSemuaActive, '#f59e0b')}">
-            🗺️ Lihat Semua
+    <div class="tw-px-1 tw-py-1">
+        <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-3 tw-px-1">Kategori</div>
+        <button id="tatakota-lihat-semua" class="tw-w-full tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-2 tw-rounded-lg tw-mb-1 tw-text-xs tw-font-semibold tw-font-[Inter] tw-transition-all tw-duration-200 ${lihatSemuaActive ? 'tw-bg-amber-500/20 tw-text-amber-400 tw-border tw-border-amber-500/40' : 'tw-text-slate-400 hover:tw-bg-white/5 tw-border tw-border-transparent'}">
+            <div class="tw-w-2 tw-h-2 tw-rounded-sm tw-bg-amber-400 tw-flex-shrink-0"></div>
+            Semua Kategori
         </button>
-        <div id="tatakota-pill-container" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+        <div id="tatakota-pill-container" class="tw-flex tw-flex-col tw-gap-0.5"></div>
     </div>`;
 
-    document.getElementById('tatakota-lihat-semua').addEventListener('click', _showAllTataKota);
+    document.getElementById('tatakota-lihat-semua')?.addEventListener('click', _showAllTataKota);
 
     const container = document.getElementById('tatakota-pill-container');
     if (!container) return;
@@ -177,96 +151,42 @@ function renderTataKotaPanel() {
     TATAKOTA_BUTTONS.forEach(btnDef => {
         const isActive = _activeTataKotaKey === btnDef.key;
         const count    = State.categoryData[btnDef.key]?.features?.length || 0;
-        const pill = document.createElement('button');
-        pill.className = 'tatakota-pill';
-        pill.dataset.key = btnDef.key;
-        _applyExclusivePillStyle(pill, btnDef.color, isActive);
-        pill.innerHTML = `
-            <span style="width:8px;height:8px;border-radius:50%;background:${btnDef.color};flex-shrink:0;
-                ${isActive ? `box-shadow:0 0 8px ${btnDef.color};` : 'opacity:0.45;'}"></span>
-            <span style="flex:1;text-align:left;font-size:13px;font-weight:600;">${btnDef.label}</span>
-            ${count ? `<span style="font-size:10px;color:#4b5568;font-weight:600;">${count.toLocaleString()}</span>` : ''}
-        `;
-        pill.addEventListener('click', () => _clickTataKotaPill(btnDef));
-        container.appendChild(pill);
+        const btn = document.createElement('button');
+        btn.className = `tw-w-full tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-2 tw-rounded-lg tw-text-xs tw-font-medium tw-font-[Inter] tw-transition-all tw-duration-200 tw-border ${isActive ? 'tw-border-[' + btnDef.color + ']/40 tw-text-slate-100' : 'tw-border-transparent tw-text-slate-400 hover:tw-bg-white/5'}`;
+        if (isActive) btn.style.background = `${btnDef.color}22`;
+        btn.innerHTML = `
+            <div class="tw-w-2 tw-h-2 tw-rounded-sm tw-flex-shrink-0 ${isActive ? '' : 'tw-opacity-40'}" style="background:${btnDef.color}"></div>
+            <span class="tw-flex-1 tw-text-left">${btnDef.label}</span>
+            ${count ? `<span class="tw-font-mono tw-text-[10px] tw-text-slate-500">${count.toLocaleString()}</span>` : ''}`;
+        btn.addEventListener('click', () => _clickTataKotaPill(btnDef));
+        container.appendChild(btn);
     });
 }
 
 function _clickTataKotaPill(btnDef) {
-    // Exclusive: hide all other tatakota layers, show only this one
     _activeTataKotaKey = btnDef.key;
-
-    TATAKOTA_BUTTONS.forEach(b => {
-        if (b.key !== btnDef.key) {
-            hideLayer(b.key);
-        }
-    });
-
-    // Load or show this layer
+    TATAKOTA_BUTTONS.forEach(b => { if (b.key !== btnDef.key) hideLayer(b.key); });
     if (!State.layerCache[btnDef.key]) {
         State.enabledCategories.add(btnDef.key);
         loadLayer(btnDef.key);
-    } else {
-        showLayer(btnDef.key);
-    }
-
+    } else { showLayer(btnDef.key); }
     renderTataKotaPanel();
 }
 
 function _showAllTataKota() {
     _activeTataKotaKey = null;
-
     TATAKOTA_BUTTONS.forEach(btnDef => {
         if (!State.layerCache[btnDef.key]) {
             State.enabledCategories.add(btnDef.key);
             loadLayer(btnDef.key);
-        } else {
-            showLayer(btnDef.key);
-        }
+        } else { showLayer(btnDef.key); }
     });
-
     renderTataKotaPanel();
 }
 
-// ── Hide all Tata Kota layers (called when leaving tatakota mode) ──────────────
 export function hideTataKotaLayers() {
-    TATAKOTA_BUTTONS.forEach(btnDef => {
-        hideLayer(btnDef.key);
-    });
+    TATAKOTA_BUTTONS.forEach(btnDef => hideLayer(btnDef.key));
     _activeTataKotaKey = null;
-}
-
-// ── Style helpers ──────────────────────────────────────────────────────────────
-function _applyExclusivePillStyle(el, color, isActive) {
-    el.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 10px 14px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: var(--font-ui);
-        background: ${isActive ? color : 'transparent'};
-        border: 1px solid ${isActive ? color : color + '55'};
-        color: ${isActive ? '#fff' : '#64748b'};
-        ${isActive ? `box-shadow: 0 2px 12px ${color}55;` : ''}
-    `;
-}
-
-function _lihatSemuaStyle(isActive, color) {
-    return `
-        display:flex;align-items:center;gap:8px;
-        width:100%;padding:9px 14px;border-radius:10px;
-        cursor:pointer;transition:all 0.2s ease;
-        font-family:var(--font-ui);font-size:12px;font-weight:700;
-        background:${isActive ? color + 'cc' : 'rgba(255,255,255,0.04)'};
-        border:1px solid ${isActive ? color : 'rgba(255,255,255,0.1)'};
-        color:${isActive ? '#fff' : '#94a3b8'};
-        ${isActive ? `box-shadow:0 2px 12px ${color}44;` : ''}
-        margin-bottom:2px;
-    `;
 }
 
 // ── Stats ──────────────────────────────────────────────────────────────────────

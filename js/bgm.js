@@ -3,7 +3,7 @@ import { startAmbientSynth, stopAmbientSynth } from './bgm-synth.js';
 
 const BGM_PREF_KEY = 'jogja-siaga-bgm-on';
 
-const TITLE_SHORT = 'Sesuatu di Jogja — KLA Project';
+const TITLE_SHORT = 'Sesuatu di Jogja — Adhitia Sofyan';
 
 let _usingSynth = false;
 let _ytPlayer = null;
@@ -56,6 +56,11 @@ function ensureYtPlayer(hostId, videoId, onState) {
                     events: {
                         onReady: () => {
                             _ytReady = true;
+                            const btn = document.getElementById('bgm-toggle');
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.title = `Putar — ${TITLE_SHORT}`;
+                            }
                             resolve(_ytPlayer);
                         },
                         onStateChange: (e) => {
@@ -99,6 +104,8 @@ export function initBgm() {
     };
 
     setUi(false);
+    btn.disabled = true;
+    btn.title = 'Memuat pemutar musik…';
 
     if (audio) {
         audio.addEventListener('error', () => {

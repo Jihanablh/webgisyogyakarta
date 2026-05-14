@@ -469,6 +469,28 @@ path.diy-boundary {
   border-radius: 999px;
 }
 
+/* Heatmap gradient bar legend */
+.legend-heatbar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    #1d4ed8 0%,
+    #06b6d4 25%,
+    #fde047 55%,
+    #fb923c 78%,
+    #ef4444 100%);
+  margin-bottom: 3px;
+}
+
+.legend-heatbar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
 /* Logo */
 .nav-logo {
   font-family: var(--font-display);

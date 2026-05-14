@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    JOGJA SIAGA — sidebar.css
    Sidebar — Layer Control & Stats
    ============================================================ */
@@ -548,4 +548,175 @@
 }
 .sb-see-all:hover {
   background: rgba(212,160,23,0.12);
+}
+
+/* ── Tab Drawer (Zona Bencana / Tempat Pengungsian) ──────────── */
+#map-top-left-chrome {
+  position: absolute;
+  left: 0;
+  top: 100px;
+  z-index: 820;
+}
+
+.disaster-tab-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.d-tab-btn {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 0 12px 12px 0;   /* only right corners rounded — drawer tab */
+  background: rgba(10, 15, 30, 0.90);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 160, 23, 0.25);
+  border-left: none;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+}
+
+.d-tab-btn:hover {
+  background: rgba(212, 160, 23, 0.10);
+  color: var(--text-primary);
+  border-color: rgba(212, 160, 23, 0.50);
+}
+
+.d-tab-btn.active {
+  background: rgba(212, 160, 23, 0.18);
+  border-color: rgba(212, 160, 23, 0.70);
+  color: var(--accent-gold);
+  box-shadow: 2px 0 12px rgba(212, 160, 23, 0.25);
+}
+
+/* Offset if sidebar visible: push tabs to right of sidebar */
+body.app-started:not(.sidebar-hidden) #map-top-left-chrome {
+  left: 360px;
+}
+
+/* ── Layer toggle switch ─────────────────────────────────────── */
+.layer-toggle {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.layer-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.layer-toggle-track {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  transition: background 0.22s, border-color 0.22s;
+}
+
+.layer-toggle-track::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: left 0.22s, background 0.22s;
+}
+
+.layer-toggle input:checked + .layer-toggle-track {
+  background: rgba(212, 160, 23, 0.35);
+  border-color: rgba(212, 160, 23, 0.60);
+}
+
+.layer-toggle input:checked + .layer-toggle-track::after {
+  left: calc(100% - 14px);
+  background: var(--accent-gold);
+}
+
+.layer-toggle input:focus-visible + .layer-toggle-track {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* ── Search icon SVG ─────────────────────────────────────────── */
+.search-icon-svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.sidebar-search-wrap {
+  position: relative;
+}
+
+.sidebar-search-wrap .table-search {
+  padding-left: 34px;
+}
+
+/* ── sb-stat-value variants ──────────────────────────────────── */
+.sb-stat-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+.sb-stat-value--amber { color: var(--accent-gold); }
+.sb-stat-value--green { color: #22c55e; }
+.sb-stat-value--red   { color: var(--accent-batik-red); }
+.sb-stat-row--spaced  { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.07); }
+
+/* ── SPA Map Page ────────────────────────────────────────────── */
+#spa-map-page {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.spa-map-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(10, 15, 30, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 160, 23, 0.22);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.spa-map-container {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.spa-map-container > div {
+  width: 100%;
+  height: 100%;
 }

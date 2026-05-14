@@ -1,5 +1,5 @@
 import { initMap } from './map.js';
-import { loadLayer, showOnlyKebencanaan } from './layers.js';
+import { loadLayer, showOnlyKebencanaan, loadDIYBoundary, showKebencanaanZona, showKebencanaanPengungsian } from './layers.js';
 import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
@@ -124,6 +124,7 @@ async function init() {
             showOnlyKebencanaan();
             document.getElementById('risk-legend')?.classList.remove('hidden');
             tryResumeBgmFromWelcomeGesture();
+            loadDIYBoundary();
             if (State.map) setTimeout(() => State.map.invalidateSize(), 100);
         });
     }
@@ -336,22 +337,16 @@ function initDisasterFilters() {
     const filters = document.querySelectorAll('.d-filter-btn');
     if (!filters.length) return;
     filters.forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', () => {
             filters.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const filterType = btn.dataset.filter;
-            
-            if (!State.activeSubcats['kebencanaan']) State.activeSubcats['kebencanaan'] = new Set();
-            State.activeSubcats['kebencanaan'].clear();
-            
+
             if (filterType === 'Zona Bencana') {
-                ['Rawan Erupsi', 'Risiko Erupsi', 'KRB III', 'KRB II', 'KRB I', 'Rawan Banjir', 'Risiko Banjir', 'Daerah Banjir', 'Rawan Gempa', 'Risiko Gempa', 'Zona Gempa', 'Rawan Longsor', 'Risiko Longsor', 'Zona Longsor', 'Rawan Kekeringan', 'Kekeringan'].forEach(s => State.activeSubcats['kebencanaan'].add(s));
+                showKebencanaanZona();
             } else {
-                ['Titik Kumpul', 'Pengungsian'].forEach(s => State.activeSubcats['kebencanaan'].add(s));
+                showKebencanaanPengungsian();
             }
-            
-            const { rebuildCategoryLayer } = await import('./layers.js');
-            rebuildCategoryLayer('kebencanaan');
         });
     });
 }

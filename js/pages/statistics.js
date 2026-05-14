@@ -196,9 +196,7 @@ function initStatChoropleth() {
     const legendEl = document.getElementById('stat-choro-legend');
     if (!el || typeof L === 'undefined') return;
     if (_statChoroMap) {
-        try {
-            _statChoroMap.remove();
-        } catch (_) {}
+        try { _statChoroMap.remove(); } catch (_) {}
         _statChoroMap = null;
     }
     const m = L.map(el, {
@@ -215,39 +213,48 @@ function initStatChoropleth() {
     }).addTo(m);
 
     let features = State.rawGeojsonCache?.kebencanaan;
-    if (!Array.isArray(features) || !features.length) {
-        features = [];
-    }
+    if (!Array.isArray(features) || !features.length) features = [];
+
     const heatPoints = [];
-    features.forEach((f) => {
+    features.forEach(f => {
         const c = featureCentroid(f);
         if (!c) return;
-        heatPoints.push([c[0], c[1], 0.9]);
+        const lr = (f.properties?.level_risiko || '').toLowerCase();
+        let intensity = 0.5;
+        if (lr.includes('sangat tinggi')) intensity = 1.0;
+        else if (lr === 'tinggi') intensity = 0.85;
+        else if (lr === 'sedang') intensity = 0.55;
+        else if (lr === 'rendah') intensity = 0.3;
+        heatPoints.push([c[0], c[1], intensity]);
     });
-    const maxC = Math.max(1, heatPoints.length);
+
     _statChoroLayer = L.heatLayer(heatPoints, {
-        radius: 34,
-        blur: 28,
+        radius: 90,
+        blur: 65,
         maxZoom: 14,
-        minOpacity: 0.45,
+        minOpacity: 0.5,
         gradient: {
-            0.1: '#1d4ed8',
-            0.35: '#22d3ee',
-            0.6: '#fde047',
-            0.8: '#fb923c',
-            1.0: '#ef4444'
+            0.0: '#1d4ed8',
+            0.2: '#06b6d4',
+            0.45: '#fde047',
+            0.72: '#fb923c',
+            1.0:  '#ef4444'
         }
     }).addTo(m);
-    renderChoroLegend(legendEl, maxC);
 
+    // Tambah batas wilayah DIY
+    fetch('data/yogyakarta_boundary.geojson')
+        .then(r => r.json())
+        .then(geojson => {
+            L.geoJSON(geojson, {
+                style: { color: '#2980b9', weight: 1.5, opacity: 0.75, fillColor: 'transparent', fillOpacity: 0 }
+            }).addTo(m);
+        })
+        .catch(() => {});
+
+    renderChoroLegend(legendEl, heatPoints.length);
     _statChoroMap = m;
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            try {
-                m.invalidateSize();
-            } catch (_) {}
-        }, 280);
-    });
+    requestAnimationFrame(() => setTimeout(() => { try { m.invalidateSize(); } catch (_) {} }, 280));
 }
 
 export function initStatisticsPage() {
@@ -466,18 +473,21 @@ function initCharts() {
 
     const distData = [42, 28, 25, 18, 15, 8, 5];
     const distTotal = distData.reduce((a, b) => a + b, 0) || 1;
+    const distLabels = ['Cangkringan', 'Ngemplak', 'Pakem', 'Turi', 'Prambanan', 'Depok', 'Gamping'];
+    const distContext = ['Erupsi', 'Banjir Lahar', 'Banjir', 'Erupsi', 'Gempa', 'Gempa', 'Banjir'];
     mk('statChartDist', {
         type: 'bar',
         data: {
-            labels: ['Cangkringan', 'Ngemplak', 'Pakem', 'Turi', 'Prambanan', 'Depok', 'Gamping'],
-            datasets: [
-                {
-                    label: 'Jumlah Kejadian',
-                    data: distData,
-                    backgroundColor: 'rgba(212, 160, 23, 0.85)',
-                    borderRadius: 4
-                }
-            ]
+            labels: distLabels,
+            datasets: [{
+                label: 'Jumlah Kejadian',
+                data: distData,
+                backgroundColor: [
+                    'rgba(239,68,68,0.85)','rgba(249,115,22,0.85)','rgba(234,179,8,0.85)',
+                    'rgba(239,68,68,0.75)','rgba(139,92,246,0.85)','rgba(59,130,246,0.85)','rgba(59,130,246,0.75)'
+                ],
+                borderRadius: 5
+            }]
         },
         options: {
             indexAxis: 'y',
@@ -487,11 +497,18 @@ function initCharts() {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        footer(items) {
-                            const v = items[0]?.parsed?.x;
-                            if (v == null) return [];
+                        title(items) {
+                            const i = items[0];
+                            return `${i.label}`;
+                        },
+                        label(ctx) {
+                            const v = ctx.parsed.x;
                             const pct = ((v / distTotal) * 100).toFixed(1);
-                            return [`${pct}% dari total bar`, `Total: ${distTotal.toLocaleString('id-ID')}`];
+                            return `  ${v.toLocaleString('id-ID')} kejadian (${pct}% dari total)`;
+                        },
+                        afterLabel(ctx) {
+                            const i = ctx.dataIndex;
+                            return `  Jenis dominan: ${distContext[i]}`;
                         }
                     }
                 }
@@ -505,18 +522,17 @@ function initCharts() {
 
     const compData = [35, 25, 15, 15, 10];
     const compTotal = compData.reduce((a, b) => a + b, 0) || 1;
+    const compLabels = ['Erupsi', 'Banjir Lahar', 'Gempa Bumi', 'Tanah Longsor', 'Kekeringan'];
     mk('statChartComp', {
         type: 'doughnut',
         data: {
-            labels: ['Erupsi', 'Banjir Lahar', 'Gempa Bumi', 'Tanah Longsor', 'Kekeringan'],
-            datasets: [
-                {
-                    data: compData,
-                    backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#3b82f6'],
-                    borderWidth: 0,
-                    hoverOffset: 8
-                }
-            ]
+            labels: compLabels,
+            datasets: [{
+                data: compData,
+                backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#3b82f6'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
         },
         options: {
             responsive: true,
@@ -526,11 +542,10 @@ function initCharts() {
                 legend: { position: 'right', labels: { boxWidth: 12, padding: 14, font: { size: 11 } } },
                 tooltip: {
                     callbacks: {
-                        footer(items) {
-                            const v = items[0]?.parsed;
-                            if (v == null) return [];
+                        label(ctx) {
+                            const v = ctx.parsed;
                             const pct = ((v / compTotal) * 100).toFixed(1);
-                            return [`${pct}% dari total donat`, `Total: ${compTotal.toLocaleString('id-ID')}`];
+                            return `  ${ctx.label}: ${v.toLocaleString('id-ID')} kasus (${pct}%)`;
                         }
                     }
                 }
@@ -543,23 +558,34 @@ function initCharts() {
         type: 'line',
         data: {
             labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
-            datasets: [
-                {
-                    label: 'Kejadian',
-                    data: [12, 19, 15, 22, 18, 30, 25],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                    tension: 0.42,
-                    fill: true,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#3b82f6'
-                }
-            ]
+            datasets: [{
+                label: 'Kejadian',
+                data: [12, 19, 15, 22, 18, 30, 25],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.12)',
+                tension: 0.42,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#3b82f6'
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label(ctx) {
+                            const v = ctx.parsed.y;
+                            const data = ctx.dataset.data;
+                            const max = Math.max(...data);
+                            const note = v === max ? ' — Tertinggi' : '';
+                            return `  ${ctx.label}: ${v.toLocaleString('id-ID')} kejadian${note}`;
+                        }
+                    }
+                }
+            },
             scales: {
                 x: { grid: { display: false } },
                 y: { grid: { color: 'rgba(255,255,255,0.05)' } }
