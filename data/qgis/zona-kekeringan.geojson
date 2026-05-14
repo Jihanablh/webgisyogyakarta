@@ -1,0 +1,69 @@
+{
+  "type": "FeatureCollection",
+  "name": "zona-kekeringan",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.5,
+              -7.95
+            ],
+            [
+              110.65,
+              -7.94
+            ],
+            [
+              110.68,
+              -8.02
+            ],
+            [
+              110.62,
+              -8.08
+            ],
+            [
+              110.52,
+              -8.07
+            ],
+            [
+              110.48,
+              -8.01
+            ],
+            [
+              110.5,
+              -7.95
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona Rawan Kekeringan Gunungkidul Selatan",
+        "category": "kebencanaan",
+        "subcategory": "Rawan Kekeringan",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Tinggi",
+        "deskripsi": "Kawasan karst dengan cadangan air tanah terbatas. Kekeringan terjadi setiap musim kemarau (Juni-Oktober).",
+        "foto": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=600",
+        "sumber_data": "BPBD Gunungkidul / PDAM",
+        "last_updated": "2024-04-01",
+        "kontak_darurat": "+62274-391942 (BPBD Gunungkidul)",
+        "instruksi_evakuasi": "Hemat penggunaan air. Hubungi BPBD untuk distribusi air bersih.",
+        "riwayat_bencana": "[{\"tanggal\":\"2023-09-01\",\"jenis\":\"Kekeringan\",\"skala\":\"Besar\",\"korban_jiwa\":0,\"pengungsi\":0,\"kerugian_material\":\"Rp 1,5 Miliar\",\"deskripsi\":\"42 desa di Gunungkidul mengalami krisis air bersih.\",\"sumber\":\"BPBD Gunungkidul\"}]",
+        "facilities": "[]",
+        "kapasitas": 0,
+        "sumber": "BPBD Gunungkidul/BPBD DIY, BNPB/IRBI 2023",
+        "tahun_data": "2024",
+        "keterangan": "Zona Rawan Kekeringan Gunungkidul Selatan - Rawan Kekeringan; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

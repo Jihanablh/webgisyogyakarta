@@ -1,90 +1,73 @@
-import { State, CATEGORIES, SUBCAT_COLORS } from './state.js';
-import { loadLargeGeoJSON } from './utils/loader.js';
+import { State, CATEGORIES } from './state.js';
 
-export const MARKER_ICONS = {
-    pariwisata:        `<path d="M3 22h18M6 18v4M10 14v8M14 10v12M18 6v16" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M12 2l-4 4h8l-4-4z" fill="white"/>`,
-    kebutuhan:         `<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" fill="none" stroke="white" stroke-width="2"/><line x1="3" y1="6" x2="21" y2="6" stroke="white" stroke-width="2"/><path d="M16 10a4 4 0 0 1-8 0" fill="none" stroke="white" stroke-width="2"/>`,
-    atm_bank:          `<rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="white" stroke-width="2"/><line x1="2" y1="10" x2="22" y2="10" stroke="white" stroke-width="2"/><line x1="6" y1="15" x2="10" y2="15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>`,
-    tempat_tinggal:    `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="white" stroke-width="2"/><polyline points="9 22 9 12 15 12 15 22" fill="none" stroke="white" stroke-width="2"/>`,
-    sosial_tugas:      `<path d="M18 8h1a4 4 0 0 1 0 8h-1" fill="none" stroke="white" stroke-width="2"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" fill="none" stroke="white" stroke-width="2"/><line x1="6" y1="1" x2="6" y2="4" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="1" x2="10" y2="4" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
-    akademik:          `<path d="M22 10v6M2 10l10-5 10 5-10 5z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
-    kesehatan_darurat: `<line x1="12" y1="5" x2="12" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>`,
-    mobilitas:         `<rect x="1" y="3" width="15" height="13" rx="2" fill="none" stroke="white" stroke-width="2"/><path d="M16 8h4l3 3v5h-7V8z" fill="none" stroke="white" stroke-width="2"/><circle cx="5.5" cy="18.5" r="2.5" fill="none" stroke="white" stroke-width="2"/><circle cx="18.5" cy="18.5" r="2.5" fill="none" stroke="white" stroke-width="2"/>`,
-    kebencanaan:       `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="none" stroke="white" stroke-width="2"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2.5" stroke-linecap="round"/>`,
-    lingkungan:        `<path d="M17 8c0 8-6 13-9 13-.5 0-1-.2-1-.5C7 18 7 14 9 10c2-4 6-6 8-6 .5 0 1 .2 1 .5 0 0 0 1.5-1 3.5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8 21s1-4 4-8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
-};
-
-function lightenHex(hex, amt) {
-    hex = hex.replace('#', '');
-    let r = parseInt(hex.slice(0,2), 16);
-    let g = parseInt(hex.slice(2,4), 16);
-    let b = parseInt(hex.slice(4,6), 16);
-    r = Math.min(255, r + amt);
-    g = Math.min(255, g + amt);
-    b = Math.min(255, b + amt);
-    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+function categoryMarkerColor(category, typeLayer = '') {
+    if (category === 'kebencanaan') {
+        if (typeLayer === 'titik_pengungsian' || typeLayer === 'titik_kumpul') return '#1a4a7a';
+        return '#ef4444';
+    }
+    const colors = {
+        pariwisata: '#d4a017',
+        kesehatan_darurat: '#e91e63',
+        akademik: '#3498db',
+        mobilitas: '#95a5a6',
+        atm_bank: '#2ecc71',
+        sosial_tugas: '#8e44ad',
+        kebutuhan: '#f59e0b',
+        tempat_tinggal: '#8b5cf6',
+        lingkungan: '#27ae60'
+    };
+    return colors[category] || CATEGORIES[category]?.color || '#d4a017';
 }
 
-function getSubcatColor(baseColor, subcatName) {
-    // Check explicit override first
-    if (SUBCAT_COLORS[subcatName]) return SUBCAT_COLORS[subcatName];
-    // Otherwise derive a shade from the base color using hash
-    let hash = 0;
-    for (let i = 0; i < subcatName.length; i++) hash = (hash * 31 + subcatName.charCodeAt(i)) & 0xffff;
-    const offset = (hash % 50) - 10; // -10 to +40 lighten offset
-    return lightenHex(baseColor, offset);
+function markerSvg(category, typeLayer = '') {
+    if (category === 'kebencanaan' && (typeLayer === 'titik_pengungsian' || typeLayer === 'titik_kumpul')) {
+        return '<path d="M5 17h14M7 17V9l5-4 5 4v8M10 17v-5h4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    const icons = {
+        pariwisata: '<circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 9h3l1.5-2h7L17 9h3v9H4V9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+        kesehatan_darurat: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>',
+        akademik: '<path d="M4 8l8-4 8 4-8 4-8-4zM7 11v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+        mobilitas: '<path d="M5 16h14M7 16l2-6h6l2 6M8 18h.01M16 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+        atm_bank: '<circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M9.5 10h3.5a2 2 0 0 1 0 4H10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+        sosial_tugas: '<path d="M5 19h14M7 17V8l5-3 5 3v9M10 17v-5h4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+        kebutuhan: '<path d="M7 8h12l-2 7H9L7 5H4M9 19h.01M16 19h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+        tempat_tinggal: '<path d="M4 11l8-7 8 7v8H6v-8M10 19v-5h4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+        lingkungan: '<path d="M18 5c-7 1-11 5-11 12 6 0 11-4 11-12zM7 17c2-4 5-6 9-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    };
+    return icons[category] || '<circle cx="12" cy="12" r="5" fill="currentColor"/>';
+}
+
+function createGmapDivIcon({ color, icon, active = false }) {
+    const safeColor = String(color || '#d4a017').replace(/"/g, '');
+    return L.divIcon({
+        className: 'gmap-div-marker',
+        html: `
+            <div class="gmap-marker ${active ? 'is-active' : ''}" style="--marker-color:${safeColor}">
+                <div class="gmap-marker-pin">
+                    <div class="gmap-marker-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>
+                    </div>
+                </div>
+            </div>`,
+        iconSize: [36, 44],
+        iconAnchor: [18, 42],
+        popupAnchor: [0, -42]
+    });
 }
 
 export function createMarker(feature, latlng, categoryKey) {
-    const cat = categoryKey || feature.properties.category || 'kebencanaan';
+    const cat = categoryKey || feature.properties?.category || 'kebencanaan';
     const baseCat = CATEGORIES[cat] ? cat : 'kebencanaan';
-    const subcat = feature.properties.subcategory || feature.properties.type || '';
-    const typeLayer = feature.properties.type_layer || '';
-    let baseColor = CATEGORIES[baseCat].color;
-    if (baseCat === 'kebencanaan') {
-        if (typeLayer === 'titik_pengungsian') baseColor = '#2980b9';
-        else if (typeLayer === 'jalur_evakuasi') baseColor = '#22c55e';
-    }
-    const color = subcat ? getSubcatColor(baseColor, subcat) : baseColor;
-    const colorLight = lightenHex(color, 55);
-
-    const size = 32;
-    const pinH = 44;
-    const r = size / 2;     // 16
-    const cx = size / 2;    // 16
-    const cy = r;           // 16  (center of circle)
-
-    // Clean teardrop pin: rounded tip at bottom, circle on top
-    const pinPath = `M ${cx - 2} ${pinH - 2} Q ${cx} ${pinH} ${cx + 2} ${pinH - 2} L ${size} ${cy} A ${r} ${r} 0 1 0 0 ${cy} Z`;
-
-    const iconHtml = MARKER_ICONS[baseCat] || '';
-    // Icon is 24x24 SVG content; scale to ~15px inside the 32px circle
-    const iconScale = 0.58;
-    const iconOffset = (size - 24 * iconScale) / 2;
-
-    const html = `
-        <div style="width:${size}px; height:${pinH}px; position:relative; filter:drop-shadow(0 3px 8px rgba(0,0,0,0.5));">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${pinH}" width="${size}" height="${pinH}">
-                <defs>
-                    <linearGradient id="mg-${baseCat}-${subcat.slice(0,4)}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:${colorLight};stop-opacity:1"/>
-                        <stop offset="100%" style="stop-color:${color};stop-opacity:1"/>
-                    </linearGradient>
-                </defs>
-                <path d="${pinPath}" fill="url(#mg-${baseCat}-${subcat.slice(0,4)})"/>
-                <g transform="translate(${iconOffset}, ${iconOffset}) scale(${iconScale})">
-                    ${iconHtml}
-                </g>
-            </svg>
-        </div>`;
+    const typeLayer = feature.properties?.type_layer || '';
+    const color = categoryMarkerColor(baseCat, typeLayer);
+    const active = baseCat === 'kebencanaan' || typeLayer === 'titik_pengungsian' || State.activeCategory === baseCat;
 
     return L.marker(latlng, {
-        icon: L.divIcon({
-            className: '',
-            html,
-            iconSize:   [size, pinH],
-            iconAnchor: [cx, pinH],
-            popupAnchor:[0, -pinH]
+        icon: createGmapDivIcon({
+            color,
+            icon: markerSvg(baseCat, typeLayer),
+            active
         })
     });
 }

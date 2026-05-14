@@ -1,0 +1,69 @@
+{
+  "type": "FeatureCollection",
+  "name": "zona-gempa",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.28,
+              -7.82
+            ],
+            [
+              110.42,
+              -7.815
+            ],
+            [
+              110.45,
+              -7.86
+            ],
+            [
+              110.43,
+              -7.92
+            ],
+            [
+              110.32,
+              -7.93
+            ],
+            [
+              110.26,
+              -7.88
+            ],
+            [
+              110.28,
+              -7.82
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona Rawan Gempa Bantul-Kota",
+        "category": "kebencanaan",
+        "subcategory": "Rawan Gempa",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Tinggi",
+        "deskripsi": "Zona patahan aktif yang menyebabkan gempa 2006 (M 6.3). Potensi gempa dangkal dengan kerusakan tinggi.",
+        "foto": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=600",
+        "sumber_data": "BMKG / Pusgen Kemen PUPR",
+        "last_updated": "2023-11-01",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "instruksi_evakuasi": "1. Drop, Cover, Hold On. 2. Jauhi bangunan tinggi. 3. Setelah gempa, periksa jalur gas & listrik.",
+        "riwayat_bencana": "[{\"tanggal\":\"2006-05-27\",\"jenis\":\"Gempa Bumi\",\"skala\":\"M 6.3\",\"korban_jiwa\":5749,\"pengungsi\":600000,\"kerugian_material\":\"Rp 29,1 Triliun\",\"deskripsi\":\"Gempa dahsyat Bantul 2006, salah satu bencana terbesar di DIY.\",\"sumber\":\"BNPB\"}]",
+        "facilities": "[]",
+        "kapasitas": 0,
+        "sumber": "BMKG, BNPB/IRBI 2023, Pusgen Kementerian PUPR",
+        "tahun_data": "2023",
+        "keterangan": "Zona Rawan Gempa Bantul-Kota - Rawan Gempa; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

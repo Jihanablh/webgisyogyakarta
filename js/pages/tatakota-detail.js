@@ -23,6 +23,24 @@ function getCoords(feature) {
     return { lat, lng };
 }
 
+function labelFor(key) {
+    const labels = {
+        name: 'Nama lokasi',
+        nama: 'Nama lokasi',
+        type: 'Jenis tempat',
+        category: 'Kategori',
+        subcategory: 'Subkategori',
+        alamat: 'Alamat',
+        address: 'Alamat',
+        rating: 'Rating',
+        sumber: 'Sumber data',
+        tahun_data: 'Tahun data',
+        keterangan: 'Keterangan'
+    };
+    if (labels[key]) return labels[key];
+    return String(key).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /**
  * Render detail lokasi ke dalam container (SPA Tata Kelola).
  */
@@ -67,8 +85,8 @@ export function renderTataKotaDetailInto(container, id, opts) {
         .filter(([k]) => !skipKeys.has(k) && typeof props[k] !== 'object')
         .map(([k, v]) => `
         <tr class="tw-border-b tw-border-white/5">
-            <td class="tw-py-2.5 tw-pr-4 tw-font-ui tw-text-[10px] tw-uppercase tw-tracking-wider tw-text-slate-500 tw-whitespace-nowrap">${esc(k)}</td>
-            <td class="tw-py-2.5 tw-font-body tw-text-sm tw-text-slate-300">${esc(String(v).slice(0, 120))}</td>
+            <td class="tw-py-3 tw-pr-5 tw-font-ui tw-text-sm tw-font-semibold tw-text-amber-200/80 tw-whitespace-nowrap">${esc(labelFor(k))}</td>
+            <td class="tw-py-3 tw-font-body tw-text-sm tw-leading-relaxed tw-text-slate-300">${esc(String(v).slice(0, 140))}</td>
         </tr>`).join('');
 
     // Keramaian bar chart data (ilustratif konsisten per lokasi hash)
@@ -80,18 +98,13 @@ export function renderTataKotaDetailInto(container, id, opts) {
     }));
 
     container.innerHTML = `
-    <div class="tatakota-detail-spa">
-        <!-- Header -->
-        <header class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-bg-slate-900/90 tw-backdrop-blur-sm tw-border-b tw-border-amber-500/20 tw-sticky tw-top-0 tw-z-20">
-            <button type="button" class="js-tk-back tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-border tw-border-amber-500/50 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui" aria-label="Kembali ke daftar">
+    <div class="tatakota-detail-spa tw-opacity-0 tw-translate-y-3 detail-page-entrance">
+        <!-- Hero -->
+        <div class="tw-relative tw-h-[58vh] tw-min-h-[420px] tw-w-full tw-overflow-hidden">
+            <button type="button" class="js-tk-back tw-absolute tw-left-6 tw-top-6 tw-z-30 tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-full tw-border tw-border-amber-500/50 tw-bg-slate-950/75 tw-backdrop-blur-md tw-text-amber-300 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui" aria-label="Kembali ke daftar">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Kembali
             </button>
-            <span class="tw-font-ui tw-text-[10px] tw-uppercase tw-tracking-widest tw-text-slate-500">Detail Lokasi</span>
-        </header>
-
-        <!-- Hero -->
-        <div class="tw-relative tw-h-[40vh] tw-w-full tw-overflow-hidden">
             <img src="${esc(hero)}" alt="${esc(name)}"
                 class="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover"
                 loading="lazy" onerror="this.src='https://picsum.photos/seed/1015/1200/480'">
@@ -102,20 +115,21 @@ export function renderTataKotaDetailInto(container, id, opts) {
                           style="background:${catColor}22;color:${catColor};border-color:${catColor}44">${esc(catLabel)}</span>
                     <span class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-rounded-full tw-bg-white/10 tw-text-white/70 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider">${esc(sub)}</span>
                 </div>
-                <h1 class="tw-font-display tw-text-3xl md:tw-text-4xl tw-font-extrabold tw-text-white tw-leading-tight tw-opacity-0 tw-translate-y-3 detail-entrance" style="--delay:80ms">${esc(name)}</h1>
+                <h1 class="tw-font-display tw-text-3xl md:tw-text-5xl tw-font-extrabold tw-text-white tw-leading-tight tw-opacity-0 tw-translate-y-3 detail-entrance" style="--delay:80ms">${esc(name)}</h1>
             </div>
         </div>
 
         <!-- Content -->
-        <div class="tw-max-w-6xl tw-mx-auto tw-px-4 tw-py-8 md:tw-px-8 tw-space-y-6">
+        <div class="tw-max-w-6xl tw-mx-auto tw-px-5 tw-py-10 md:tw-px-10 md:tw-py-14 tw-space-y-10">
 
             <!-- Grid 2 kolom -->
-            <div class="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-2">
+            <div class="tw-grid tw-grid-cols-1 tw-gap-10 lg:tw-grid-cols-[1.2fr_0.8fr]">
 
                 <!-- Info utama -->
-                <section class="tw-rounded-xl tw-border tw-border-white/8 tw-bg-slate-900/60 tw-overflow-hidden tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:160ms">
-                    <div class="tw-px-4 tw-py-3 tw-border-b tw-border-white/8">
-                        <h2 class="tw-font-display tw-text-sm tw-font-bold tw-text-amber-400 tw-uppercase tw-tracking-wider">Informasi Utama</h2>
+                <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:160ms">
+                    <div class="tw-mb-5">
+                        <h2 class="tw-font-display tw-text-2xl tw-font-bold tw-text-slate-100">Informasi Lokasi</h2>
+                        <p class="tw-mt-2 tw-text-sm tw-leading-relaxed tw-text-slate-500 tw-font-ui">Ringkasan atribut utama dari data lokasi.</p>
                     </div>
                     <div class="tw-overflow-x-auto">
                         <table class="tw-w-full tw-border-collapse tw-text-left tw-px-4">
@@ -127,27 +141,27 @@ export function renderTataKotaDetailInto(container, id, opts) {
                 <!-- Fasilitas + aksi -->
                 <div class="tw-flex tw-flex-col tw-gap-4">
                     ${fasilitas.length ? `
-                    <section class="tw-rounded-xl tw-border tw-border-white/8 tw-bg-slate-900/60 tw-p-4 tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:220ms">
-                        <h2 class="tw-font-display tw-text-sm tw-font-bold tw-text-amber-400 tw-uppercase tw-tracking-wider tw-mb-3">Fasilitas</h2>
+                    <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:220ms">
+                        <h2 class="tw-font-display tw-text-xl tw-font-bold tw-text-slate-100 tw-mb-4">Fasilitas</h2>
                         <div class="tw-flex tw-flex-wrap tw-gap-2">
-                            ${fasilitas.map(f => `<span class="tw-px-3 tw-py-1 tw-rounded-full tw-bg-slate-800 tw-border tw-border-white/10 tw-text-slate-300 tw-text-xs tw-font-medium">${esc(String(f))}</span>`).join('')}
+                            ${fasilitas.map(f => `<span class="tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-amber-400/5 tw-border tw-border-amber-400/25 tw-text-amber-100/90 tw-text-xs tw-font-medium">${esc(String(f))}</span>`).join('')}
                         </div>
                     </section>` : ''}
 
                     <!-- Aksi -->
-                    <section class="tw-rounded-xl tw-border tw-border-white/8 tw-bg-slate-900/60 tw-p-4 tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:280ms">
-                        <h2 class="tw-font-display tw-text-sm tw-font-bold tw-text-amber-400 tw-uppercase tw-tracking-wider tw-mb-3">Aksi</h2>
-                        <div class="tw-flex tw-flex-col tw-gap-2">
+                    <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:280ms">
+                        <h2 class="tw-font-display tw-text-xl tw-font-bold tw-text-slate-100 tw-mb-4">Aksi Cepat</h2>
+                        <div class="tw-flex tw-flex-wrap tw-gap-3">
                             <button type="button" id="tk-btn-arahkan"
-                                class="tw-w-full tw-py-2.5 tw-px-4 tw-rounded-xl tw-bg-amber-500 hover:tw-bg-amber-400 tw-text-slate-900 tw-text-sm tw-font-bold tw-transition-all tw-duration-200 tw-font-ui">
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-bg-amber-400/90 hover:tw-bg-amber-300 tw-text-slate-950 tw-text-sm tw-font-bold tw-transition-all tw-duration-200 tw-font-ui">
                                 Arahkan ke Sini
                             </button>
                             <button type="button" id="tk-btn-peta-kategori"
-                                class="tw-w-full tw-py-2.5 tw-px-4 tw-rounded-xl tw-border tw-border-amber-500/40 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-border tw-border-amber-500/40 tw-text-amber-300 hover:tw-bg-amber-500/10 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
                                 Lihat di Peta
                             </button>
                             <a href="https://maps.google.com?q=${lat},${lng}" target="_blank" rel="noopener noreferrer"
-                                class="tw-w-full tw-py-2.5 tw-px-4 tw-rounded-xl tw-border tw-border-white/15 tw-text-slate-400 hover:tw-bg-white/5 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui tw-text-center tw-block">
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-border tw-border-white/15 tw-text-slate-400 hover:tw-bg-white/5 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
                                 Buka di Google Maps
                             </a>
                         </div>
@@ -156,8 +170,8 @@ export function renderTataKotaDetailInto(container, id, opts) {
             </div>
 
             <!-- Grafik keramaian -->
-            <section class="tw-rounded-xl tw-border tw-border-white/8 tw-bg-slate-900/60 tw-p-4 tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:340ms">
-                <h2 class="tw-font-display tw-text-sm tw-font-bold tw-text-amber-400 tw-uppercase tw-tracking-wider tw-mb-4">Estimasi Keramaian Mingguan</h2>
+            <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:340ms">
+                <h2 class="tw-font-display tw-text-2xl tw-font-bold tw-text-slate-100 tw-mb-5">Estimasi Keramaian Mingguan</h2>
                 <div class="tw-flex tw-items-end tw-gap-1.5 tw-h-20">
                     ${crowd.map(c => `
                     <div class="tw-flex-1 tw-flex tw-flex-col tw-items-center tw-gap-1">
@@ -195,6 +209,8 @@ export function renderTataKotaDetailInto(container, id, opts) {
 
     // Entrance animations
     requestAnimationFrame(() => {
+        container.querySelector('.detail-page-entrance')?.classList.remove('tw-opacity-0', 'tw-translate-y-3');
+        container.querySelector('.detail-page-entrance')?.classList.add('tw-opacity-100', 'tw-translate-y-0', 'tw-transition-all', 'tw-duration-500');
         container.querySelectorAll('.detail-entrance').forEach(el => {
             const delay = parseInt(el.style.getPropertyValue('--delay')) || 0;
             setTimeout(() => {

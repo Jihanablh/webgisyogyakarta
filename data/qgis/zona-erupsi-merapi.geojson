@@ -1,0 +1,245 @@
+{
+  "type": "FeatureCollection",
+  "name": "zona-erupsi-merapi",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.4257,
+              -7.5207
+            ],
+            [
+              110.4557,
+              -7.5307
+            ],
+            [
+              110.4757,
+              -7.5507
+            ],
+            [
+              110.4807,
+              -7.5707
+            ],
+            [
+              110.4707,
+              -7.5907
+            ],
+            [
+              110.4457,
+              -7.5957
+            ],
+            [
+              110.4207,
+              -7.5907
+            ],
+            [
+              110.4057,
+              -7.5707
+            ],
+            [
+              110.4007,
+              -7.5507
+            ],
+            [
+              110.4107,
+              -7.5307
+            ],
+            [
+              110.4257,
+              -7.5207
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona KRB III Merapi",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Tinggi",
+        "zona": "KRB III",
+        "radius_km": 5,
+        "deskripsi": "Zona paling berbahaya, radius 0-5 km dari puncak Merapi. Area ini terkena dampak langsung awan panas (pyroclastic flow), lontaran material vulkanik, dan lahar.",
+        "foto": "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=600",
+        "sumber_data": "BPPTKG / BPBD DIY",
+        "last_updated": "2024-01-15",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "kapasitas": 0,
+        "facilities": "[]",
+        "instruksi_evakuasi": "1. Segera tinggalkan zona KRB III jika ada peringatan. 2. Ikuti jalur evakuasi yang telah ditentukan (menjauhi sungai/lembah). 3. Gunakan masker N95 untuk melindungi dari abu vulkanik. 4. Menuju titik kumpul terdekat yang telah ditetapkan BPBD.",
+        "riwayat_bencana": "[{\"tanggal\":\"2010-10-26\",\"jenis\":\"Erupsi\",\"skala\":\"VEI 4\",\"korban_jiwa\":353,\"pengungsi\":350000,\"kerugian_material\":\"Rp 4,23 Triliun\",\"deskripsi\":\"Erupsi besar Merapi 2010, terbesar dalam 100 tahun terakhir.\",\"sumber\":\"BNPB\"},{\"tanggal\":\"2006-06-14\",\"jenis\":\"Erupsi\",\"skala\":\"VEI 2\",\"korban_jiwa\":2,\"pengungsi\":17000,\"kerugian_material\":\"Rp 180 Miliar\",\"deskripsi\":\"Erupsi sedang, awan panas mengarah ke Kali Gendol.\",\"sumber\":\"BPPTKG\"},{\"tanggal\":\"2018-05-11\",\"jenis\":\"Erupsi Freatik\",\"skala\":\"VEI 1\",\"korban_jiwa\":0,\"pengungsi\":2400,\"kerugian_material\":\"Rp 5 Miliar\",\"deskripsi\":\"Erupsi freatik dengan kolom abu setinggi 5.500 meter.\",\"sumber\":\"BPPTKG\"}]",
+        "sumber": "BPPTKG, BPBD DIY, Pergub DIY No. 62 Tahun 2020 Renkon Erupsi Gunung Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Zona KRB III Merapi - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.3957,
+              -7.5007
+            ],
+            [
+              110.4457,
+              -7.5007
+            ],
+            [
+              110.4957,
+              -7.5207
+            ],
+            [
+              110.5157,
+              -7.5607
+            ],
+            [
+              110.5107,
+              -7.6007
+            ],
+            [
+              110.4857,
+              -7.6207
+            ],
+            [
+              110.4457,
+              -7.6307
+            ],
+            [
+              110.3957,
+              -7.6207
+            ],
+            [
+              110.3657,
+              -7.6007
+            ],
+            [
+              110.3557,
+              -7.5607
+            ],
+            [
+              110.3657,
+              -7.5207
+            ],
+            [
+              110.3957,
+              -7.5007
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona KRB II Merapi",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Sedang",
+        "zona": "KRB II",
+        "radius_km": 10,
+        "deskripsi": "Zona bahaya sedang, radius 5-10 km. Terdampak hujan abu lebat, lahar dingin, dan potensi aliran piroklastik saat erupsi besar.",
+        "foto": "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=600",
+        "sumber_data": "BPPTKG / BPBD DIY",
+        "last_updated": "2024-01-15",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "kapasitas": 0,
+        "facilities": "[]",
+        "instruksi_evakuasi": "1. Pantau informasi BPPTKG secara berkala. 2. Siapkan tas siaga bencana (dokumen, obat, makanan). 3. Kenali rute evakuasi dan lokasi barak pengungsian terdekat.",
+        "riwayat_bencana": "[{\"tanggal\":\"2010-10-26\",\"jenis\":\"Erupsi\",\"skala\":\"VEI 4\",\"korban_jiwa\":353,\"pengungsi\":350000,\"kerugian_material\":\"Rp 4,23 Triliun\",\"deskripsi\":\"Erupsi besar Merapi 2010.\",\"sumber\":\"BNPB\"}]",
+        "sumber": "BPPTKG, BPBD DIY, Pergub DIY No. 62 Tahun 2020 Renkon Erupsi Gunung Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Zona KRB II Merapi - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.3457,
+              -7.4807
+            ],
+            [
+              110.4457,
+              -7.4707
+            ],
+            [
+              110.5457,
+              -7.4907
+            ],
+            [
+              110.5757,
+              -7.5507
+            ],
+            [
+              110.5657,
+              -7.6307
+            ],
+            [
+              110.5257,
+              -7.6707
+            ],
+            [
+              110.4457,
+              -7.6807
+            ],
+            [
+              110.3657,
+              -7.6707
+            ],
+            [
+              110.3257,
+              -7.6307
+            ],
+            [
+              110.3157,
+              -7.5507
+            ],
+            [
+              110.3257,
+              -7.4907
+            ],
+            [
+              110.3457,
+              -7.4807
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona KRB I Merapi",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Rendah",
+        "zona": "KRB I",
+        "radius_km": 15,
+        "deskripsi": "Zona waspada, radius 10-15 km. Terdampak hujan abu tipis dan lahar dingin pasca-erupsi melalui sungai-sungai yang berhulu di Merapi.",
+        "foto": "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=600",
+        "sumber_data": "BPPTKG",
+        "last_updated": "2024-01-15",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "kapasitas": 0,
+        "facilities": "[]",
+        "instruksi_evakuasi": "1. Ikuti perkembangan status Merapi via BPPTKG. 2. Hindari area tepian sungai saat hujan deras pasca-erupsi.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPPTKG, BPBD DIY, Pergub DIY No. 62 Tahun 2020 Renkon Erupsi Gunung Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Zona KRB I Merapi - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

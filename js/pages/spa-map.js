@@ -1,4 +1,5 @@
 import { CONFIG } from '../state.js';
+import { createMarker } from '../markers.js';
 
 let _spaMap       = null;
 let _prevPageId   = null;  // ID halaman sebelumnya untuk kembali
@@ -15,8 +16,18 @@ export function showSingleMarkerMap(name, lat, lng, fromPageId = null) {
     _prevPageId = fromPageId;
     _setupSpaMapPage(name);
     _initSpaMap((map) => {
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(`<strong style="font-family:var(--font-display);font-size:14px">${_esc(name)}</strong>`).openPopup();
+        const feature = {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [lng, lat] },
+            properties: { name, category: 'pariwisata' }
+        };
+        const marker = createMarker(feature, [lat, lng], 'pariwisata').addTo(map);
+        marker.bindTooltip(`<strong>${_esc(name)}</strong><br><span>Lokasi terpilih</span>`, {
+            direction: 'top',
+            offset: [0, -18],
+            opacity: 1,
+            className: 'map-marker-tooltip'
+        });
         map.setView([lat, lng], 16, { animate: true });
     });
 }
@@ -38,14 +49,14 @@ export function showCategoryMap(catLabel, features, catColor = '#d4a017', fromPa
             if (f.geometry?.type !== 'Point') return;
             const [lng, lat] = f.geometry.coordinates;
             const name = f.properties?.name || f.properties?.nama || 'Lokasi';
-            const marker = L.circleMarker([lat, lng], {
-                radius: 7,
-                fillColor: catColor,
-                color: '#fff',
-                weight: 1.5,
-                fillOpacity: 0.9
+            const catKey = f.properties?.category || _categoryKeyFromLabel(catLabel);
+            const marker = createMarker(f, [lat, lng], catKey);
+            marker.bindTooltip(`<strong>${_esc(name)}</strong><br><span>${_esc(f.properties?.subcategory || f.properties?.type || catLabel)}</span>`, {
+                direction: 'top',
+                offset: [0, -18],
+                opacity: 1,
+                className: 'map-marker-tooltip'
             });
-            marker.bindPopup(`<strong style="font-family:var(--font-display);font-size:13px">${_esc(name)}</strong>`);
             group.addLayer(marker);
         });
         group.addTo(map);
@@ -54,6 +65,17 @@ export function showCategoryMap(catLabel, features, catColor = '#d4a017', fromPa
             if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
         } catch (_) {}
     });
+}
+
+function _categoryKeyFromLabel(label) {
+    const s = String(label || '').toLowerCase();
+    if (s.includes('wisata') || s.includes('pariwisata')) return 'pariwisata';
+    if (s.includes('sehat')) return 'kesehatan_darurat';
+    if (s.includes('didik') || s.includes('akademik')) return 'akademik';
+    if (s.includes('mobil')) return 'mobilitas';
+    if (s.includes('uang') || s.includes('bank')) return 'atm_bank';
+    if (s.includes('perintah') || s.includes('sosial')) return 'sosial_tugas';
+    return 'pariwisata';
 }
 
 /** Sembunyikan SPA map page dan kembali ke halaman sebelumnya */

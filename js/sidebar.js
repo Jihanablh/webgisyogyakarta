@@ -15,9 +15,6 @@ const DISASTER_LAYERS = [
     { id: 'pengungsian',label: 'Titik Pengungsian',  subcats: ['Risiko Erupsi Merapi'], color: '#06b6d4' },
 ];
 
-// Toggle state per layer id — semua aktif by default
-const _layerToggles = Object.fromEntries(DISASTER_LAYERS.map(l => [l.id, true]));
-
 // ── Tata Kota category definitions ─────────────────────────────────────────────
 const TATAKOTA_BUTTONS = [
     { key: 'pariwisata',        label: 'Pariwisata & Keramaian', color: '#f59e0b' },
@@ -83,48 +80,21 @@ function renderKebencanaaanPanel() {
 
     panel.innerHTML = `
     <div class="tw-px-1 tw-py-1">
-        <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-3 tw-px-1">Layer Aktif</div>
-        <div id="disaster-layer-list" class="tw-flex tw-flex-col tw-gap-0.5">
+        <div id="disaster-layer-list" class="tw-flex tw-flex-col tw-gap-0.5" aria-label="Legenda layer kebencanaan">
             ${DISASTER_LAYERS.map(layer => _renderLayerItem(layer)).join('')}
         </div>
     </div>`;
-
-    // Wire toggle switches
-    panel.querySelectorAll('.disaster-toggle-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const id = e.target.dataset.layerId;
-            _layerToggles[id] = e.target.checked;
-            _applyLayerToggles();
-        });
-    });
 }
 
 function _renderLayerItem(layer) {
-    const on = _layerToggles[layer.id];
     return `
-    <div class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-2.5 tw-rounded-lg tw-transition-all tw-duration-200 hover:tw-bg-white/5">
+    <div class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-2.5">
         <div class="tw-w-2 tw-h-2 tw-rounded-full tw-flex-shrink-0 tw-ring-1 tw-ring-white/20"
-             style="background:${layer.color};${on ? `box-shadow:0 0 6px ${layer.color}88` : 'opacity:0.4'}"></div>
-        <span class="tw-flex-1 tw-text-[12px] tw-font-medium ${on ? 'tw-text-slate-200' : 'tw-text-slate-500'} tw-font-[Inter,sans-serif] tw-transition-colors">
+             style="background:${layer.color};box-shadow:0 0 6px ${layer.color}66"></div>
+        <span class="tw-flex-1 tw-text-[12px] tw-font-medium tw-text-slate-200 tw-font-[Inter,sans-serif]">
             ${layer.label}
         </span>
-        <label class="layer-toggle tw-cursor-pointer">
-            <input type="checkbox" class="disaster-toggle-input" data-layer-id="${layer.id}" ${on ? 'checked' : ''}>
-            <span class="layer-toggle-track"></span>
-        </label>
     </div>`;
-}
-
-function _applyLayerToggles() {
-    import('./layers.js').then(({ showKebencanaanZona, showKebencanaanPengungsian }) => {
-        // Re-render to update visual states
-        renderKebencanaaanPanel();
-        // Check if pengungsian toggle is on
-        const pengungsianOn = _layerToggles['pengungsian'];
-        const zonaOn = DISASTER_LAYERS.some(l => l.id !== 'pengungsian' && _layerToggles[l.id]);
-        if (pengungsianOn) showKebencanaanPengungsian();
-        else if (zonaOn) showKebencanaanZona();
-    });
 }
 
 // ── Tata Kota panel ────────────────────────────────────────────────────────────
@@ -204,11 +174,52 @@ function updateWelcomeStats() {
 
     const grid = document.getElementById('stats-grid');
     if (grid && total > 0) {
+        const kebFeatures = State.categoryData.kebencanaan?.features || [];
+        const zonaCount = kebFeatures.filter(f => ['Polygon', 'MultiPolygon'].includes(f.geometry?.type)).length;
+        const shelterCount = kebFeatures.filter(f => f.geometry?.type === 'Point' && String(f.properties?.type_layer || '').includes('pengungsian')).length;
+        const areaKm2 = Math.max(1, Math.round(kebFeatures
+            .filter(f => f.geometry?.type === 'Polygon')
+            .reduce((sum, f) => sum + roughPolygonAreaKm2(f.geometry.coordinates?.[0] || []), 0)));
+        const maxRiskPopulation = kebFeatures.reduce((max, f) => {
+            const histories = Array.isArray(f.properties?.riwayat_bencana) ? f.properties.riwayat_bencana : [];
+            return Math.max(max, ...histories.map(h => Number(h.pengungsi || 0)));
+        }, 350000);
         grid.innerHTML = `
-            <div class="stat-card"><div class="stat-number">${total.toLocaleString()}</div><div class="stat-label">Lokasi</div></div>
-            <div class="stat-card"><div class="stat-number">${cats}</div><div class="stat-label">Kategori</div></div>
-            <div class="stat-card"><div class="stat-number">${subcats}</div><div class="stat-label">Sub-Kat</div></div>`;
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${zonaCount}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Zona Bencana</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${areaKm2}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Area km2</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${Math.round(maxRiskPopulation / 1000)}K</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Populasi Risiko</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${shelterCount}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Pengungsian</div>
+            </div>`;
     }
+}
+
+function roughPolygonAreaKm2(ring) {
+    if (!Array.isArray(ring) || ring.length < 3) return 0;
+    const lat0 = ring.reduce((s, p) => s + (Number(p[1]) || 0), 0) / ring.length;
+    const kmLon = 111.32 * Math.cos(lat0 * Math.PI / 180);
+    const kmLat = 110.57;
+    let area = 0;
+    for (let i = 0; i < ring.length; i++) {
+        const a = ring[i];
+        const b = ring[(i + 1) % ring.length];
+        const x1 = (Number(a[0]) || 0) * kmLon;
+        const y1 = (Number(a[1]) || 0) * kmLat;
+        const x2 = (Number(b[0]) || 0) * kmLon;
+        const y2 = (Number(b[1]) || 0) * kmLat;
+        area += x1 * y2 - x2 * y1;
+    }
+    return Math.abs(area) / 2;
 }
 
 // ── Search ─────────────────────────────────────────────────────────────────────
@@ -302,12 +313,14 @@ function renderRecentEventsWidget() {
         { title: 'Banjir Bantul',       status: 'Waspada',           statusClass: 'status-warning',  time: '2 hari lalu' },
         { title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)',   statusClass: 'status-moderate', time: '1 jam lalu' },
     ];
-    list.innerHTML = events.map(e => `
-        <div class="rew-item">
-            <div class="rew-info">
-                <div class="rew-event-title">${e.title}</div>
-                <span class="rew-badge ${e.statusClass}">${e.status}</span>
-                <div class="rew-time">Terakhir: ${e.time}</div>
+    list.innerHTML = events.slice(0, 3).map(e => `
+        <div class="tw-py-2.5 tw-border-b tw-border-white/5 last:tw-border-0">
+            <div class="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div class="tw-font-[Inter,sans-serif] tw-text-xs tw-font-semibold tw-text-slate-200">${e.title}</div>
+                <span class="tw-font-[Space_Mono,monospace] tw-text-[9px] tw-text-slate-500">${e.time}</span>
+            </div>
+            <div class="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <span class="tw-inline-block tw-px-2 tw-py-0.5 tw-rounded-full tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-wide ${e.statusClass === 'status-danger' ? 'tw-bg-red-900/40 tw-text-red-400 tw-border tw-border-red-500/30' : e.statusClass === 'status-warning' ? 'tw-bg-amber-900/30 tw-text-amber-400 tw-border tw-border-amber-500/30' : 'tw-bg-blue-900/30 tw-text-blue-400 tw-border tw-border-blue-500/30'}">${e.status}</span>
             </div>
         </div>`).join('');
     if (widget) widget.style.display = 'block';

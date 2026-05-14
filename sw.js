@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jogjamap-v2-cache';
+const CACHE_NAME = 'jogjamap-v5-cache';
 const ASSETS = [
   '/',
   '/index.html',

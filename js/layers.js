@@ -7,6 +7,28 @@ let _kebHeatLayer    = null;  // L.heatLayer for zona bencana
 let _kebLineLayer    = null;  // L.featureGroup for jalur evakuasi lines
 let _kebMarkerLayer  = null;  // L.featureGroup for titik pengungsian / titik kumpul
 let _boundaryLayer   = null;  // DIY boundary GeoJSON
+let _kebZonaVisible = true;
+let _kebPengungsianVisible = true;
+
+function esc(v) {
+    return String(v ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function bindFeatureTooltip(layer, feature) {
+    const props = feature.properties || {};
+    const title = props.name || props.nama || 'Lokasi';
+    const meta = props.kapasitas
+        ? `Kapasitas ${Number(props.kapasitas).toLocaleString()} jiwa`
+        : (props.subcategory || props.type || props.level_risiko || 'Informasi lokasi');
+    layer.bindTooltip(
+        `<strong>${esc(title)}</strong><br><span>${esc(meta)}</span>`,
+        { direction: 'top', offset: [0, -18], opacity: 1, className: 'map-marker-tooltip' }
+    );
+}
 
 /** Helper: centroid dari feature geometry */
 function getCentroid(feature) {
@@ -32,10 +54,11 @@ function getCentroid(feature) {
 function risikoIntensity(levelRisiko) {
     const l = (levelRisiko || '').toLowerCase();
     if (l.includes('sangat tinggi')) return 1.0;
-    if (l === 'tinggi') return 0.8;
-    if (l === 'sedang') return 0.5;
-    if (l === 'rendah') return 0.3;
-    return 0.2;
+    if (l.includes('tinggi'))        return 0.8;
+    if (l.includes('sedang'))        return 0.5;
+    if (l.includes('rendah'))        return 0.3;
+    if (l.includes('info'))          return 0.6;  // jalur evakuasi and pengungsian
+    return 0.4;
 }
 
 /** Build heatmap layer dari polygon/linestring zona bencana */
@@ -52,16 +75,18 @@ function buildKebHeatLayer(features) {
     });
     if (!heatPoints.length) return null;
     return L.heatLayer(heatPoints, {
-        radius: 80,
-        blur: 55,
-        maxZoom: 15,
-        minOpacity: 0.45,
+        radius: 90,
+        blur: 65,
+        maxZoom: 16,
+        minOpacity: 0.5,
         gradient: {
-            0.0: '#1d4ed8',
-            0.25: '#06b6d4',
-            0.5:  '#fde047',
+            0.0:  '#1d4ed8',
+            0.2:  '#0ea5e9',
+            0.4:  '#22d3ee',
+            0.55: '#fde047',
             0.75: '#fb923c',
-            1.0:  '#ef4444'
+            0.9:  '#ef4444',
+            1.0:  '#dc2626'
         }
     });
 }
@@ -74,11 +99,14 @@ function buildKebLineLayer(features) {
     );
     if (!evakuasiFeatures.length) return null;
     return L.geoJSON({ type: 'FeatureCollection', features: evakuasiFeatures }, {
+        renderer: L.svg({ padding: 0.5 }),
         style: () => ({
-            color: '#22c55e',
-            weight: 3,
-            opacity: 0.85,
-            dashArray: '8 6'
+            color: '#27ae60',
+            weight: 5,
+            opacity: 0.9,
+            lineCap: 'round',
+            lineJoin: 'round',
+            noClip: true
         }),
         onEachFeature: (feature, layer) => {
             layer.on('click', () => {
@@ -93,14 +121,18 @@ function buildKebLineLayer(features) {
 /** Build marker layer untuk titik pengungsian & titik kumpul */
 function buildKebMarkerLayer(features) {
     const pointFeatures = features.filter(f => {
-        const tl = f.properties?.type_layer || '';
+        const tl = (f.properties?.type_layer || '').toLowerCase();
+        const subcat = (f.properties?.subcategory || '').toLowerCase();
         return f.geometry?.type === 'Point' &&
-            (tl === 'titik_pengungsian' || tl === 'titik_kumpul');
+            (tl === 'titik_pengungsian' || tl === 'titik_kumpul' ||
+             tl === 'pengungsian' || subcat.includes('pengungsian') ||
+             subcat.includes('kumpul'));
     });
     if (!pointFeatures.length) return null;
     return L.geoJSON({ type: 'FeatureCollection', features: pointFeatures }, {
         pointToLayer: (feature, latlng) => createMarker(feature, latlng, 'kebencanaan'),
         onEachFeature: (feature, layer) => {
+            bindFeatureTooltip(layer, feature);
             layer.on('click', () => {
                 document.dispatchEvent(new CustomEvent('markerClicked', {
                     detail: { feature, category: 'kebencanaan', layer }
@@ -117,19 +149,44 @@ function _clearKebLayers() {
     if (_kebMarkerLayer && State.map) { try { State.map.removeLayer(_kebMarkerLayer); } catch(_) {} }
 }
 
-/** Tampilkan zona bencana: heatmap + jalur evakuasi */
-export function showKebencanaanZona() {
-    _clearKebLayers();
+function _syncKebLayers() {
     if (!State.map) return;
-    if (_kebHeatLayer)  State.map.addLayer(_kebHeatLayer);
-    if (_kebLineLayer)  State.map.addLayer(_kebLineLayer);
+    if (_kebHeatLayer) {
+        if (_kebZonaVisible && !State.map.hasLayer(_kebHeatLayer)) State.map.addLayer(_kebHeatLayer);
+        if (!_kebZonaVisible && State.map.hasLayer(_kebHeatLayer)) State.map.removeLayer(_kebHeatLayer);
+    }
+    if (_kebLineLayer) {
+        if (_kebZonaVisible && !State.map.hasLayer(_kebLineLayer)) State.map.addLayer(_kebLineLayer);
+        if (!_kebZonaVisible && State.map.hasLayer(_kebLineLayer)) State.map.removeLayer(_kebLineLayer);
+    }
+    if (_kebMarkerLayer) {
+        if (_kebPengungsianVisible && !State.map.hasLayer(_kebMarkerLayer)) State.map.addLayer(_kebMarkerLayer);
+        if (!_kebPengungsianVisible && State.map.hasLayer(_kebMarkerLayer)) State.map.removeLayer(_kebMarkerLayer);
+    }
 }
 
-/** Tampilkan tempat pengungsian: hanya marker titik */
+/** Tampilkan zona bencana: heatmap + jalur evakuasi */
+export function showKebencanaanZona() {
+    _kebZonaVisible = true;
+    _syncKebLayers();
+}
+
+/** Tampilkan tempat pengungsian: marker titik */
 export function showKebencanaanPengungsian() {
-    _clearKebLayers();
-    if (!State.map) return;
-    if (_kebMarkerLayer) State.map.addLayer(_kebMarkerLayer);
+    _kebPengungsianVisible = true;
+    _syncKebLayers();
+}
+
+export function toggleKebencanaanZona() {
+    _kebZonaVisible = !_kebZonaVisible;
+    _syncKebLayers();
+    return _kebZonaVisible;
+}
+
+export function toggleKebencanaanPengungsian() {
+    _kebPengungsianVisible = !_kebPengungsianVisible;
+    _syncKebLayers();
+    return _kebPengungsianVisible;
 }
 
 /** Load dan render batas wilayah DIY di atas heatmap */
@@ -183,6 +240,7 @@ function buildLayerGroup(category, features) {
     const geoJsonLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
         pointToLayer: (feature, latlng) => createMarker(feature, latlng, category),
         onEachFeature: (feature, layer) => {
+            if (feature.geometry?.type === 'Point') bindFeatureTooltip(layer, feature);
             layer.on('click', () => {
                 document.dispatchEvent(new CustomEvent('markerClicked', {
                     detail: { feature, category, layer }
@@ -198,7 +256,7 @@ function buildLayerGroup(category, features) {
 export async function loadLayer(category) {
     if (State.layerCache[category]) {
         if (category === 'kebencanaan') {
-            showKebencanaanZona();
+            _syncKebLayers();
             return;
         }
         if (State.enabledCategories.has(category)) {
@@ -237,7 +295,9 @@ export async function loadLayer(category) {
     if (category === 'kebencanaan') {
         // Show zona bencana by default
         if (State.enabledCategories.has(category)) {
-            showKebencanaanZona();
+            _kebZonaVisible = true;
+            _kebPengungsianVisible = true;
+            _syncKebLayers();
         }
     } else {
         if (State.enabledCategories.has(category)) {
@@ -250,7 +310,7 @@ export async function loadLayer(category) {
 
 export function showLayer(category) {
     State.enabledCategories.add(category);
-    if (category === 'kebencanaan') { showKebencanaanZona(); return; }
+    if (category === 'kebencanaan') { _syncKebLayers(); return; }
     const lg = State.layerCache[category];
     if (lg && !State.markerClusterGroup.hasLayer(lg)) {
         State.markerClusterGroup.addLayer(lg);
@@ -259,7 +319,10 @@ export function showLayer(category) {
 
 export function hideLayer(category) {
     State.enabledCategories.delete(category);
-    if (category === 'kebencanaan') { _clearKebLayers(); return; }
+    if (category === 'kebencanaan') {
+        _clearKebLayers();
+        return;
+    }
     const lg = State.layerCache[category];
     if (lg) State.markerClusterGroup.removeLayer(lg);
 }
@@ -270,7 +333,11 @@ export function showOnlyCategory(category) {
     State.enabledCategories.add(category);
     Object.keys(State.layerCache).forEach(cat => {
         if (cat === 'kebencanaan') {
-            if (category === 'kebencanaan') showKebencanaanZona();
+            if (category === 'kebencanaan') {
+                _kebZonaVisible = true;
+                _kebPengungsianVisible = true;
+                _syncKebLayers();
+            }
             else _clearKebLayers();
         } else {
             if (cat !== category) {
@@ -302,7 +369,12 @@ export function showAllLayers() {
     State.onlyKebencanaan = false;
     Object.keys(State.layerCache).forEach(cat => {
         State.enabledCategories.add(cat);
-        if (cat === 'kebencanaan') { showKebencanaanZona(); return; }
+        if (cat === 'kebencanaan') {
+            _kebZonaVisible = true;
+            _kebPengungsianVisible = true;
+            _syncKebLayers();
+            return;
+        }
         if (!State.markerClusterGroup.hasLayer(State.layerCache[cat])) {
             State.markerClusterGroup.addLayer(State.layerCache[cat]);
         }
@@ -319,7 +391,7 @@ export function rebuildCategoryLayer(key) {
         _kebHeatLayer   = buildKebHeatLayer(rawFeatures);
         _kebLineLayer   = buildKebLineLayer(rawFeatures);
         _kebMarkerLayer = buildKebMarkerLayer(rawFeatures);
-        if (State.enabledCategories.has(key)) showKebencanaanZona();
+        if (State.enabledCategories.has(key)) _syncKebLayers();
         return;
     }
 

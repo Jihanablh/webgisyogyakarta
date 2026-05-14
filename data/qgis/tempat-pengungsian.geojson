@@ -1,0 +1,128 @@
+{
+  "type": "FeatureCollection",
+  "name": "tempat-pengungsian",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4078,
+          -7.7158
+        ]
+      },
+      "properties": {
+        "name": "Barak Pengungsian Stadion Maguwoharjo",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "titik_pengungsian",
+        "level_risiko": "Info",
+        "deskripsi": "Stadion utama Sleman, kapasitas besar untuk pengungsi Merapi.",
+        "foto": "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600",
+        "kapasitas": 2000,
+        "facilities": "[\"Tenda Darurat\",\"Air Bersih\",\"MCK\",\"Dapur Umum\",\"Posko Kesehatan\"]",
+        "sumber_data": "BPBD DIY",
+        "last_updated": "2024-03-01",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "instruksi_evakuasi": "Datang ke posko terdekat, lapor ke petugas, ikuti arahan penempatan tenda.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD DIY/BPBD Sleman, Renkon Erupsi Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Barak Pengungsian Stadion Maguwoharjo - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4124,
+          -7.6277
+        ]
+      },
+      "properties": {
+        "name": "Barak Pengungsian Balai Desa Umbulharjo",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "titik_pengungsian",
+        "level_risiko": "Info",
+        "deskripsi": "Titik pengungsian terdekat dari lereng Merapi sisi selatan.",
+        "foto": "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9?w=600",
+        "kapasitas": 500,
+        "facilities": "[\"Tenda Darurat\",\"Air Bersih\",\"MCK\",\"Dapur Umum\"]",
+        "sumber_data": "BPBD DIY",
+        "last_updated": "2024-03-01",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "instruksi_evakuasi": "Datang ke posko terdekat, lapor ke petugas, ikuti arahan penempatan tenda.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD DIY/BPBD Sleman, Renkon Erupsi Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Barak Pengungsian Balai Desa Umbulharjo - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.384,
+          -7.7842
+        ]
+      },
+      "properties": {
+        "name": "Posko Pengungsian GOR Amongrogo",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "titik_pengungsian",
+        "level_risiko": "Info",
+        "deskripsi": "Gedung olahraga besar di pusat kota, digunakan saat erupsi 2010.",
+        "foto": "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600",
+        "kapasitas": 3000,
+        "facilities": "[\"Tenda Darurat\",\"Air Bersih\",\"MCK\",\"Dapur Umum\",\"Posko Kesehatan\",\"Logistik\"]",
+        "sumber_data": "BPBD DIY",
+        "last_updated": "2024-03-01",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "instruksi_evakuasi": "Datang ke posko terdekat, lapor ke petugas, ikuti arahan penempatan tenda.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD DIY/BPBD Sleman, Renkon Erupsi Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Posko Pengungsian GOR Amongrogo - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.47,
+          -7.752
+        ]
+      },
+      "properties": {
+        "name": "Barak Pengungsian Prambanan",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "titik_pengungsian",
+        "level_risiko": "Info",
+        "deskripsi": "Titik pengungsian untuk warga lereng timur Merapi.",
+        "foto": "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9?w=600",
+        "kapasitas": 800,
+        "facilities": "[\"Tenda Darurat\",\"Air Bersih\",\"MCK\"]",
+        "sumber_data": "BPBD DIY",
+        "last_updated": "2024-03-01",
+        "kontak_darurat": "+62274-515059 (BPBD DIY)",
+        "instruksi_evakuasi": "Datang ke posko terdekat, lapor ke petugas, ikuti arahan penempatan tenda.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD DIY/BPBD Sleman, Renkon Erupsi Merapi",
+        "tahun_data": "2024",
+        "keterangan": "Barak Pengungsian Prambanan - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

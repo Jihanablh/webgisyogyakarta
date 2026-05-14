@@ -5,12 +5,12 @@ import { showCategoryMap } from './spa-map.js';
 const TATA_KEYS = ['pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank', 'sosial_tugas'];
 
 const CATEGORY_CARDS = [
-    { key: 'pariwisata',        title: 'Pariwisata',    desc: 'Destinasi, budaya, dan rekreasi kota',         icon: '🏛️', gradient: 'from-amber-900/60 to-amber-700/30' },
-    { key: 'mobilitas',         title: 'Mobilitas',     desc: 'Terminal, stasiun, akses transportasi',         icon: '🚌', gradient: 'from-cyan-900/60 to-cyan-700/30' },
-    { key: 'kesehatan_darurat', title: 'Kesehatan',     desc: 'Rumah sakit, klinik, layanan darurat',          icon: '🏥', gradient: 'from-rose-900/60 to-rose-700/30' },
-    { key: 'akademik',          title: 'Pendidikan',    desc: 'Kampus, sekolah, pusat pembelajaran',           icon: '🎓', gradient: 'from-violet-900/60 to-violet-700/30' },
-    { key: 'atm_bank',          title: 'Keuangan',      desc: 'ATM, bank, layanan transaksi',                  icon: '🏦', gradient: 'from-emerald-900/60 to-emerald-700/30' },
-    { key: 'sosial_tugas',      title: 'Pemerintahan',  desc: 'Layanan publik dan fasilitas sosial',           icon: '🏢', gradient: 'from-blue-900/60 to-blue-700/30' }
+    { key: 'pariwisata',        title: 'Pariwisata',    desc: 'Destinasi, budaya, dan rekreasi kota',         color: '#f59e0b', gradient: 'from-amber-900/60 to-amber-700/30' },
+    { key: 'mobilitas',         title: 'Mobilitas',     desc: 'Terminal, stasiun, akses transportasi',         color: '#06b6d4', gradient: 'from-cyan-900/60 to-cyan-700/30' },
+    { key: 'kesehatan_darurat', title: 'Kesehatan',     desc: 'Rumah sakit, klinik, layanan darurat',          color: '#f43f5e', gradient: 'from-rose-900/60 to-rose-700/30' },
+    { key: 'akademik',          title: 'Pendidikan',    desc: 'Kampus, sekolah, pusat pembelajaran',           color: '#a855f7', gradient: 'from-violet-900/60 to-violet-700/30' },
+    { key: 'atm_bank',          title: 'Keuangan',      desc: 'ATM, bank, layanan transaksi',                  color: '#10b981', gradient: 'from-emerald-900/60 to-emerald-700/30' },
+    { key: 'sosial_tugas',      title: 'Pemerintahan',  desc: 'Layanan publik dan fasilitas sosial',           color: '#3b82f6', gradient: 'from-blue-900/60 to-blue-700/30' }
 ];
 
 // Mapping spesifik nama → Picsum seed (konsisten setiap refresh)
@@ -169,12 +169,12 @@ export function initTataKotaPage() {
 // ── Category selection grid ────────────────────────────────────────────────────
 function _renderCategoryGrid(root) {
     root.innerHTML = `
-    <div class="tw-max-w-[1120px] tw-mx-auto tw-px-4 tw-py-6">
+    <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-px-6 lg:tw-px-10 tw-py-8">
         <div class="tw-mb-8 tw-pb-6 tw-border-b tw-border-white/10">
             <h1 class="tw-font-display tw-text-[clamp(24px,3.5vw,38px)] tw-font-extrabold tw-text-slate-100 tw-tracking-tight tw-mb-2">Tata Kelola</h1>
             <p class="tw-font-ui tw-text-sm tw-text-slate-400">Pilih kategori untuk melihat daftar lokasi secara terfokus.</p>
         </div>
-        <div id="tatakota-category-grid" class="tw-grid tw-grid-cols-2 md:tw-grid-cols-3 tw-gap-4"></div>
+        <div id="tatakota-category-grid" class="tw-grid tw-w-full tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6"></div>
     </div>`;
 
     const catGrid = root.querySelector('#tatakota-category-grid');
@@ -182,15 +182,15 @@ function _renderCategoryGrid(root) {
         const count = State.rawGeojsonCache[c.key]?.length || 0;
         const card = document.createElement('button');
         card.type = 'button';
-        card.className = 'tatakota-category-card tw-group tw-relative tw-overflow-hidden tw-text-left tw-p-5 tw-rounded-2xl tw-border tw-border-white/8 tw-bg-slate-900/80 tw-backdrop-blur-sm tw-transition-all tw-duration-300 hover:tw-scale-105 hover:tw-shadow-xl hover:tw-border-amber-500/30 tw-opacity-0 tw-translate-y-4';
+        card.className = 'tatakota-category-card tw-group tw-relative tw-w-full tw-min-w-0 tw-overflow-hidden tw-text-left tw-p-6 tw-rounded-2xl tw-border tw-border-white/8 tw-bg-slate-900/80 tw-backdrop-blur-sm tw-transition-all tw-duration-300 hover:tw-scale-[1.02] hover:tw-shadow-xl hover:tw-border-amber-500/30 tw-opacity-0 tw-translate-y-4';
         card.style.transitionDelay = `${idx * 60}ms`;
         card.innerHTML = `
             <div class="tw-absolute tw-inset-0 tw-bg-gradient-to-br ${c.gradient} tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100"></div>
             <div class="tw-relative tw-z-10">
-                <div class="tw-mb-3 tw-text-2xl">${c.icon}</div>
-                <h3 class="tw-font-display tw-text-base tw-font-bold tw-text-slate-100 tw-mb-1">${esc(c.title)}</h3>
+                <div class="tw-w-8 tw-h-1 tw-rounded-full tw-mb-4" style="background:${c.color}"></div>
+                <h3 class="tw-font-display tw-text-lg tw-font-bold tw-text-slate-100 tw-mb-1">${esc(c.title)}</h3>
                 <p class="tw-font-ui tw-text-xs tw-text-slate-400 tw-leading-relaxed tw-mb-3">${esc(c.desc)}</p>
-                ${count ? `<span class="tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded-full tw-bg-amber-500/15 tw-text-amber-400 tw-text-[10px] tw-font-mono tw-font-semibold">${count.toLocaleString()} lokasi</span>` : ''}
+                ${count ? `<span class="tw-inline-flex tw-items-center tw-px-2 tw-py-0.5 tw-rounded-full tw-text-[10px] tw-font-mono tw-font-semibold" style="background:${c.color}18;color:${c.color}">${count.toLocaleString()} lokasi</span>` : ''}
             </div>`;
         card.addEventListener('click', () => {
             _activeCat = c.key;
@@ -214,7 +214,7 @@ function _renderCardList(root) {
     const catColor = CATEGORIES[_activeCat]?.color || '#d4a017';
 
     root.innerHTML = `
-    <div class="tw-max-w-[1120px] tw-mx-auto tw-px-4 tw-py-6">
+    <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-px-6 lg:tw-px-10 tw-py-8">
         <div class="tw-mb-6 tw-pb-6 tw-border-b tw-border-white/10">
             <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
                 <button type="button" id="tatakota-back-cats"
@@ -231,7 +231,7 @@ function _renderCardList(root) {
             <p class="tw-font-ui tw-text-sm tw-text-slate-400">Kategori: <span class="tw-text-amber-400 tw-font-semibold">${esc(catInfo?.title || _activeCat)}</span></p>
         </div>
         <div id="tatakota-counter" class="tw-font-mono tw-text-xs tw-text-slate-500 tw-mb-4" aria-live="polite"></div>
-        <div id="tatakota-grid-host" class="tatakota-grid"></div>
+        <div id="tatakota-grid-host" class="tw-w-full"></div>
         <button type="button" id="tatakota-loadmore"
             class="tw-mt-6 tw-w-full tw-py-3 tw-rounded-xl tw-border tw-border-amber-500/30 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui" style="display:none">
             Tampilkan semua data
@@ -270,7 +270,7 @@ function _renderGrid(root) {
     if (counterEl) counterEl.textContent = `Menampilkan ${slice.length} dari ${all.length} lokasi`;
 
     const grid = document.createElement('div');
-    grid.className = 'tatakota-grid';
+    grid.className = 'tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6';
 
     slice.forEach(({ feature, cat }, cardIdx) => {
         const props = feature.properties || {};
@@ -280,19 +280,29 @@ function _renderGrid(root) {
         const { lat, lng } = getCoords(feature);
         const img   = cardImageUrl(cat, name);
         const catColor = CATEGORIES[cat]?.color || '#d4a017';
+        const rating = (4.1 + (hashPick(`${name}|rating`, 8) / 10)).toFixed(1);
 
         const card = document.createElement('article');
-        card.className = 'tatakota-card tw-opacity-0 tw-translate-y-5 tw-transition-all tw-duration-500';
+        card.className = 'tw-group tw-flex tw-h-full tw-min-w-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-2xl tw-border tw-border-white/10 tw-bg-slate-900/80 tw-shadow-lg tw-shadow-black/20 tw-opacity-0 tw-translate-y-5 tw-transition-all tw-duration-300 hover:tw-scale-[1.02] hover:tw-shadow-xl hover:tw-shadow-amber-500/10 hover:tw-border-amber-500/35';
         const safeImg = String(img).replace(/"/g, '&quot;').replace(/'/g, '%27');
         card.innerHTML = `
-            <div class="tatakota-card-photo" style="background-image:url('${safeImg}')"></div>
-            <div class="tatakota-card-body">
-                <h3 class="tatakota-card-title">${esc(name)}</h3>
-                <span class="tatakota-card-sub">${esc(sub)}</span>
-                <p class="tatakota-card-addr">${esc(addr)}</p>
-                <div class="tatakota-card-actions">
-                    <button type="button" class="tatakota-btn tatakota-btn--ghost js-detail">Detail</button>
-                    <button type="button" class="tatakota-btn tatakota-btn--ghost js-map" style="color:${catColor};border-color:${catColor}44">Lihat di Peta</button>
+            <img src="${safeImg}" alt="${esc(name)}" loading="lazy"
+                class="tw-aspect-[4/3] tw-w-full tw-object-cover tw-rounded-t-2xl tw-bg-slate-800"
+                onerror="this.src='https://picsum.photos/seed/1015/800/600'">
+            <div class="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-p-5">
+                <div class="tw-mb-3">
+                    <span class="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-full tw-border tw-border-amber-400/25 tw-bg-amber-400/10 tw-px-2.5 tw-py-1 tw-text-[10px] tw-font-semibold tw-text-amber-300 tw-font-ui">${esc(sub)}</span>
+                </div>
+                <h3 class="tw-mb-2 tw-font-display tw-text-lg tw-font-bold tw-leading-snug tw-text-slate-100">${esc(name)}</h3>
+                <p class="tw-line-clamp-2 tw-min-h-[40px] tw-text-sm tw-leading-relaxed tw-text-slate-400 tw-font-ui">${esc(addr)}</p>
+                <div class="tw-mt-3 tw-flex tw-items-center tw-gap-2" aria-label="Rating ${rating} dari 5">
+                    <span class="tw-text-sm tw-tracking-[0.12em] tw-text-amber-400">★★★★★</span>
+                    <span class="tw-font-mono tw-text-xs tw-text-slate-500">${rating}</span>
+                </div>
+                <div class="tw-mt-auto tw-flex tw-items-center tw-gap-3 tw-pt-5">
+                    <button type="button" class="js-detail tw-inline-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-white/15 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-xs tw-font-bold tw-text-slate-200 tw-transition-colors hover:tw-border-amber-400/45 hover:tw-text-amber-300 tw-font-ui">Detail</button>
+                    <button type="button" class="js-map tw-ml-auto tw-inline-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-px-4 tw-py-2.5 tw-text-xs tw-font-bold tw-transition-colors tw-font-ui"
+                        style="color:${catColor};border-color:${catColor}55;background:${catColor}12">Lihat di Peta</button>
                 </div>
             </div>`;
 
@@ -328,7 +338,7 @@ function _renderGrid(root) {
         });
     });
 
-    const old = host.querySelector('.tatakota-grid');
+    const old = host.firstElementChild;
     if (old) old.replaceWith(grid);
     else host.appendChild(grid);
 

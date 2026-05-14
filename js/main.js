@@ -1,5 +1,5 @@
 import { initMap } from './map.js';
-import { loadLayer, showOnlyKebencanaan, loadDIYBoundary, showKebencanaanZona, showKebencanaanPengungsian } from './layers.js';
+import { loadLayer, showOnlyKebencanaan, loadDIYBoundary, toggleKebencanaanZona, toggleKebencanaanPengungsian } from './layers.js';
 import { initSidebar } from './sidebar.js';
 import { initDetailPanel } from './detail-panel.js';
 import { Router } from './utils/router.js';
@@ -13,6 +13,7 @@ import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js';
 import { buildGeoKnowledgeIndex } from './geo-index.js';
 import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js';
 import { initWelcomeCinematic } from './welcome-cinematic.js';
+import { createMarker } from './markers.js';
 
 window.State = State;
 window.CATEGORIES = CATEGORIES;
@@ -49,8 +50,18 @@ function openSingleMapMode(map, id) {
             } catch (_) {}
         });
     }
-    const marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup(`<strong>${String(name || 'Lokasi')}</strong>`).openPopup();
+    const feature = {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [lng, lat] },
+        properties: { name: name || 'Lokasi', category: 'pariwisata' }
+    };
+    const marker = createMarker(feature, [lat, lng], 'pariwisata').addTo(map);
+    marker.bindTooltip(`<strong>${String(name || 'Lokasi')}</strong><br><span>Lokasi terpilih</span>`, {
+        direction: 'top',
+        offset: [0, -18],
+        opacity: 1,
+        className: 'map-marker-tooltip'
+    });
     map.setView([lat, lng], 16, { animate: true });
     return true;
 }
@@ -90,10 +101,13 @@ async function init() {
 
             if (page === 'map') {
                 document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
+                document.getElementById('map-right-stack')?.classList.remove('hidden');
+                document.getElementById('risk-legend')?.classList.remove('hidden');
                 showOnlyKebencanaan();
                 if (State.map) setTimeout(() => State.map.invalidateSize(), 50);
             } else {
                 document.getElementById('map-top-left-chrome')?.classList.add('hidden');
+                document.getElementById('map-right-stack')?.classList.add('hidden');
             }
         });
     });
@@ -121,6 +135,7 @@ async function init() {
             document.body.classList.add('app-started');
             document.getElementById('top-nav')?.classList.add('is-visible');
             document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
+            document.getElementById('map-right-stack')?.classList.remove('hidden');
             showOnlyKebencanaan();
             document.getElementById('risk-legend')?.classList.remove('hidden');
             tryResumeBgmFromWelcomeGesture();
@@ -338,16 +353,20 @@ function initDisasterFilters() {
     if (!filters.length) return;
     filters.forEach(btn => {
         btn.addEventListener('click', () => {
-            filters.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
             const filterType = btn.dataset.filter;
 
-            if (filterType === 'Zona Bencana') {
-                showKebencanaanZona();
-            } else {
-                showKebencanaanPengungsian();
-            }
+            const isOn = filterType === 'Zona Bencana'
+                ? toggleKebencanaanZona()
+                : toggleKebencanaanPengungsian();
+            btn.classList.toggle('active', isOn);
         });
+    });
+
+    // After kebencanaan loads, apply the currently active filter
+    document.addEventListener('layerLoaded', (e) => {
+        if (e.detail?.category === 'kebencanaan') {
+            filters.forEach(btn => btn.classList.add('active'));
+        }
     });
 }
 

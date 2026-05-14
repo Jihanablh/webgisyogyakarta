@@ -23,11 +23,13 @@ function loadYouTubeApi() {
             resolve();
             return;
         }
+        const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
         const prev = window.onYouTubeIframeAPIReady;
         window.onYouTubeIframeAPIReady = () => {
             if (typeof prev === 'function') prev();
             resolve();
         };
+        if (existing) return;
         const s = document.createElement('script');
         s.src = 'https://www.youtube.com/iframe_api';
         s.async = true;
@@ -99,8 +101,9 @@ export function initBgm() {
         btn.classList.toggle('is-playing', playing);
         if (playing) btn.classList.remove('bgm-error');
         const lab = getLabelEl(btn);
-        if (lab) lab.textContent = playing ? 'Jeda' : TITLE_SHORT;
-        btn.title = playing ? 'Jeda pemutaran' : `Putar — ${TITLE_SHORT} (YouTube embed setelah klik)`;
+        // Always show song title; play/pause communicated via icon/class
+        if (lab) lab.textContent = TITLE_SHORT;
+        btn.title = playing ? `Sedang diputar — ${TITLE_SHORT}` : `Putar — ${TITLE_SHORT}`;
     };
 
     setUi(false);
@@ -115,6 +118,24 @@ export function initBgm() {
         audio.addEventListener('playing', () => {
             btn.classList.remove('bgm-error');
         });
+    }
+
+    if (useYt) {
+        ensureYtPlayer('bgm-youtube-host', vid, (st) => {
+            if (st === 1) setUi(true);
+            if (st === 2 || st === 0) {
+                setUi(false);
+                localStorage.setItem(BGM_PREF_KEY, '0');
+            }
+        }).catch((e) => {
+            console.warn('YouTube BGM init gagal, tombol fallback diaktifkan', e);
+            destroyYtPlayer();
+            btn.disabled = false;
+            btn.title = `Putar â€” ${TITLE_SHORT}`;
+        });
+    } else {
+        btn.disabled = false;
+        btn.title = `Putar â€” ${TITLE_SHORT}`;
     }
 
     btn.addEventListener('click', async () => {
