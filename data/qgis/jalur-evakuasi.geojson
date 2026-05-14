@@ -1,0 +1,114 @@
+{
+  "type": "FeatureCollection",
+  "name": "jalur-evakuasi",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            110.4457,
+            -7.5707
+          ],
+          [
+            110.4357,
+            -7.5907
+          ],
+          [
+            110.4257,
+            -7.6107
+          ],
+          [
+            110.4157,
+            -7.6407
+          ],
+          [
+            110.4057,
+            -7.6707
+          ],
+          [
+            110.3957,
+            -7.7007
+          ],
+          [
+            110.3857,
+            -7.7307
+          ],
+          [
+            110.3757,
+            -7.7607
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Jalur Evakuasi Merapi — Sleman Barat",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "jalur_evakuasi",
+        "level_risiko": "Info",
+        "deskripsi": "Jalur evakuasi utama via Jl. Kaliurang menuju Kota Yogyakarta. Jarak tempuh ~25 km, estimasi 45 menit.",
+        "sumber_data": "BPBD Sleman",
+        "last_updated": "2023-08-10",
+        "instruksi_evakuasi": "Ikuti rambu evakuasi hijau. Jangan berhenti di tepian sungai. Utamakan kendaraan roda dua untuk menghindari kemacetan.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD Sleman/BPBD DIY, Renkon Erupsi Merapi",
+        "tahun_data": "2023",
+        "keterangan": "Jalur Evakuasi Merapi — Sleman Barat - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            110.4657,
+            -7.5707
+          ],
+          [
+            110.4857,
+            -7.5907
+          ],
+          [
+            110.5057,
+            -7.6207
+          ],
+          [
+            110.5157,
+            -7.6507
+          ],
+          [
+            110.5057,
+            -7.6807
+          ],
+          [
+            110.4957,
+            -7.7107
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Jalur Evakuasi Merapi — Sleman Timur",
+        "category": "kebencanaan",
+        "subcategory": "Risiko Erupsi Merapi",
+        "type_layer": "jalur_evakuasi",
+        "level_risiko": "Info",
+        "deskripsi": "Jalur evakuasi via Prambanan menuju Klaten. Jarak ~20 km, estimasi 35 menit.",
+        "sumber_data": "BPBD Sleman",
+        "last_updated": "2023-08-10",
+        "instruksi_evakuasi": "Ikuti Jl. Solo-Yogya ke arah timur. Berkumpul di Stadion Prambanan.",
+        "riwayat_bencana": "[]",
+        "sumber": "BPBD Sleman/BPBD DIY, Renkon Erupsi Merapi",
+        "tahun_data": "2023",
+        "keterangan": "Jalur Evakuasi Merapi — Sleman Timur - Risiko Erupsi Merapi; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

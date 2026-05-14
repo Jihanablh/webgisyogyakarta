@@ -1,210 +1,228 @@
 import { State, CATEGORIES } from './state.js';
-import { rebuildCategoryLayer, showOnlyKebencanaan, showAllLayers } from './layers.js';
+import { loadLayer, showLayer, hideLayer } from './layers.js';
 import { escapeHtml } from './utils/helpers.js';
 
 let _map = null;
 
+// ── Disaster layer definitions (subcats sesuai GeoJSON aktual) ────────────────
+const DISASTER_LAYERS = [
+    { id: 'erupsi',     label: 'Erupsi Merapi',    subcats: ['Risiko Erupsi Merapi'], color: '#ef4444' },
+    { id: 'banjir',     label: 'Rawan Banjir',      subcats: ['Rawan Banjir'],         color: '#3b82f6' },
+    { id: 'gempa',      label: 'Rawan Gempa',        subcats: ['Rawan Gempa'],          color: '#f97316' },
+    { id: 'longsor',    label: 'Rawan Longsor',      subcats: ['Rawan Longsor'],        color: '#92400e' },
+    { id: 'kekeringan', label: 'Rawan Kekeringan',   subcats: ['Rawan Kekeringan'],     color: '#ca8a04' },
+    { id: 'evakuasi',   label: 'Jalur Evakuasi',     subcats: ['Risiko Erupsi Merapi'], color: '#22c55e' },
+    { id: 'pengungsian',label: 'Titik Pengungsian',  subcats: ['Risiko Erupsi Merapi'], color: '#06b6d4' },
+];
+
+// ── Tata Kota category definitions ─────────────────────────────────────────────
+const TATAKOTA_BUTTONS = [
+    { key: 'pariwisata',        label: 'Pariwisata & Keramaian', color: '#f59e0b' },
+    { key: 'tempat_tinggal',    label: 'Tempat Tinggal',         color: '#8b5cf6' },
+    { key: 'kebutuhan',         label: 'Kebutuhan Sehari-hari',  color: '#3b82f6' },
+    { key: 'atm_bank',          label: 'ATM & Bank',             color: '#06b6d4' },
+    { key: 'sosial_tugas',      label: 'Sosial & Tugas',         color: '#16a34a' },
+    { key: 'akademik',          label: 'Pusat Akademik',         color: '#a855f7' },
+    { key: 'kesehatan_darurat', label: 'Kesehatan & Darurat',    color: '#f43f5e' },
+];
+
+let _sidebarMode     = 'kebencanaan';
+let _activeTataKotaKey = null;
+
+export function getSidebarMode() { return _sidebarMode; }
+
 export function initSidebar({ map, router, onCategoryToggle }) {
     _map = map;
 
-    // --- Sidebar open/close ---
-    const sidebar = document.getElementById('sidebar');
+    const sidebar   = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    const closeBtn = document.getElementById('sidebar-toggle-close');
-    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
-    if (closeBtn) closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+    if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('hidden'));
 
-    // --- Panel close buttons ---
     const icClose = document.getElementById('info-card-close');
     if (icClose) icClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeInfoCard?.(); });
-
     const tpClose = document.getElementById('tp-close');
     if (tpClose) tpClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeTourismPanel?.(); });
-
     const dpClose = document.getElementById('dp-close');
     if (dpClose) dpClose.addEventListener('click', (e) => { e.stopPropagation(); window.closeDisasterPanel?.(); });
 
-    // --- Stats page link ---
     const statsBtn = document.getElementById('btn-open-stats');
     if (statsBtn) statsBtn.addEventListener('click', () => {
-        const tab = document.querySelector('.top-nav-tab[data-page="statistik"]');
-        if (tab) tab.click();
+        document.querySelector('.top-nav-tab[data-page="statistik"]')?.click();
     });
 
-    // --- Recent events widget ---
     const rewAll = document.getElementById('rew-see-all');
     if (rewAll) rewAll.addEventListener('click', () => {
-        const tab = document.querySelector('.top-nav-tab[data-page="laporan"]');
-        if (tab) tab.click();
+        document.querySelector('.top-nav-tab[data-page="laporan"]')?.click();
     });
     renderRecentEventsWidget();
 
-    // --- Accordion (built after layers load) ---
-    // Listen for each layer load to refresh the accordion
     document.addEventListener('layerLoaded', () => {
-        renderAccordion();
-        buildSearchIndex();
         updateWelcomeStats();
+        buildSearchIndex();
+        if (_sidebarMode === 'tatakota') renderTataKotaPanel();
     });
 
-    // --- Search ---
+    renderKebencanaaanPanel();
     initSearch();
-
-    // --- "Show All / Hide Others" toggle button ---
-    _insertToggleButton();
 }
 
-// ── Toggle All/Only Disaster ──────────────────────────────────────────────────
-function _insertToggleButton() {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar) return;
-    // Insert before sidebar-footer
-    const footer = sidebar.querySelector('.sidebar-footer');
-    const btn = document.createElement('button');
-    btn.id = 'btn-toggle-layers';
-    btn.className = 'layer-toggle-btn';
-    btn.textContent = 'Tampilkan Semua Kategori';
-    btn.addEventListener('click', () => {
-        if (State.onlyKebencanaan) {
-            showAllLayers();
-            btn.textContent = 'Sembunyikan Kategori Lain';
-            btn.classList.add('active');
-        } else {
-            showOnlyKebencanaan();
-            btn.textContent = 'Tampilkan Semua Kategori';
-            btn.classList.remove('active');
-        }
-    });
-    if (footer) sidebar.insertBefore(btn, footer);
-    else sidebar.appendChild(btn);
+// ── Mode switching ─────────────────────────────────────────────────────────────
+export function setSidebarMode(mode) {
+    _sidebarMode = mode;
+    if (mode === 'kebencanaan') renderKebencanaaanPanel();
+    else renderTataKotaPanel();
 }
 
-// ── Accordion ─────────────────────────────────────────────────────────────────
-function renderAccordion() {
-    let container = document.getElementById('accordion-container');
+// ── Kebencanaan panel — Tailwind dark glass toggle switches ────────────────────
+function renderKebencanaaanPanel() {
+    const panel = document.getElementById('sidebar-mode-panel');
+    if (!panel) return;
+
+    panel.innerHTML = `
+    <div class="tw-px-1 tw-py-1">
+        <div id="disaster-layer-list" class="tw-flex tw-flex-col tw-gap-0.5" aria-label="Legenda layer kebencanaan">
+            ${DISASTER_LAYERS.map(layer => _renderLayerItem(layer)).join('')}
+        </div>
+    </div>`;
+}
+
+function _renderLayerItem(layer) {
+    return `
+    <div class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-2.5">
+        <div class="tw-w-2 tw-h-2 tw-rounded-full tw-flex-shrink-0 tw-ring-1 tw-ring-white/20"
+             style="background:${layer.color};box-shadow:0 0 6px ${layer.color}66"></div>
+        <span class="tw-flex-1 tw-text-[12px] tw-font-medium tw-text-slate-200 tw-font-[Inter,sans-serif]">
+            ${layer.label}
+        </span>
+    </div>`;
+}
+
+// ── Tata Kota panel ────────────────────────────────────────────────────────────
+function renderTataKotaPanel() {
+    const panel = document.getElementById('sidebar-mode-panel');
+    if (!panel) return;
+
+    const lihatSemuaActive = _activeTataKotaKey === null;
+    panel.innerHTML = `
+    <div class="tw-px-1 tw-py-1">
+        <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-3 tw-px-1">Kategori</div>
+        <button id="tatakota-lihat-semua" class="tw-w-full tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-2 tw-rounded-lg tw-mb-1 tw-text-xs tw-font-semibold tw-font-[Inter] tw-transition-all tw-duration-200 ${lihatSemuaActive ? 'tw-bg-amber-500/20 tw-text-amber-400 tw-border tw-border-amber-500/40' : 'tw-text-slate-400 hover:tw-bg-white/5 tw-border tw-border-transparent'}">
+            <div class="tw-w-2 tw-h-2 tw-rounded-sm tw-bg-amber-400 tw-flex-shrink-0"></div>
+            Semua Kategori
+        </button>
+        <div id="tatakota-pill-container" class="tw-flex tw-flex-col tw-gap-0.5"></div>
+    </div>`;
+
+    document.getElementById('tatakota-lihat-semua')?.addEventListener('click', _showAllTataKota);
+
+    const container = document.getElementById('tatakota-pill-container');
     if (!container) return;
 
-    const html = Object.entries(CATEGORIES).map(([key, cat]) => {
-        const data = State.categoryData[key];
-        const count = data ? data.features.length : 0;
-        const meta = State.categoryMeta[key];
-        const subcats = meta ? meta.subcategories : {};
-
-        const subcatHtml = Object.entries(subcats).map(([scName, scCount]) => {
-            const isActive = State.activeSubcats[key] && State.activeSubcats[key].has(scName);
-            const dotColor = (key === 'kebencanaan' || key === 'lingkungan')
-                ? (State.categoryMeta[key]?.subcatColors?.[scName] || cat.color)
-                : cat.color;
-            return `
-            <div class="subcat-item" data-category="${key}" data-subcat="${escapeHtml(scName)}">
-                <div class="subcat-check ${isActive ? 'checked' : ''}" style="--check-color:${cat.color}"></div>
-                <span class="subcat-name">${escapeHtml(scName)}</span>
-                <span class="subcat-badge">${scCount}</span>
-            </div>`;
-        }).join('');
-
-        const isOn = State.activeSubcats[key] && State.activeSubcats[key].size > 0;
-        return `
-        <div class="accordion-item" id="acc-${key}">
-            <div class="accordion-header" data-category="${key}">
-                <div class="acc-icon" style="background:${cat.color}20;color:${cat.color}">${cat.icon}</div>
-                <div class="acc-info">
-                    <div class="acc-label">${cat.label}</div>
-                    <div class="acc-count">${count.toLocaleString()} tempat</div>
-                </div>
-                <button class="acc-master-toggle ${isOn ? 'on' : ''}" data-category="${key}" style="--toggle-color:${cat.color}" title="Tampilkan/Sembunyikan"></button>
-                <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="6 9 12 15 18 9"/>
-                </svg>
-            </div>
-            <div class="accordion-body">
-                <div class="subcat-list">${subcatHtml}</div>
-            </div>
-        </div>`;
-    }).join('');
-
-    container.innerHTML = html;
-    _attachAccordionListeners(container);
-}
-
-function _attachAccordionListeners(container) {
-    // Expand/collapse
-    container.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', (e) => {
-            if (e.target.closest('.acc-master-toggle')) return;
-            header.closest('.accordion-item').classList.toggle('expanded');
-        });
-    });
-
-    // Master toggle
-    container.querySelectorAll('.acc-master-toggle').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const key = btn.dataset.category;
-            const isOn = btn.classList.contains('on');
-            if (isOn) {
-                btn.classList.remove('on');
-                State.activeSubcats[key] = new Set();
-                btn.closest('.accordion-item').querySelectorAll('.subcat-check').forEach(c => c.classList.remove('checked'));
-            } else {
-                btn.classList.add('on');
-                const raw = State.rawGeojsonCache[key] || [];
-                const all = new Set(raw.map(f => f.properties.subcategory || f.properties.type || 'Lainnya'));
-                State.activeSubcats[key] = all;
-                btn.closest('.accordion-item').querySelectorAll('.subcat-check').forEach(c => c.classList.add('checked'));
-            }
-            rebuildCategoryLayer(key);
-        });
-    });
-
-    // Subcat toggle
-    container.querySelectorAll('.subcat-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const key = item.dataset.category;
-            const sc = item.dataset.subcat;
-            const check = item.querySelector('.subcat-check');
-            if (check.classList.contains('checked')) {
-                check.classList.remove('checked');
-                State.activeSubcats[key]?.delete(sc);
-            } else {
-                check.classList.add('checked');
-                State.activeSubcats[key] = State.activeSubcats[key] || new Set();
-                State.activeSubcats[key].add(sc);
-            }
-            // Update master toggle state
-            const accItem = item.closest('.accordion-item');
-            const anyChecked = [...accItem.querySelectorAll('.subcat-check')].some(c => c.classList.contains('checked'));
-            const masterBtn = accItem.querySelector('.acc-master-toggle');
-            if (masterBtn) anyChecked ? masterBtn.classList.add('on') : masterBtn.classList.remove('on');
-            rebuildCategoryLayer(key);
-        });
+    TATAKOTA_BUTTONS.forEach(btnDef => {
+        const isActive = _activeTataKotaKey === btnDef.key;
+        const count    = State.categoryData[btnDef.key]?.features?.length || 0;
+        const btn = document.createElement('button');
+        btn.className = `tw-w-full tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-2 tw-rounded-lg tw-text-xs tw-font-medium tw-font-[Inter] tw-transition-all tw-duration-200 tw-border ${isActive ? 'tw-border-[' + btnDef.color + ']/40 tw-text-slate-100' : 'tw-border-transparent tw-text-slate-400 hover:tw-bg-white/5'}`;
+        if (isActive) btn.style.background = `${btnDef.color}22`;
+        btn.innerHTML = `
+            <div class="tw-w-2 tw-h-2 tw-rounded-sm tw-flex-shrink-0 ${isActive ? '' : 'tw-opacity-40'}" style="background:${btnDef.color}"></div>
+            <span class="tw-flex-1 tw-text-left">${btnDef.label}</span>
+            ${count ? `<span class="tw-font-mono tw-text-[10px] tw-text-slate-500">${count.toLocaleString()}</span>` : ''}`;
+        btn.addEventListener('click', () => _clickTataKotaPill(btnDef));
+        container.appendChild(btn);
     });
 }
 
-// ── Stats ────────────────────────────────────────────────────────────────────
+function _clickTataKotaPill(btnDef) {
+    _activeTataKotaKey = btnDef.key;
+    TATAKOTA_BUTTONS.forEach(b => { if (b.key !== btnDef.key) hideLayer(b.key); });
+    if (!State.layerCache[btnDef.key]) {
+        State.enabledCategories.add(btnDef.key);
+        loadLayer(btnDef.key);
+    } else { showLayer(btnDef.key); }
+    renderTataKotaPanel();
+}
+
+function _showAllTataKota() {
+    _activeTataKotaKey = null;
+    TATAKOTA_BUTTONS.forEach(btnDef => {
+        if (!State.layerCache[btnDef.key]) {
+            State.enabledCategories.add(btnDef.key);
+            loadLayer(btnDef.key);
+        } else { showLayer(btnDef.key); }
+    });
+    renderTataKotaPanel();
+}
+
+export function hideTataKotaLayers() {
+    TATAKOTA_BUTTONS.forEach(btnDef => hideLayer(btnDef.key));
+    _activeTataKotaKey = null;
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
 function updateWelcomeStats() {
-    const total = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
-    const cats = Object.keys(State.categoryData).length;
+    const total   = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
+    const cats    = Object.keys(State.categoryData).length;
     const subcats = Object.values(State.categoryMeta).reduce((s, m) => s + Object.keys(m?.subcategories || {}).length, 0);
 
     const wsTotal = document.getElementById('ws-total');
-    const wsCats = document.getElementById('ws-cats');
-    const wsSub = document.getElementById('ws-subcats');
+    const wsCats  = document.getElementById('ws-cats');
+    const wsSub   = document.getElementById('ws-subcats');
     if (wsTotal) wsTotal.textContent = total.toLocaleString();
-    if (wsCats) wsCats.textContent = cats;
-    if (wsSub) wsSub.textContent = subcats;
+    if (wsCats)  wsCats.textContent  = cats;
+    if (wsSub)   wsSub.textContent   = subcats;
 
-    // Also update sidebar stats grid
     const grid = document.getElementById('stats-grid');
     if (grid && total > 0) {
+        const kebFeatures = State.categoryData.kebencanaan?.features || [];
+        const zonaCount = kebFeatures.filter(f => ['Polygon', 'MultiPolygon'].includes(f.geometry?.type)).length;
+        const shelterCount = kebFeatures.filter(f => f.geometry?.type === 'Point' && String(f.properties?.type_layer || '').includes('pengungsian')).length;
+        const areaKm2 = Math.max(1, Math.round(kebFeatures
+            .filter(f => f.geometry?.type === 'Polygon')
+            .reduce((sum, f) => sum + roughPolygonAreaKm2(f.geometry.coordinates?.[0] || []), 0)));
+        const maxRiskPopulation = kebFeatures.reduce((max, f) => {
+            const histories = Array.isArray(f.properties?.riwayat_bencana) ? f.properties.riwayat_bencana : [];
+            return Math.max(max, ...histories.map(h => Number(h.pengungsi || 0)));
+        }, 350000);
         grid.innerHTML = `
-            <div class="stat-card"><div class="stat-number">${total.toLocaleString()}</div><div class="stat-label">Lokasi</div></div>
-            <div class="stat-card"><div class="stat-number">${cats}</div><div class="stat-label">Kategori</div></div>
-            <div class="stat-card"><div class="stat-number">${subcats}</div><div class="stat-label">Sub-Kat</div></div>`;
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${zonaCount}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Zona Bencana</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${areaKm2}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Area km2</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${Math.round(maxRiskPopulation / 1000)}K</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Populasi Risiko</div>
+            </div>
+            <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${shelterCount}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Pengungsian</div>
+            </div>`;
     }
 }
 
-// ── Search ────────────────────────────────────────────────────────────────────
+function roughPolygonAreaKm2(ring) {
+    if (!Array.isArray(ring) || ring.length < 3) return 0;
+    const lat0 = ring.reduce((s, p) => s + (Number(p[1]) || 0), 0) / ring.length;
+    const kmLon = 111.32 * Math.cos(lat0 * Math.PI / 180);
+    const kmLat = 110.57;
+    let area = 0;
+    for (let i = 0; i < ring.length; i++) {
+        const a = ring[i];
+        const b = ring[(i + 1) % ring.length];
+        const x1 = (Number(a[0]) || 0) * kmLon;
+        const y1 = (Number(a[1]) || 0) * kmLat;
+        const x2 = (Number(b[0]) || 0) * kmLon;
+        const y2 = (Number(b[1]) || 0) * kmLat;
+        area += x1 * y2 - x2 * y1;
+    }
+    return Math.abs(area) / 2;
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────────
 function buildSearchIndex() {
     State.searchIndex = [];
     for (const [key, data] of Object.entries(State.categoryData)) {
@@ -214,7 +232,7 @@ function buildSearchIndex() {
 }
 
 function initSearch() {
-    const input = document.getElementById('search-input');
+    const input      = document.getElementById('search-input');
     const resultsDiv = document.getElementById('search-results');
     if (!input || !resultsDiv) return;
 
@@ -231,7 +249,7 @@ function initSearch() {
         if (input.value.trim().length >= 2) resultsDiv.classList.remove('hidden');
     });
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-container')) resultsDiv.classList.add('hidden');
+        if (!e.target.closest('.sidebar-search-wrap')) resultsDiv.classList.add('hidden');
     });
 }
 
@@ -240,7 +258,7 @@ function performSearch(query, resultsDiv) {
         .filter(f => {
             const name = (f.properties.name || '').toLowerCase();
             const type = (f.properties.type || '').toLowerCase();
-            const sc = (f.properties.subcategory || '').toLowerCase();
+            const sc   = (f.properties.subcategory || '').toLowerCase();
             return name.includes(query) || type.includes(query) || sc.includes(query);
         })
         .slice(0, 20);
@@ -249,8 +267,8 @@ function performSearch(query, resultsDiv) {
         resultsDiv.innerHTML = '<div class="search-result-item"><span class="search-result-name" style="color:var(--text-muted)">Tidak ditemukan</span></div>';
     } else {
         resultsDiv.innerHTML = matches.map((f, i) => {
-            const cat = CATEGORIES[f._categoryKey];
-            const sc = f.properties.subcategory || f.properties.type || '';
+            const cat    = CATEGORIES[f._categoryKey];
+            const sc     = f.properties.subcategory || f.properties.type || '';
             const coords = f.geometry.coordinates;
             return `<div class="search-result-item" data-idx="${i}" data-lon="${coords[0]}" data-lat="${coords[1]}" data-cat="${f._categoryKey}">
                 <span class="search-result-dot" style="background:${cat.color}"></span>
@@ -263,23 +281,18 @@ function performSearch(query, resultsDiv) {
 
         resultsDiv.querySelectorAll('.search-result-item[data-lon]').forEach((item, idx) => {
             item.addEventListener('click', () => {
-                const lat = parseFloat(item.dataset.lat);
-                const lon = parseFloat(item.dataset.lon);
+                const lat    = parseFloat(item.dataset.lat);
+                const lon    = parseFloat(item.dataset.lon);
                 const catKey = item.dataset.cat;
                 resultsDiv.classList.add('hidden');
                 document.getElementById('search-input').value = '';
-
                 if (_map) _map.flyTo([lat, lon], 17, { duration: 1.2 });
-
-                // Remove previous highlight
                 if (State.searchHighlightMarker) {
                     _map.removeLayer(State.searchHighlightMarker);
                     State.searchHighlightMarker = null;
                 }
-
                 const feature = matches[idx];
                 if (feature) {
-                    // Show detail panel via custom event
                     document.dispatchEvent(new CustomEvent('markerClicked', {
                         detail: { feature, category: catKey }
                     }));
@@ -290,22 +303,24 @@ function performSearch(query, resultsDiv) {
     resultsDiv.classList.remove('hidden');
 }
 
-// ── Recent Events Widget ──────────────────────────────────────────────────────
+// ── Recent Events Widget ───────────────────────────────────────────────────────
 function renderRecentEventsWidget() {
-    const list = document.getElementById('rew-list');
+    const list   = document.getElementById('rew-list');
     const widget = document.getElementById('recent-events-widget');
     if (!list) return;
     const events = [
-        { icon: '🌋', title: 'Aktivitas Merapi', status: 'Siaga (Level III)', statusClass: 'status-danger', time: '3 jam lalu' },
-        { icon: '🌧️', title: 'Banjir Bantul', status: 'Waspada', statusClass: 'status-warning', time: '2 hari lalu' },
-        { icon: '🌿', title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)', statusClass: 'status-moderate', time: '1 jam lalu' },
+        { title: 'Aktivitas Merapi',    status: 'Siaga (Level III)', statusClass: 'status-danger',   time: '3 jam lalu' },
+        { title: 'Banjir Bantul',       status: 'Waspada',           statusClass: 'status-warning',  time: '2 hari lalu' },
+        { title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)',   statusClass: 'status-moderate', time: '1 jam lalu' },
     ];
-    list.innerHTML = events.map(e => `
-        <div class="rew-item">
-            <span class="rew-icon">${e.icon}</span>
-            <div class="rew-info">
-                <div class="rew-event-title">${e.title} <span class="rew-status ${e.statusClass}">→ ${e.status}</span></div>
-                <div class="rew-time">Terakhir: ${e.time}</div>
+    list.innerHTML = events.slice(0, 3).map(e => `
+        <div class="tw-py-2.5 tw-border-b tw-border-white/5 last:tw-border-0">
+            <div class="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div class="tw-font-[Inter,sans-serif] tw-text-xs tw-font-semibold tw-text-slate-200">${e.title}</div>
+                <span class="tw-font-[Space_Mono,monospace] tw-text-[9px] tw-text-slate-500">${e.time}</span>
+            </div>
+            <div class="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <span class="tw-inline-block tw-px-2 tw-py-0.5 tw-rounded-full tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-wide ${e.statusClass === 'status-danger' ? 'tw-bg-red-900/40 tw-text-red-400 tw-border tw-border-red-500/30' : e.statusClass === 'status-warning' ? 'tw-bg-amber-900/30 tw-text-amber-400 tw-border tw-border-amber-500/30' : 'tw-bg-blue-900/30 tw-text-blue-400 tw-border tw-border-blue-500/30'}">${e.status}</span>
             </div>
         </div>`).join('');
     if (widget) widget.style.display = 'block';

@@ -1,0 +1,69 @@
+{
+  "type": "FeatureCollection",
+  "name": "zona-longsor",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.52,
+              -7.92
+            ],
+            [
+              110.58,
+              -7.91
+            ],
+            [
+              110.61,
+              -7.95
+            ],
+            [
+              110.59,
+              -7.98
+            ],
+            [
+              110.54,
+              -7.99
+            ],
+            [
+              110.51,
+              -7.96
+            ],
+            [
+              110.52,
+              -7.92
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona Rawan Longsor Gunungkidul Utara",
+        "category": "kebencanaan",
+        "subcategory": "Rawan Longsor",
+        "type_layer": "zona_bahaya",
+        "level_risiko": "Sedang",
+        "deskripsi": "Perbukitan karst Gunungkidul dengan kemiringan >40° rawan longsor saat musim hujan.",
+        "foto": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=600",
+        "sumber_data": "BPBD Gunungkidul",
+        "last_updated": "2024-01-30",
+        "kontak_darurat": "+62274-391942 (BPBD Gunungkidul)",
+        "instruksi_evakuasi": "Hindari tebing terjal saat hujan deras. Perhatikan retakan tanah sebagai tanda awal.",
+        "riwayat_bencana": "[{\"tanggal\":\"2023-12-15\",\"jenis\":\"Longsor\",\"skala\":\"Kecil\",\"korban_jiwa\":0,\"pengungsi\":45,\"kerugian_material\":\"Rp 300 Juta\",\"deskripsi\":\"Longsor menutup jalan desa di Kecamatan Patuk.\",\"sumber\":\"BPBD Gunungkidul\"}]",
+        "facilities": "[]",
+        "kapasitas": 0,
+        "sumber": "BPBD DIY/BPBD Kabupaten-Kota, BNPB/IRBI 2023",
+        "tahun_data": "2024",
+        "keterangan": "Zona Rawan Longsor Gunungkidul Utara - Rawan Longsor; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}

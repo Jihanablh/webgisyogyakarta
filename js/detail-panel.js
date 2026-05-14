@@ -10,15 +10,13 @@ export function initDetailPanel() {
     window.showDisasterPanel  = showDisasterPanel;
     window.closeDisasterPanel = closeDisasterPanel;
     window.renderMiniBarChart = renderMiniBarChart;
+    window.openDetailPanel    = openDetailPanel;
 
     // Listen for marker click events dispatched by layers.js
     document.addEventListener('markerClicked', (e) => {
         const { feature, category } = e.detail;
-        if (category === 'kebencanaan') {
-            showDisasterPanel(feature, category);
-        } else {
-            showTourismPanel(feature, category);
-        }
+        // Open unified dark panel
+        openUnifiedPanel(feature, category);
     });
 
     // Report modal close
@@ -222,7 +220,11 @@ function renderMiniBarChart(canvas, data) {
         const barH = val * (h - 8);
         const x = i * barW + 1;
         const y = h - barH - 2;
-        let color = data[i] >= 60 ? '#ef4444' : data[i] >= 30 ? '#f59e0b' : '#10b981';
+        let color = '#27ae60';
+        if (data[i] >= 55) color = '#c0392b';
+        else if (data[i] >= 40) color = '#e67e22';
+        else if (data[i] >= 28) color = '#f1c40f';
+        else color = '#27ae60';
         if (i === currentHour) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
         ctx.fillStyle = i === currentHour ? '#ffffff' : color;
         ctx.fillRect(x, y, barW - 1, Math.max(barH, 1));
@@ -231,6 +233,18 @@ function renderMiniBarChart(canvas, data) {
 }
 
 // ── Disaster Detail Panel ─────────────────────────────────────────────────────
+// Warna badge per subkategori bencana
+const DISASTER_BADGE_COLORS = {
+    'Rawan Erupsi': '#ef4444', 'Risiko Erupsi': '#ef4444',
+    'KRB III': '#ef4444',      'KRB II': '#dc2626',    'KRB I': '#b91c1c',
+    'Rawan Banjir': '#3b82f6', 'Risiko Banjir': '#2563eb', 'Daerah Banjir': '#1d4ed8',
+    'Rawan Gempa':  '#f97316', 'Risiko Gempa':  '#ea580c', 'Zona Gempa':   '#c2410c',
+    'Rawan Longsor':'#92400e', 'Risiko Longsor':'#78350f', 'Zona Longsor': '#713f12',
+    'Rawan Kekeringan':'#ca8a04','Kekeringan':  '#a16207',
+    'Jalur Evakuasi':'#22c55e',
+    'Titik Kumpul': '#06b6d4', 'Pengungsian':  '#6366f1',
+};
+
 function showDisasterPanel(feature, categoryKey) {
     const panel = document.getElementById('disaster-panel');
     if (!panel) return;
@@ -239,65 +253,123 @@ function showDisasterPanel(feature, categoryKey) {
     closeInfoCard();
     State.currentReportFeature = { feature, categoryKey };
 
+    // ── Header photo / gradient ───────────────────────────────────────────────
     const header = document.getElementById('dp-header');
-    header.style.backgroundImage = props.foto
-        ? `url('${props.foto}')`
-        : 'linear-gradient(135deg, #dc2626, #991b1b)';
+    const subcat = props.subcategory || props.type || 'Kebencanaan';
+    const badgeColor = DISASTER_BADGE_COLORS[subcat] || '#dc2626';
 
-    const badgeEl = document.getElementById('dp-risk-badge');
-    const lr = props.level_risiko || 'Info';
-    const zona = props.zona ? ` · ${props.zona}` : '';
-    const riskClass = lr === 'Tinggi' ? 'risk-high' : lr === 'Sedang' ? 'risk-medium' : lr === 'Rendah' ? 'risk-low' : 'risk-info';
-    badgeEl.className = `dp-risk-badge ${riskClass}`;
-    badgeEl.textContent = `${lr === 'Tinggi' ? '🔴' : lr === 'Sedang' ? '🟠' : lr === 'Rendah' ? '🟡' : 'ℹ️'} RISIKO ${lr.toUpperCase()}${zona}`;
+    if (props.foto) {
+        header.style.backgroundImage = `url('${props.foto}')`;
+    } else {
+        header.style.backgroundImage = `linear-gradient(135deg, ${badgeColor}, ${badgeColor}99)`;
+    }
 
+    // ── Category badge (subkategori berwarna) ─────────────────────────────────
+    const badgeEl = document.getElementById('dp-category-badge');
+    if (badgeEl) {
+        badgeEl.textContent = subcat;
+        badgeEl.style.cssText = `
+            display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;
+            letter-spacing:0.08em;padding:4px 12px;border-radius:20px;
+            background:${badgeColor}cc;color:#fff;border:1px solid ${badgeColor};
+            backdrop-filter:blur(8px);margin-bottom:8px;
+        `;
+    }
+
+    // ── Nama ─────────────────────────────────────────────────────────────────
     document.getElementById('dp-name').textContent = props.name || 'Unnamed';
 
-    const metaItems = [];
-    if (props.radius_km)    metaItems.push(`📍 Radius 0–${props.radius_km} km dari puncak`);
-    if (props.sumber_data)  metaItems.push(`📊 Sumber: ${props.sumber_data}`);
-    if (props.last_updated) metaItems.push(`Diperbarui: ${props.last_updated}`);
-    document.getElementById('dp-meta').innerHTML = metaItems.join(' · ');
+    // ── Kapasitas & Status ────────────────────────────────────────────────────
+    const capRow = document.getElementById('dp-capacity-row');
+    if (props.kapasitas || props.status_terisi) {
+        capRow.style.display = 'flex';
+        const capEl = document.getElementById('dp-capacity');
+        const statEl = document.getElementById('dp-status');
+        if (capEl) capEl.textContent = props.kapasitas ? `${props.kapasitas.toLocaleString()} jiwa` : '—';
+        if (statEl) {
+            const st = props.status_terisi || '—';
+            statEl.textContent = st;
+            statEl.style.color = st.toLowerCase().includes('penuh') ? '#ef4444'
+                                : st.toLowerCase().includes('sebagian') ? '#f97316' : '#22c55e';
+        }
+    } else {
+        capRow.style.display = 'none';
+    }
 
-    document.getElementById('dp-description').textContent = props.deskripsi || '';
+    // ── Alamat ───────────────────────────────────────────────────────────────
+    const addrRow = document.getElementById('dp-address-row');
+    if (props.address || props.alamat) {
+        addrRow.style.display = 'flex';
+        document.getElementById('dp-address').textContent = props.address || props.alamat;
+    } else {
+        addrRow.style.display = 'none';
+    }
 
+    // ── Deskripsi ─────────────────────────────────────────────────────────────
+    const descEl = document.getElementById('dp-description');
+    if (descEl) {
+        descEl.textContent = props.deskripsi || props.description || '';
+        descEl.style.display = (props.deskripsi || props.description) ? 'block' : 'none';
+    }
+
+    // ── Fasilitas ─────────────────────────────────────────────────────────────
     const facSection = document.getElementById('dp-facilities-section');
-    const facilities = props.facilities || [];
+    const facilities  = props.facilities || [];
     if (facilities.length > 0) {
         facSection.style.display = 'block';
-        document.getElementById('dp-facilities').innerHTML = facilities.map(f => `<span class="dp-facility-chip">${escapeHtml(f)}</span>`).join('');
-    } else { facSection.style.display = 'none'; }
+        document.getElementById('dp-facilities').innerHTML = facilities.map(f => {
+            const fac = FACILITY_MAP[f] || { icon: '📍', label: f };
+            return `<span class="dp-facility-chip">${fac.icon} ${escapeHtml(fac.label)}</span>`;
+        }).join('');
+    } else {
+        facSection.style.display = 'none';
+    }
 
+    // ── Instruksi Evakuasi ────────────────────────────────────────────────────
     const evacBox = document.getElementById('dp-evac-box');
-    if (props.instruksi_evakuasi) { evacBox.style.display = 'block'; document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi; }
-    else { evacBox.style.display = 'none'; }
+    if (props.instruksi_evakuasi) {
+        evacBox.style.display = 'block';
+        document.getElementById('dp-evac-text').textContent = props.instruksi_evakuasi;
+    } else {
+        evacBox.style.display = 'none';
+    }
 
-    const histSection = document.getElementById('dp-history-section');
-    const history = props.riwayat_bencana || [];
-    if (history.length > 0) {
-        histSection.style.display = 'block';
-        document.getElementById('dp-history-list').innerHTML = history.slice(0, 3).map(h => `
-            <div class="dp-history-item">
-                <div class="dp-history-date">🗓️ ${h.tanggal}</div>
-                <div class="dp-history-detail">${escapeHtml(h.jenis)} ${h.skala} · ${h.korban_jiwa} korban jiwa</div>
-                <div class="dp-history-sub">${(h.pengungsi || 0).toLocaleString()} pengungsi · ${h.kerugian_material || '-'}</div>
-            </div>`).join('');
-    } else { histSection.style.display = 'none'; }
+    // ── Kontak Darurat ────────────────────────────────────────────────────────
+    const contactCard = document.getElementById('dp-contact');
+    if (props.kontak_darurat || props.instansi) {
+        contactCard.style.display = 'flex';
+        const nameEl = document.getElementById('dp-contact-name');
+        const phoneEl = document.getElementById('dp-contact-phone');
+        const callEl  = document.getElementById('dp-contact-call');
+        const phone = (props.kontak_darurat || '').replace(/[^\d+]/g, '').slice(0, 16);
+        if (nameEl) nameEl.textContent = props.instansi || 'BPBD DIY';
+        if (phoneEl) {
+            phoneEl.textContent = props.kontak_darurat || '';
+            phoneEl.href = `tel:${phone}`;
+        }
+        if (callEl) callEl.href = `tel:${phone}`;
+        // Badge color for call button
+        const callBtn = document.querySelector('.dp-contact-call-btn');
+        if (callBtn) callBtn.style.background = badgeColor;
+    } else {
+        contactCard.style.display = 'none';
+    }
 
-    const contactEl = document.getElementById('dp-contact');
-    if (props.kontak_darurat) {
-        contactEl.style.display = 'flex';
-        const phone = props.kontak_darurat.replace(/[^\d+]/g, '').slice(0, 16);
-        document.getElementById('dp-contact-phone').textContent = props.kontak_darurat;
-        document.getElementById('dp-contact-phone').href = `tel:${phone}`;
-    } else { contactEl.style.display = 'none'; }
+    // ── Sumber & Tanggal ──────────────────────────────────────────────────────
+    const sourceEl = document.getElementById('dp-source');
+    const updEl    = document.getElementById('dp-updated');
+    if (sourceEl) {
+        sourceEl.style.display = 'block';
+        if (updEl) updEl.textContent = props.last_updated || props.tanggal_update || '—';
+    }
 
-    // Detect center for gmaps
+    // ── Tombol aksi ───────────────────────────────────────────────────────────
     const g = feature.geometry;
     let cLat = -7.7956, cLon = 110.3695;
     if (g.type === 'Point') { cLon = g.coordinates[0]; cLat = g.coordinates[1]; }
 
-    document.getElementById('dp-btn-gmaps').onclick = () => window.open(`https://www.google.com/maps?q=${cLat},${cLon}`, '_blank');
+    document.getElementById('dp-btn-gmaps').onclick = () =>
+        window.open(`https://www.google.com/maps?q=${cLat},${cLon}`, '_blank');
     document.getElementById('dp-btn-report').onclick = () => {
         const lapTab = document.querySelector('.top-nav-tab[data-page="laporan"]');
         if (lapTab) lapTab.click();
@@ -331,4 +403,227 @@ function renderReportModalTab(tab) {
     } else if (tab === 'kontak') {
         content.innerHTML = `<div style="padding:20px"><p>Kontak Darurat BPBD: <a href="tel:${props.kontak_darurat||''}">${escapeHtml(props.kontak_darurat||'-')}</a></p></div>`;
     }
+}
+
+function renderStarRow(rating) {
+    const r = Math.max(0, Math.min(5, rating));
+    const full = Math.floor(r);
+    const half = r - full >= 0.5 ? 1 : 0;
+    let html = '<span class="dp-stars" aria-label="' + r.toFixed(1) + ' dari 5">';
+    for (let i = 0; i < 5; i++) {
+        if (i < full) html += '<span class="dp-star dp-star-full">★</span>';
+        else if (i === full && half) html += '<span class="dp-star dp-star-half">★</span>';
+        else html += '<span class="dp-star dp-star-empty">★</span>';
+    }
+    html += '</span>';
+    return html;
+}
+
+function defaultHourlyCrowd(seed) {
+    const out = [];
+    let h = 0;
+    for (let i = 0; i < 24; i++) {
+        h = (h * 9301 + 49297 + seed.charCodeAt(i % seed.length)) % 233280;
+        out.push(15 + (h % 70));
+    }
+    return out;
+}
+
+function nz(val, fallback) {
+    if (val === undefined || val === null || val === '') return fallback;
+    if (val === 0 || val === '0') return fallback;
+    return val;
+}
+
+// ── Unified Dark Panel (vertical scroll, no tabs) ───────────────────────────
+function openUnifiedPanel(feature, categoryKey) {
+    const panel = document.getElementById('detail-panel');
+    const vertical = document.getElementById('detail-vertical-body');
+    if (!panel || !vertical) return;
+    const props = feature.properties || {};
+    const cat   = CATEGORIES[categoryKey] || {};
+    const g     = feature.geometry;
+    const isDisaster = categoryKey === 'kebencanaan';
+    const isPengungsian = !!(props.kapasitas || props.type_layer === 'titik_pengungsian' || props.type === 'Tempat Pengungsian' || props.subcategory === 'Pengungsian' || props.subcategory === 'Titik Kumpul');
+
+    const metaEl = document.getElementById('detail-meta-strip');
+    if (metaEl) {
+        metaEl.classList.remove('hidden');
+        if (isDisaster) {
+            const risk = props.risiko || props.level_risiko || props.tingkat_risiko || '—';
+            const kec = nz(props.kecamatan, 'Wilayah DIY');
+            const zona = props.zona ? String(props.zona) : '';
+            metaEl.innerHTML = `
+                <div class="detail-meta-row detail-meta-row--risk">
+                    <span class="detail-meta-pill">${escapeHtml(String(risk))}</span>
+                    <span class="detail-meta-text">${escapeHtml(zona ? `${zona} · ${kec}` : String(kec))}</span>
+                </div>`;
+        } else {
+            const rating = Number(props.rating) || 4.2;
+            const reviews = props.reviews_count ?? 286;
+            const pengunjung = props.pengunjung ?? 2400;
+            const jam = props.opening_hours || props.jam_buka || '08.00–18.00';
+            const htm = props.htm || props.ticket_price || 'Rp 25.000';
+            metaEl.innerHTML = `
+                <div class="detail-meta-row detail-meta-row--tourism">
+                    ${renderStarRow(rating)}
+                    <span class="detail-meta-num">${rating.toFixed(1)}</span>
+                    <span class="detail-meta-muted">(${Number(reviews).toLocaleString('id-ID')} ulasan)</span>
+                </div>
+                <div class="detail-meta-grid">
+                    <div><span class="detail-meta-k">Pengunjung/hari</span><span class="detail-meta-v">±${Number(pengunjung).toLocaleString('id-ID')}</span></div>
+                    <div><span class="detail-meta-k">Jam</span><span class="detail-meta-v">${escapeHtml(String(jam))}</span></div>
+                    <div><span class="detail-meta-k">Tarif</span><span class="detail-meta-v">${escapeHtml(String(htm))}</span></div>
+                </div>`;
+        }
+    }
+
+    if (g && g.type === 'Point') {
+        window._detailLatLng = [g.coordinates[1], g.coordinates[0]];
+    } else if (g && g.type === 'Polygon') {
+        const coords = g.coordinates[0];
+        const avgLat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+        const avgLon = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+        window._detailLatLng = [avgLat, avgLon];
+    }
+
+    const imgEl = document.getElementById('detail-photo-img');
+    const fallbackUnsplashId = {
+        kebencanaan: 'photo-1588668214407-6ea9a6d8c272',
+        pariwisata: 'photo-1584810359583-96fc3448beaa',
+        wisata: 'photo-1584810359583-96fc3448beaa',
+        mobilitas: 'photo-1570125909232-e0963dc1758e',
+        lingkungan: 'photo-1448375240586-882707db888b',
+        kesehatan_darurat: 'photo-1519494026892-80bbd2d6fd0d',
+        kebutuhan: 'photo-1555529669-e69e7aa0ba9a',
+        tempat_tinggal: 'photo-1566073771259-6a8506099945',
+        atm_bank: 'photo-1563013544-824ae1b704d3',
+        sosial_tugas: 'photo-1450101499163-a353f31ffcc4',
+        akademik: 'photo-1523050854058-8df90110c9f1',
+        default: 'photo-1555890725-11ccf6d9922a'
+    };
+    const pid = fallbackUnsplashId[categoryKey] || fallbackUnsplashId.default;
+    const builtFallback = `https://images.unsplash.com/${pid}?auto=format&fit=crop&w=400&h=200&q=80`;
+    imgEl.src = props.foto || builtFallback;
+    imgEl.onerror = () => {
+        imgEl.onerror = null;
+        imgEl.src = `https://picsum.photos/seed/${encodeURIComponent(props.name || props.nama || 'jogja')}/400/200`;
+    };
+
+    const badge = document.getElementById('detail-cat-badge');
+    const riskBadgeMap = { 'Sangat Tinggi':'badge-risiko-sangat-tinggi','Tinggi':'badge-risiko-tinggi','Sedang':'badge-risiko-sedang','Rendah':'badge-risiko-rendah' };
+    const subcatText = props.subcategory || props.subkategori || props.type || props.jenis_bencana;
+    const riskKey = props.risiko || props.level_risiko || '';
+    badge.className = 'detail-category-badge ' + (riskBadgeMap[riskKey] || (categoryKey === 'kebencanaan' ? 'badge-risiko-sedang' : 'badge-wisata'));
+    badge.textContent = riskKey || subcatText || cat.label || categoryKey;
+
+    document.getElementById('detail-name').textContent = props.name || props.nama || '—';
+
+    const hist = Array.isArray(props.riwayat_bencana) ? props.riwayat_bencana : [];
+    const lastH = hist.length ? hist[0] : null;
+
+    function row(label, val) {
+        return `<div class="dp-row"><span class="dp-label">${label}</span><span class="dp-val">${escapeHtml(String(val))}</span></div>`;
+    }
+
+    if (isDisaster) {
+        let html = '';
+        if (isPengungsian) {
+            const kap = nz(props.kapasitas, 800);
+            const fasil = props.fasilitas || props.facilities || ['Tenda Darurat', 'Air Bersih', 'MCK', 'Posko Kesehatan'];
+            const flist = Array.isArray(fasil) ? fasil : String(fasil).split(',');
+            html += `<div class="dp-section">Informasi</div>`;
+            html += row('Nama', props.name || props.nama || '—');
+            html += row('Alamat', nz(props.alamat, 'Lokasi strategis evakuasi Merapi · DIY'));
+            html += row('Kapasitas', `${kap} jiwa`);
+            html += row('Status operasi', nz(props.status_terisi, 'Siaga / siap operasi'));
+            html += row('Kontak', nz(props.kontak_darurat, '(0274) 515059 — BPBD DIY'));
+            html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
+                flist.map((f) => `<span class="dp-chip">${escapeHtml(String(f).trim())}</span>`).join('') +
+                `</div>`;
+            html += `<div class="dp-section">Kapasitas &amp; okupansi (ilustrasi)</div>
+                <p class="dp-desc" style="font-size:12px;color:var(--text-muted)">Grafik di bawah memproyeksikan okupansi harian rata-rata berdasarkan kapasitas barak.</p>
+                <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
+        } else {
+            const luas = nz(props.luas_terdampak_km2, props.radius_km ? `±${Number(props.radius_km) * 12} km² (estimasi)` : '±42 km² (estimasi wilayah)');
+            const pop = nz(props.populasi_berisiko, '±125.000 jiwa (estimasi populasi terpapar)');
+            const korban = nz(props.korban_jiwa, lastH && lastH.korban_jiwa != null ? `${lastH.korban_jiwa} (riwayat terakhir)` : '0 (tidak ada korban jiwa pada skenario baseline)');
+            const pengungsi = nz(props.pengungsi, lastH && lastH.pengungsi != null ? String(lastH.pengungsi) : '—');
+            const kerugian = nz(props.kerugian_material, lastH && lastH.kerugian_material ? lastH.kerugian_material : 'Data sedang dikonsolidasi');
+            html += `<div class="dp-section">Ringkasan zona</div>`;
+            html += row('Zona', props.name || props.nama || '—');
+            html += row('Jenis', nz(props.jenis_bencana, subcatText || '—'));
+            html += row('Tingkat risiko', nz(props.level_risiko, props.risiko || 'Sedang'));
+            html += row('Luas terdampak', luas);
+            html += row('Populasi berisiko', pop);
+            if (props.deskripsi) {
+                html += `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>`;
+            }
+            html += `<div class="dp-section">Dampak &amp; data operasional</div>`;
+            html += row('Korban jiwa (referensi)', korban);
+            html += row('Pengungsi / terdampak', pengungsi);
+            html += row('Kerugian material', kerugian);
+            if (props.instruksi_evakuasi) {
+                html += `<div class="dp-section">Instruksi evakuasi</div><p class="dp-desc">${escapeHtml(props.instruksi_evakuasi)}</p>`;
+            }
+            html += `<div class="dp-section">Fasilitas &amp; titik penting terdekat</div>
+                <div class="dp-chip-row">
+                    <span class="dp-chip">Titik kumpul ±1,2 km</span>
+                    <span class="dp-chip">Puskesmas ±3 km</span>
+                    <span class="dp-chip">Jalur evakuasi utama</span>
+                    <span class="dp-chip">Distribusi logistik BPBD</span>
+                </div>`;
+            if (hist.length) {
+                html += `<div class="dp-section">Riwayat kejadian</div>`;
+                hist.slice(0, 4).forEach((h) => {
+                    html += `<div class="dp-history-card"><strong>${escapeHtml(h.tanggal || '')}</strong> · ${escapeHtml(h.jenis || '')} ${escapeHtml(h.skala || '')}<br>${escapeHtml(h.deskripsi || '')}</div>`;
+                });
+            }
+            html += `<div class="dp-section">Indeks aktivitas (24 jam)</div>
+                <p class="dp-desc" style="font-size:11px;color:var(--text-muted)">Ilustrasi intensitas pemantauan lapangan.</p>
+                <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
+        }
+        vertical.innerHTML = html;
+        requestAnimationFrame(() => {
+            const canvas = document.getElementById('detail-chart');
+            if (!canvas) return;
+            const seed = String(props.name || props.nama || 'z');
+            const crowd = defaultHourlyCrowd(seed);
+            renderMiniBarChart(canvas, crowd);
+        });
+    } else {
+        const infoRows = [
+            ['Kategori', cat.label || categoryKey],
+            subcatText ? ['Subkategori', subcatText] : null,
+            (props.alamat || props.address) ? ['Alamat', props.alamat || props.address] : null,
+            props.kecamatan ? ['Kecamatan', props.kecamatan] : null,
+            props.operator ? ['Pengelola', props.operator] : null,
+            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00–18.00'],
+            ['Tiket / HTM', props.htm || props.ticket_price || 'Gratis'],
+        ].filter(Boolean);
+        let html = infoRows.map(([l, v]) => row(l, v)).join('');
+        html += props.deskripsi ? `<div class="dp-section">Deskripsi</div><p class="dp-desc">${escapeHtml(props.deskripsi)}</p>` : '';
+        html += `<div class="dp-section">Ringkasan</div>
+            <p class="dp-desc">Lokasi dalam katalog Tata Kelola Jogja Siaga. Angka kunjungan bersifat estimasi bila belum ada sensus resmi.</p>`;
+        const fasilList = props.fasilitas || props.amenity_list || ['Parkir', 'Toilet', 'Musholla', 'Area tunggu', 'WiFi'];
+        const chips = (Array.isArray(fasilList) ? fasilList : String(fasilList).split(',')).map(s => String(s).trim()).filter(Boolean);
+        html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
+            chips.map((c) => `<span class="dp-chip">${escapeHtml(c)}</span>`).join('') + `</div>`;
+        const crowd = props.hourly_crowd || defaultHourlyCrowd(String(props.name || props.nama || categoryKey));
+        html += `<div class="dp-section">Keramaian per jam (00–23)</div>
+            <p class="dp-desc" style="font-size:11px;margin-bottom:8px;color:var(--text-muted)">Hijau rendah · Kuning sedang · Oranye ramai · Merah sangat ramai</p>
+            <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
+        vertical.innerHTML = html;
+        requestAnimationFrame(() => {
+            const canvas = document.getElementById('detail-chart');
+            if (canvas) renderMiniBarChart(canvas, crowd);
+        });
+    }
+
+    panel.classList.add('open');
+    vertical.scrollTop = 0;
+}
+
+export function openDetailPanel(feature, categoryKey) {
+    openUnifiedPanel(feature, categoryKey);
 }

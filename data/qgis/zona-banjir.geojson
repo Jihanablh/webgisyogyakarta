@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "name": "zona-banjir",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.34,
+              -7.87
+            ],
+            [
+              110.38,
+              -7.865
+            ],
+            [
+              110.39,
+              -7.89
+            ],
+            [
+              110.37,
+              -7.91
+            ],
+            [
+              110.34,
+              -7.905
+            ],
+            [
+              110.32,
+              -7.89
+            ],
+            [
+              110.34,
+              -7.87
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona Rawan Banjir Bantul",
+        "category": "kebencanaan",
+        "subcategory": "Rawan Banjir",
+        "type_layer": "rawan_banjir",
+        "level_risiko": "Tinggi",
+        "deskripsi": "Kawasan dataran rendah Bantul yang sering terdampak banjir dari luapan Sungai Opak dan Sungai Progo saat musim hujan.",
+        "foto": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600",
+        "sumber_data": "BPBD Bantul / BMKG",
+        "last_updated": "2024-02-20",
+        "kontak_darurat": "+62274-367233 (BPBD Bantul)",
+        "instruksi_evakuasi": "1. Pindahkan barang berharga ke tempat tinggi. 2. Segera evakuasi jika ketinggian air >50cm. 3. Hubungi BPBD Bantul.",
+        "riwayat_bencana": "[{\"tanggal\":\"2024-01-05\",\"jenis\":\"Banjir\",\"skala\":\"Sedang\",\"korban_jiwa\":0,\"pengungsi\":1200,\"kerugian_material\":\"Rp 2,8 Miliar\",\"deskripsi\":\"Banjir akibat hujan lebat merendam 5 desa.\",\"sumber\":\"BPBD Bantul\"},{\"tanggal\":\"2023-02-18\",\"jenis\":\"Banjir\",\"skala\":\"Besar\",\"korban_jiwa\":1,\"pengungsi\":3500,\"kerugian_material\":\"Rp 7,1 Miliar\",\"deskripsi\":\"Banjir besar merendam 12 desa di Bantul.\",\"sumber\":\"BNPB\"}]",
+        "facilities": "[]",
+        "kapasitas": 0,
+        "sumber": "BPBD DIY/BPBD Kabupaten-Kota, BMKG; pembaruan peta rawan bencana 2025",
+        "tahun_data": "2024",
+        "keterangan": "Zona Rawan Banjir Bantul - Rawan Banjir; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.35,
+              -7.78
+            ],
+            [
+              110.38,
+              -7.775
+            ],
+            [
+              110.385,
+              -7.795
+            ],
+            [
+              110.365,
+              -7.81
+            ],
+            [
+              110.345,
+              -7.805
+            ],
+            [
+              110.335,
+              -7.79
+            ],
+            [
+              110.35,
+              -7.78
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Zona Rawan Banjir Kota Yogyakarta",
+        "category": "kebencanaan",
+        "subcategory": "Rawan Banjir",
+        "type_layer": "rawan_banjir",
+        "level_risiko": "Sedang",
+        "deskripsi": "Area perkotaan dengan drainase terbatas. Banjir genangan terjadi saat curah hujan >100mm/hari.",
+        "foto": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600",
+        "sumber_data": "BPBD Kota Yogyakarta",
+        "last_updated": "2024-02-20",
+        "kontak_darurat": "+62274-551215",
+        "instruksi_evakuasi": "Hindari jalan yang tergenang. Matikan listrik jika air masuk rumah.",
+        "riwayat_bencana": "[{\"tanggal\":\"2024-01-12\",\"jenis\":\"Banjir Genangan\",\"skala\":\"Ringan\",\"korban_jiwa\":0,\"pengungsi\":200,\"kerugian_material\":\"Rp 500 Juta\",\"deskripsi\":\"Genangan air setinggi 30-50 cm di beberapa titik.\",\"sumber\":\"BPBD Kota\"}]",
+        "facilities": "[]",
+        "kapasitas": 0,
+        "sumber": "BPBD DIY/BPBD Kabupaten-Kota, BMKG; pembaruan peta rawan bencana 2025",
+        "tahun_data": "2024",
+        "keterangan": "Zona Rawan Banjir Kota Yogyakarta - Rawan Banjir; disiapkan untuk QGIS EPSG:4326 dari data kebencanaan project dan rujukan publik."
+      }
+    }
+  ]
+}
