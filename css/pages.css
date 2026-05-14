@@ -619,8 +619,13 @@
 
 /* ── Tata Kelola (SPA) ───────────────────────────────────── */
 .tatakota-root {
-  max-width: 1120px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+#tatakota-page.tatakota-detail-active {
+  padding: 0;
 }
 .tatakota-category-grid {
   display: grid;

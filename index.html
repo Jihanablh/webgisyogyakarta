@@ -173,24 +173,21 @@
         <!-- ============ SIDEBAR ============ -->
         <aside id="sidebar">
             <div class="sidebar-inner">
-                <!-- Close button: absolute positioned inside panel -->
-                <button type="button" class="sidebar-close-fab" id="sidebar-toggle" aria-label="Tutup panel">&times;</button>
-
                 <div class="sidebar-scroll tw-animate-[fadeInUp_0.45s_ease_both]">
                     <!-- Search -->
-                    <div class="tw-px-3 tw-pt-3 tw-pb-3">
+                    <div class="tw-px-4 tw-py-3">
                         <div class="sidebar-search-wrap">
                             <svg class="search-icon-svg" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                             <input type="text" id="search-input"
-                                class="tw-w-full tw-py-3 tw-pl-9 tw-pr-3 tw-rounded-2xl tw-bg-slate-900/75 tw-border tw-border-amber-500/20 focus:tw-border-amber-500/60 tw-text-slate-100 tw-text-xs tw-font-[Inter,sans-serif] tw-placeholder-slate-500 tw-transition-colors tw-duration-200 tw-outline-none"
+                                class="tw-w-full tw-py-2.5 tw-pl-9 tw-pr-3 tw-rounded-xl tw-bg-slate-800/80 tw-border tw-border-slate-600/50 focus:tw-border-amber-500/50 tw-text-slate-100 tw-text-xs tw-font-[Inter,sans-serif] tw-placeholder-slate-500 tw-transition-colors tw-duration-200 tw-outline-none"
                                 placeholder="Cari nama tempat..." autocomplete="off">
                             <div id="search-results" class="hidden"></div>
                         </div>
                     </div>
 
                     <!-- Status -->
-                    <div class="tw-px-3 tw-py-2">
-                        <div class="tw-rounded-2xl tw-border tw-border-red-400/25 tw-bg-red-950/20 tw-p-4 tw-shadow-lg tw-shadow-black/20">
+                    <div class="tw-border-t tw-border-amber-500/10 tw-px-4 tw-py-3">
+                        <div class="tw-rounded-xl tw-border tw-border-red-400/25 tw-bg-slate-800/60 tw-p-3 tw-shadow-lg tw-shadow-black/20">
                             <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                                 <div>
                                     <div class="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-[0.16em] tw-text-red-300 tw-font-[Inter,sans-serif]">Status Siaga DIY</div>
@@ -216,20 +213,20 @@
                     </div>
 
                     <!-- Stats -->
-                    <div class="tw-px-3 tw-py-2">
+                    <div class="tw-border-t tw-border-amber-500/10 tw-px-4 tw-py-3">
                         <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-2 tw-font-[Inter,sans-serif]">Ringkasan Kebencanaan</div>
                         <div id="stats-grid" class="tw-grid tw-grid-cols-2 tw-gap-2"></div>
                         <button type="button" id="btn-open-stats" class="sb-ghost-btn tw-mt-3">Buka Dashboard Statistika</button>
                     </div>
 
                     <!-- Legend -->
-                    <div class="tw-px-3 tw-py-2">
+                    <div class="tw-border-t tw-border-amber-500/10 tw-px-4 tw-py-3">
                         <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-2 tw-font-[Inter,sans-serif]">Layer Kebencanaan</div>
                         <div id="sidebar-mode-panel"></div>
                     </div>
 
                     <!-- Events -->
-                    <div id="recent-events-widget" class="tw-px-3 tw-py-2" style="display:none">
+                    <div id="recent-events-widget" class="tw-border-t tw-border-amber-500/10 tw-px-4 tw-py-3" style="display:none">
                         <div class="tw-text-[9px] tw-font-bold tw-uppercase tw-tracking-[0.14em] tw-text-slate-500 tw-mb-2 tw-font-[Inter,sans-serif]">Kejadian Terkini</div>
                         <div id="rew-list"></div>
                         <button type="button" class="tw-mt-2 tw-bg-transparent tw-border-0 tw-p-0 tw-text-[11px] tw-font-semibold tw-text-amber-400 hover:tw-text-amber-300 tw-cursor-pointer" id="rew-see-all">Lihat semua di Laporan Bencana</button>
