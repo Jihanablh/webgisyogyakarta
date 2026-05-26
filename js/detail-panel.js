@@ -131,7 +131,7 @@ function showTourismPanel(feature, categoryKey) {
         }
         document.getElementById('tp-stars').innerHTML   = starsHtml;
         document.getElementById('tp-rating').textContent = rating.toFixed(1);
-        document.getElementById('tp-reviews').textContent = props.reviews ? `Â· ${props.reviews.toLocaleString()} ulasan` : '';
+        document.getElementById('tp-reviews').textContent = props.reviews ? `\u00b7 ${props.reviews.toLocaleString()} ulasan` : '';
         document.getElementById('tp-visitors').textContent = props.visitors_per_day ? `~${props.visitors_per_day.toLocaleString()} / hari` : '';
     } else if (statsRow) { statsRow.style.display = 'none'; }
 
@@ -152,9 +152,9 @@ function showTourismPanel(feature, categoryKey) {
         const crowdLevel  = hourlyData[currentHour] || 0;
         const badge2 = document.getElementById('tp-crowd-badge');
         if (badge2) {
-            if (crowdLevel >= 60) { badge2.textContent = 'Ã°Å¸â€Â´ Keramaian tinggi';  badge2.className = 'tp-crowd-badge crowd-high'; }
-            else if (crowdLevel >= 30) { badge2.textContent = 'Ã°Å¸Å¸Â¡ Keramaian sedang'; badge2.className = 'tp-crowd-badge crowd-medium'; }
-            else { badge2.textContent = 'Ã°Å¸Å¸Â¢ Keramaian rendah'; badge2.className = 'tp-crowd-badge crowd-low'; }
+            if (crowdLevel >= 60) { badge2.textContent = 'Keramaian tinggi';  badge2.className = 'tp-crowd-badge crowd-high'; }
+            else if (crowdLevel >= 30) { badge2.textContent = 'Keramaian sedang'; badge2.className = 'tp-crowd-badge crowd-medium'; }
+            else { badge2.textContent = 'Keramaian rendah'; badge2.className = 'tp-crowd-badge crowd-low'; }
         }
     } else if (chartSection) { chartSection.style.display = 'none'; }
 
@@ -164,7 +164,7 @@ function showTourismPanel(feature, categoryKey) {
     if (facilities.length > 0) {
         if (facSection) facSection.style.display = 'flex';
         document.getElementById('tp-facilities').innerHTML = facilities.map(f => {
-            const fac = FACILITY_MAP[f] || { icon: 'Ã°Å¸â€œÂ', label: f };
+            const fac = FACILITY_MAP[f] || { icon: '&bull;', label: f };
             return `<div class="tp-facility-item"><span class="tp-facility-icon">${fac.icon}</span><span class="tp-facility-label">${escapeHtml(fac.label)}</span></div>`;
         }).join('');
     } else if (facSection) { facSection.style.display = 'none'; }
@@ -290,9 +290,9 @@ function showDisasterPanel(feature, categoryKey) {
         capRow.style.display = 'flex';
         const capEl = document.getElementById('dp-capacity');
         const statEl = document.getElementById('dp-status');
-        if (capEl) capEl.textContent = props.kapasitas ? `${props.kapasitas.toLocaleString()} jiwa` : 'â€”';
+        if (capEl) capEl.textContent = props.kapasitas ? `${props.kapasitas.toLocaleString()} jiwa` : 'Ã¢â‚¬â€';
         if (statEl) {
-            const st = props.status_terisi || 'â€”';
+            const st = props.status_terisi || 'Ã¢â‚¬â€';
             statEl.textContent = st;
             statEl.style.color = st.toLowerCase().includes('penuh') ? '#ef4444'
                                 : st.toLowerCase().includes('sebagian') ? '#f97316' : '#22c55e';
@@ -323,7 +323,7 @@ function showDisasterPanel(feature, categoryKey) {
     if (facilities.length > 0) {
         facSection.style.display = 'block';
         document.getElementById('dp-facilities').innerHTML = facilities.map(f => {
-            const fac = FACILITY_MAP[f] || { icon: 'Ã°Å¸â€œÂ', label: f };
+            const fac = FACILITY_MAP[f] || { icon: '&bull;', label: f };
             return `<span class="dp-facility-chip">${fac.icon} ${escapeHtml(fac.label)}</span>`;
         }).join('');
     } else {
@@ -365,7 +365,7 @@ function showDisasterPanel(feature, categoryKey) {
     const updEl    = document.getElementById('dp-updated');
     if (sourceEl) {
         sourceEl.style.display = 'block';
-        if (updEl) updEl.textContent = props.last_updated || props.tanggal_update || 'â€”';
+        if (updEl) updEl.textContent = props.last_updated || props.tanggal_update || 'Ã¢â‚¬â€';
     }
 
     // -- Tombol aksi -----------------------------------------------------------
@@ -456,19 +456,19 @@ function openUnifiedPanel(feature, categoryKey) {
     if (metaEl) {
         metaEl.classList.remove('hidden');
         if (isDisaster) {
-            const risk = isPengungsian ? (props.jenis_posko || 'Pengungsian') : (props.kelas_risiko || props.risiko || props.level_risiko || props.tingkat_risiko || 'â€”');
+            const risk = isPengungsian ? (props.jenis_posko || 'Pengungsian') : (props.kelas_risiko || props.risiko || props.level_risiko || props.tingkat_risiko || 'Ã¢â‚¬â€');
             const kec = props.kabupaten_kota || props.kab_kota || nz(props.kecamatan, 'Wilayah DIY');
             const zona = props.zona ? String(props.zona) : (props.kapanewon || '');
             metaEl.innerHTML = `
                 <div class="detail-meta-row detail-meta-row--risk">
                     <span class="detail-meta-pill">${escapeHtml(String(risk))}</span>
-                    <span class="detail-meta-text">${escapeHtml(zona ? `${zona} Â· ${kec}` : String(kec))}</span>
+                    <span class="detail-meta-text">${escapeHtml(zona ? `${zona} \u00b7 ${kec}` : String(kec))}</span>
                 </div>`;
         } else {
             const rating = Number(props.rating) || 4.2;
             const reviews = props.reviews_count ?? 286;
             const pengunjung = props.pengunjung ?? 2400;
-            const jam = props.opening_hours || props.jam_buka || '08.00â€“18.00';
+            const jam = props.opening_hours || props.jam_buka || '08.00Ã¢â‚¬â€œ18.00';
             const htm = props.htm || props.ticket_price || 'Rp 25.000';
             metaEl.innerHTML = `
                 <div class="detail-meta-row detail-meta-row--tourism">
@@ -477,7 +477,7 @@ function openUnifiedPanel(feature, categoryKey) {
                     <span class="detail-meta-muted">(${Number(reviews).toLocaleString('id-ID')} ulasan)</span>
                 </div>
                 <div class="detail-meta-grid">
-                    <div><span class="detail-meta-k">Pengunjung/hari</span><span class="detail-meta-v">Â±${Number(pengunjung).toLocaleString('id-ID')}</span></div>
+                    <div><span class="detail-meta-k">Pengunjung/hari</span><span class="detail-meta-v">&plusmn;${Number(pengunjung).toLocaleString('id-ID')}</span></div>
                     <div><span class="detail-meta-k">Jam</span><span class="detail-meta-v">${escapeHtml(String(jam))}</span></div>
                     <div><span class="detail-meta-k">Tarif</span><span class="detail-meta-v">${escapeHtml(String(htm))}</span></div>
                 </div>`;
@@ -523,7 +523,7 @@ function openUnifiedPanel(feature, categoryKey) {
     badge.className = 'detail-category-badge ' + (riskBadgeMap[riskKey] || (categoryKey === 'kebencanaan' ? 'badge-risiko-sedang' : 'badge-wisata'));
     badge.textContent = sanitizeText(riskKey || subcatText || cat.label || categoryKey);
 
-    document.getElementById('detail-name').textContent = sanitizeText(props.kab_kota || props.nama_lokasi || props.name || props.nama || 'â€”');
+    document.getElementById('detail-name').textContent = sanitizeText(props.kab_kota || props.nama_lokasi || props.name || props.nama || 'Ã¢â‚¬â€');
 
     const hist = Array.isArray(props.riwayat_bencana) ? props.riwayat_bencana : [];
     const lastH = hist.length ? hist[0] : null;
@@ -535,7 +535,7 @@ function openUnifiedPanel(feature, categoryKey) {
     if (isDisaster) {
         let html = '';
         if (isKabupatenRisk) {
-            const risk = props.kelas_risiko || 'â€”';
+            const risk = props.kelas_risiko || 'Ã¢â‚¬â€';
             const color = riskColor(risk);
             html += `<div class="dp-section">Ringkasan kabupaten/kota 2025</div>`;
             html += row('Wilayah', props.kab_kota);
@@ -566,14 +566,14 @@ function openUnifiedPanel(feature, categoryKey) {
             html += row('Tahun data', props.tahun_data || 2025);
             html += `<div class="dp-section">Catatan</div><p class="dp-desc">${escapeHtml(props.catatan || 'Data ditampilkan sesuai atribut pada GeoJSON posko pengungsian logistik DIY 2025.')}</p>`;
         } else {
-            const luas = nz(props.luas_terdampak_km2, props.radius_km ? `Â±${Number(props.radius_km) * 12} kmÂ² (estimasi)` : 'Â±42 kmÂ² (estimasi wilayah)');
-            const pop = nz(props.populasi_berisiko, 'Â±125.000 jiwa (estimasi populasi terpapar)');
+            const luas = nz(props.luas_terdampak_km2, props.radius_km ? `&plusmn;${Number(props.radius_km) * 12} km&sup2; (estimasi)` : '&plusmn;42 km&sup2; (estimasi wilayah)');
+            const pop = nz(props.populasi_berisiko, '&plusmn;125.000 jiwa (estimasi populasi terpapar)');
             const korban = nz(props.korban_jiwa, lastH && lastH.korban_jiwa != null ? `${lastH.korban_jiwa} (riwayat terakhir)` : '0 (tidak ada korban jiwa pada skenario baseline)');
-            const pengungsi = nz(props.pengungsi, lastH && lastH.pengungsi != null ? String(lastH.pengungsi) : 'â€”');
+            const pengungsi = nz(props.pengungsi, lastH && lastH.pengungsi != null ? String(lastH.pengungsi) : '&mdash;');
             const kerugian = nz(props.kerugian_material, lastH && lastH.kerugian_material ? lastH.kerugian_material : 'Data sedang dikonsolidasi');
             html += `<div class="dp-section">Ringkasan zona</div>`;
-            html += row('Zona', props.name || props.nama || 'â€”');
-            html += row('Jenis', nz(props.jenis_bencana, subcatText || 'â€”'));
+            html += row('Zona', props.name || props.nama || '&mdash;');
+            html += row('Jenis', nz(props.jenis_bencana, subcatText || '&mdash;'));
             html += row('Tingkat risiko', nz(props.level_risiko, props.risiko || 'Sedang'));
             html += row('Luas terdampak', luas);
             html += row('Populasi berisiko', pop);
@@ -589,15 +589,15 @@ function openUnifiedPanel(feature, categoryKey) {
             }
             html += `<div class="dp-section">Fasilitas &amp; titik penting terdekat</div>
                 <div class="dp-chip-row">
-                    <span class="dp-chip">Titik kumpul Â±1,2 km</span>
-                    <span class="dp-chip">Puskesmas Â±3 km</span>
+                    <span class="dp-chip">Titik kumpul &plusmn;1,2 km</span>
+                    <span class="dp-chip">Puskesmas &plusmn;3 km</span>
                     <span class="dp-chip">Jalur evakuasi utama</span>
                     <span class="dp-chip">Distribusi logistik BPBD</span>
                 </div>`;
             if (hist.length) {
                 html += `<div class="dp-section">Riwayat kejadian</div>`;
                 hist.slice(0, 4).forEach((h) => {
-                    html += `<div class="dp-history-card"><strong>${escapeHtml(h.tanggal || '')}</strong> Â· ${escapeHtml(h.jenis || '')} ${escapeHtml(h.skala || '')}<br>${escapeHtml(h.deskripsi || '')}</div>`;
+                    html += `<div class="dp-history-card"><strong>${escapeHtml(h.tanggal || '')}</strong> &middot; ${escapeHtml(h.jenis || '')} ${escapeHtml(h.skala || '')}<br>${escapeHtml(h.deskripsi || '')}</div>`;
                 });
             }
             html += `<div class="dp-section">Indeks aktivitas (24 jam)</div>
@@ -619,7 +619,7 @@ function openUnifiedPanel(feature, categoryKey) {
             (props.alamat || props.address) ? ['Alamat', props.alamat || props.address] : null,
             props.kecamatan ? ['Kecamatan', props.kecamatan] : null,
             props.operator ? ['Pengelola', props.operator] : null,
-            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00â€“18.00'],
+            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00Ã¢â‚¬â€œ18.00'],
             ['Tiket / HTM', props.htm || props.ticket_price || 'Gratis'],
         ].filter(Boolean);
         let html = infoRows.map(([l, v]) => row(l, v)).join('');
@@ -631,8 +631,8 @@ function openUnifiedPanel(feature, categoryKey) {
         html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
             chips.map((c) => `<span class="dp-chip">${escapeHtml(c)}</span>`).join('') + `</div>`;
         const crowd = props.hourly_crowd || defaultHourlyCrowd(String(props.name || props.nama || categoryKey));
-        html += `<div class="dp-section">Keramaian per jam (00â€“23)</div>
-            <p class="dp-desc" style="font-size:11px;margin-bottom:8px;color:var(--text-muted)">Hijau rendah Â· Kuning sedang Â· Oranye ramai Â· Merah sangat ramai</p>
+        html += `<div class="dp-section">Keramaian per jam (00Ã¢â‚¬â€œ23)</div>
+            <p class="dp-desc" style="font-size:11px;margin-bottom:8px;color:var(--text-muted)">Hijau rendah &middot; Kuning sedang &middot; Oranye ramai &middot; Merah sangat ramai</p>
             <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
         vertical.innerHTML = html;
         requestAnimationFrame(() => {
