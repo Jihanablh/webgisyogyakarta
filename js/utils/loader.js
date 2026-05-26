@@ -1,4 +1,4 @@
-export class LoadingManager {
+﻿export class LoadingManager {
   constructor(total) {
     this.total = total;
     this.loaded = 0;

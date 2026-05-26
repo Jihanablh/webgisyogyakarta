@@ -1,9 +1,9 @@
-/* ============================================================
+﻿/* ============================================================
    JOGJA SIAGA — pages.css
    Statistik, Laporan Bencana, Tentang
    ============================================================ */
 
-/* ── KPI Cards ────────────────────────────────────────────── */
+/* -- KPI Cards ---------------------------------------------- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -54,7 +54,7 @@
 .kpi-trend.up   { color: var(--accent-batik-red); }
 .kpi-trend.down { color: var(--accent-green); }
 
-/* ── Chart Grids ──────────────────────────────────────────── */
+/* -- Chart Grids -------------------------------------------- */
 .chart-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -89,7 +89,7 @@
   height: 200px;
 }
 
-/* ── Data Table ───────────────────────────────────────────── */
+/* -- Data Table --------------------------------------------- */
 .data-table-wrap {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
@@ -206,7 +206,7 @@
   font-weight: 700;
 }
 
-/* ── LAPORAN PAGE ─────────────────────────────────────────── */
+/* -- LAPORAN PAGE ------------------------------------------- */
 .lap-kpi-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -455,7 +455,7 @@
   line-height: 1.5;
 }
 
-/* ── TENTANG PAGE ─────────────────────────────────────────── */
+/* -- TENTANG PAGE ------------------------------------------- */
 .tentang-hero {
   background: linear-gradient(135deg, var(--bg-elevated), var(--bg-card));
   border: 1px solid var(--border-card);
@@ -617,7 +617,7 @@
   .tentang-hero { padding: 28px 20px; }
 }
 
-/* ── Tata Kelola (SPA) ───────────────────────────────────── */
+/* -- Tata Kelola (SPA) ------------------------------------- */
 .tatakota-root {
   width: 100%;
   max-width: none;
@@ -801,12 +801,12 @@
   box-shadow: var(--shadow-gold);
 }
 
-/* ── Laporan: stagger + chips ─────────────────────────────── */
+/* -- Laporan: stagger + chips ------------------------------- */
 .report-font-mono {
   font-family: var(--font-mono), ui-monospace, monospace;
 }
 
-/* ── Tatakota Detail SPA ───────────────────────────────────── */
+/* -- Tatakota Detail SPA ------------------------------------- */
 .tatakota-detail-spa {
   position: relative;
   min-height: 100%;
@@ -865,7 +865,7 @@
   min-height: 320px;
 }
 
-/* ── tatakota card transition ─────────────────────────────── */
+/* -- tatakota card transition ------------------------------- */
 .tatakota-card {
   transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.25s ease, box-shadow 0.35s ease;
 }
@@ -895,7 +895,7 @@
   }
 }
 
-/* Timeline rail: garis vertikal “digambar” */
+/* Timeline rail: garis vertikal "digambar" */
 .report-tl-rail {
   position: relative;
 }
@@ -952,7 +952,7 @@
   pointer-events: none;
   background: linear-gradient(180deg, rgba(10, 15, 30, 0.15) 0%, rgba(10, 15, 30, 0.88) 100%);
 }
-.report-tl-surface--merapi::before {
+.report-tl-surface--orange::before {
   background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=70');
 }
 .report-tl-surface--flood::before {
@@ -994,7 +994,7 @@
   color: var(--accent-gold) !important;
 }
 
-/* ── Statistik: stagger reveal + heatmap ─────────────────── */
+/* -- Statistik: stagger reveal + heatmap ------------------- */
 .stat-io-section {
   opacity: 0;
   transform: translateY(22px);
@@ -1016,7 +1016,7 @@
   background: #0a0f1e;
 }
 
-/* ── Tentang: dividers + cards (used by about.js) ─────────── */
+/* -- Tentang: dividers + cards (used by about.js) ----------- */
 .ta-divider {
   display: flex;
   align-items: center;
@@ -1044,7 +1044,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.08);
 }
 
-/* ── Tentang: scroll reveal ───────────────────────────────── */
+/* -- Tentang: scroll reveal --------------------------------- */
 .about-reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -1182,7 +1182,7 @@
   }
 }
 
-/* ── Tata Kelola overlay on map ───────────────────────────── */
+/* -- Tata Kelola overlay on map ----------------------------- */
 #tatakota-page.tatakota-on-map {
   position: absolute;
   inset: 0;

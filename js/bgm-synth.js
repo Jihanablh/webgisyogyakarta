@@ -1,4 +1,4 @@
-/** Continuous soft pad — Web Audio fallback when <audio> fails. */
+﻿/** Continuous soft pad — Web Audio fallback when <audio> fails. */
 let _ctx = null;
 let _master = null;
 const _oscs = [];

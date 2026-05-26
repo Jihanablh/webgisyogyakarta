@@ -1,0 +1,55 @@
+METADATA SUMBER DATA
+
+File hasil:
+jumlah_dampak_bencana_diy_2025_per_kecamatan.geojson
+
+File salinan pembanding:
+jumlah_dampak_bencana_diy_2025_per_kecamatan_lengkap.geojson
+
+Wilayah:
+Daerah Istimewa Yogyakarta.
+
+Unit analisis:
+Kecamatan/kapanewon/kemantren.
+
+Periode:
+1 Januari 2025 - 31 Desember 2025.
+
+Tanggal akses:
+15 Mei 2026.
+
+Sumber data yang digunakan:
+1. DIBI/BNPB Data Bencana tabel pencarian.
+   URL: https://gis.bnpb.go.id/databencana/tabel/pencarian.php
+   Filter: 2025-01-01 sampai 2025-12-31.
+2. Portal Satu Data Bencana Indonesia / BNPB.
+   URL: https://data.bnpb.go.id/dataset/data-bencana-indonesia
+3. BIG RBI Administrasi_AR_Kecamatan_10K.
+   URL: https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/Administrasi_AR_Kecamatan_10K/MapServer/0
+
+Metode pengisian data:
+1. Polygon kecamatan/kapanewon/kemantren menggunakan batas administrasi BIG dalam CRS EPSG:4326.
+2. Data kejadian/dampak 2025 diambil dari tabel pencarian DIBI/BNPB.
+3. Record DIBI/BNPB yang menyebut tepat satu kecamatan/kapanewon/kemantren pada kabupaten/kota yang sama digunakan untuk mengisi atribut kecamatan tersebut.
+4. Record yang menyebut lebih dari satu kecamatan tidak dibagi rata dan tidak dialokasikan ke kecamatan, karena tidak tersedia dampak resmi terpisah per kecamatan.
+5. Kecamatan tanpa record resmi spesifik diisi angka 0 sesuai instruksi pengguna untuk menghindari data perkiraan.
+
+Rumus jumlah dampak:
+jumlah_dampak = meninggal + luka_luka + hilang + mengungsi + rumah_rusak.
+
+Aturan jika data tidak tersedia:
+Jika data resmi tingkat kecamatan tidak tersedia, tidak terverifikasi, atau hanya tersedia pada tingkat kabupaten/kota/multi-kecamatan, maka nilai diisi 0 dan catatan_validasi menjelaskan alasannya. Angka 0 dalam konteks ini berarti tidak ada data resmi spesifik yang dapat dimasukkan tanpa asumsi, bukan klaim mutlak bahwa tidak pernah terjadi bencana.
+
+Klasifikasi kelas_dampak:
+Tidak ada kejadian: jumlah_dampak = 0.
+Rendah (1-12): jumlah_dampak 1 sampai 12.
+Sedang (13-24): jumlah_dampak 13 sampai 24.
+Tinggi (25+): jumlah_dampak 25 atau lebih.
+
+Ringkasan proses:
+Jumlah record DIBI/BNPB DIY 2025 yang terdeteksi: 29.
+Jumlah record yang dapat dialokasikan ke tepat satu kecamatan: 2.
+Jumlah record yang tidak dialokasikan karena multi-kecamatan/tidak cocok: 27.
+
+Catatan:
+Tidak ada angka perkiraan, simulasi, atau pembagian rata. Semua kolom atribut pada file hasil diisi tanpa null.

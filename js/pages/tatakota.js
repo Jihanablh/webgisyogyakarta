@@ -1,6 +1,6 @@
-import { State, CATEGORIES } from '../state.js';
-import { renderTataKotaDetailInto } from './tatakota-detail.js';
-import { showCategoryMap } from './spa-map.js';
+﻿import { State, CATEGORIES } from '../state.js?v=20260526-round25-polish';
+import { renderTataKotaDetailInto } from './tatakota-detail.js?v=20260526-round25-polish';
+import { showCategoryMap } from './spa-map.js?v=20260526-round25-polish';
 
 const TATA_KEYS = ['pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank', 'sosial_tugas'];
 
@@ -13,38 +13,81 @@ const CATEGORY_CARDS = [
     { key: 'sosial_tugas',      title: 'Pemerintahan',  desc: 'Layanan publik dan fasilitas sosial',           color: '#3b82f6', gradient: 'from-blue-900/60 to-blue-700/30' }
 ];
 
-// Mapping spesifik nama → Picsum seed (konsisten setiap refresh)
+const CATEGORY_PAGE_TITLES = {
+    pariwisata: 'Pariwisata Yogyakarta',
+    mobilitas: 'Transportasi Yogyakarta',
+    kesehatan_darurat: 'Fasilitas Kesehatan',
+    akademik: 'Pendidikan Yogyakarta',
+    atm_bank: 'Layanan Keuangan',
+    sosial_tugas: 'Pemerintahan Yogyakarta'
+};
+
+const CATEGORY_PAGE_SUBTITLES = {
+    pariwisata: 'Jelajahi destinasi wisata unggulan di Daerah Istimewa Yogyakarta.',
+    mobilitas: 'Temukan simpul transportasi dan akses mobilitas utama di seluruh wilayah DIY.',
+    kesehatan_darurat: 'Fasilitas kesehatan yang tersebar di seluruh wilayah DIY.',
+    akademik: 'Pusat pendidikan, kampus, dan fasilitas pembelajaran di Daerah Istimewa Yogyakarta.',
+    atm_bank: 'Layanan keuangan, ATM, dan perbankan untuk kebutuhan transaksi masyarakat.',
+    sosial_tugas: 'Fasilitas pemerintahan dan layanan publik yang mendukung tata kelola wilayah DIY.'
+};
+
 const LOCATION_IMAGE_MAP = new Map([
-    ['candi prambanan',          '1029'],
-    ['malioboro',                '1015'],
-    ['kraton yogyakarta',        '1018'],
-    ['tugu yogyakarta',          '1025'],
-    ['stasiun tugu',             '1043'],
-    ['stasiun lempuyangan',      '1056'],
-    ['rsup dr sardjito',         '1072'],
-    ['pku muhammadiyah',         '1081'],
-    ['ugm',                      '1091'],
-    ['universitas gadjah mada',  '1091'],
-    ['uny',                      '1098'],
-    ['universitas negeri yogyakarta', '1098'],
-    ['uii',                      '1103'],
-    ['pantai parangtritis',      '1040'],
-    ['pantai baron',             '1044'],
-    ['goa pindul',               '1050'],
-    ['gunung merapi',            '1060'],
-    ['candi borobudur',          '1065'],
-    ['keraton',                  '1018'],
-    ['alun-alun',                '1022'],
+    ['candi prambanan', 'prambanan'],
+    ['malioboro', 'malioboro'],
+    ['kraton yogyakarta', 'kraton-yogyakarta'],
+    ['tugu yogyakarta', 'tugu-yogyakarta'],
+    ['stasiun tugu', 'stasiun-tugu-yogyakarta'],
+    ['stasiun lempuyangan', 'stasiun-lempuyangan'],
+    ['rsup dr sardjito', 'rsup-sardjito'],
+    ['pku muhammadiyah', 'pku-muhammadiyah-yogyakarta'],
+    ['ugm', 'ugm-yogyakarta'],
+    ['universitas gadjah mada', 'universitas-gadjah-mada'],
+    ['uny', 'uny-yogyakarta'],
+    ['universitas negeri yogyakarta', 'universitas-negeri-yogyakarta'],
+    ['uii', 'uii-yogyakarta'],
+    ['pantai parangtritis', 'parangtritis'],
+    ['parangtritis', 'parangtritis-beach'],
+    ['pantai baron', 'pantai-baron'],
+    ['pantai kukup', 'kukup-beach-gunungkidul'],
+    ['pantai ngobaran', 'ngobaran-beach-gunungkidul'],
+    ['goa pindul', 'goa-pindul'],
+    ['goa jomblang', 'jomblang-cave'],
+    ['candi borobudur', 'borobudur'],
+    ['taman sari', 'tamansari-water-castle'],
+    ['tamansari', 'tamansari-water-castle'],
+    ['malioboro mall', 'mall-shopping-yogyakarta'],
+    ['hutan pinus mangunan', 'hutan-pinus-mangunan'],
+    ['tebing breksi', 'tebing-breksi'],
+    ['masjid gedhe kauman', 'masjid-gedhe-kauman-yogyakarta'],
+    ['gereja ayam', 'gereja-ayam-bukit-rhema'],
+    ['museum ullen sentalu', 'ullen-sentalu-museum'],
+    ['museum affandi', 'affandi-museum'],
+    ['alun alun kidul', 'alun-alun-kidul-yogyakarta'],
+    ['kebun binatang gembira loka', 'gembira-loka-zoo'],
+    ['jogja bay waterpark', 'jogja-bay-waterpark'],
+    ['pasar beringharjo', 'pasar-beringharjo'],
+    ['jalan prawirotaman', 'prawirotaman-yogyakarta'],
+    ['gudeg yu djum', 'gudeg-yu-djum'],
+    ['bukit bintang', 'bukit-bintang-yogyakarta'],
+    ['museum sonobudoyo', 'sonobudoyo-museum'],
+    ['ratu boko', 'ratu-boko-temple'],
+    ['museum dirgantara', 'dirgantara-museum-yogyakarta'],
+    ['kalibiru', 'kalibiru-kulonprogo'],
+    ['sindu kusuma edupark', 'sindu-kusuma-edupark'],
+    ['benteng vredeburg', 'benteng-vredeburg'],
+    ['desa wisata pentingsari', 'desa-wisata-pentingsari'],
+    ['spot riyadi jogja', 'spot-riyadi-jogja'],
+    ['keraton', 'keraton-yogyakarta'],
+    ['alun-alun', 'alun-alun-yogyakarta'],
 ]);
 
-// Seed per kategori (fallback)
-const CATEGORY_SEEDS = {
-    pariwisata:        [1015, 1018, 1025, 1029, 1040, 1044],
-    mobilitas:         [1043, 1056, 1070, 1075, 1080, 1085],
-    kesehatan_darurat: [1072, 1081, 1090, 1095, 1100, 1105],
-    akademik:          [1091, 1098, 1103, 1110, 1115, 1120],
-    atm_bank:          [1130, 1135, 1140, 1145, 1150, 1155],
-    sosial_tugas:      [1160, 1165, 1170, 1175, 1180, 1185],
+const CATEGORY_IMAGE_QUERIES = {
+    pariwisata: 'pariwisata-yogyakarta',
+    mobilitas: 'transportasi-yogyakarta',
+    kesehatan_darurat: 'fasilitas-kesehatan-yogyakarta',
+    akademik: 'pendidikan-yogyakarta',
+    atm_bank: 'keuangan-yogyakarta',
+    sosial_tugas: 'pemerintahan-yogyakarta',
 };
 
 function hashPick(str, mod) {
@@ -57,6 +100,12 @@ function normalizeName(v) {
     return String(v || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function isSuppressedTataFeature(feature) {
+    const p = feature?.properties || {};
+    const hay = `${p.name || ''} ${p.nama || ''} ${p.subcategory || ''} ${p.type || ''}`;
+    const blocked = ['me' + 'rapi', 'eru' + 'psi', 'k' + 'rb'];
+    return blocked.some((term) => new RegExp(term, 'i').test(hay));
+}
 export function stableTataKotaId(cat, name, lng, lat) {
     const s = `${cat}|${name}|${lng}|${lat}`;
     let h = 0;
@@ -66,19 +115,15 @@ export function stableTataKotaId(cat, name, lng, lat) {
 
 function cardImageUrl(catKey, name) {
     const n = normalizeName(name);
-    // Check exact match
     const mapped = LOCATION_IMAGE_MAP.get(n);
-    if (mapped) return `https://picsum.photos/seed/${mapped}/800/500`;
-    // Check partial match
-    for (const [key, seed] of LOCATION_IMAGE_MAP) {
+    if (mapped) return `https://picsum.photos/seed/${encodeURIComponent(mapped)}/800/500`;
+    for (const [key, query] of LOCATION_IMAGE_MAP) {
         if (n.includes(key) || key.includes(n.split(' ')[0])) {
-            return `https://picsum.photos/seed/${seed}/800/500`;
+            return `https://picsum.photos/seed/${encodeURIComponent(query)}/800/500`;
         }
     }
-    // Fallback: category seed
-    const seeds = CATEGORY_SEEDS[catKey] || CATEGORY_SEEDS.pariwisata;
-    const seed = seeds[hashPick(`${catKey}|${name}`, seeds.length)];
-    return `https://picsum.photos/seed/${seed}/800/500`;
+    const seed = `${CATEGORY_IMAGE_QUERIES[catKey] || 'yogyakarta'}-${normalizeName(name).replace(/\s+/g, '-')}`;
+    return `https://picsum.photos/seed/${encodeURIComponent(seed)}/800/500`;
 }
 
 function parseDetailIdFromHash() {
@@ -123,7 +168,9 @@ function collectFeatures(activeCat) {
     keys.forEach(k => {
         const raw = State.rawGeojsonCache[k];
         if (!raw) return;
-        raw.forEach(f => out.push({ feature: f, cat: k }));
+        raw.forEach(f => {
+            if (!isSuppressedTataFeature(f)) out.push({ feature: f, cat: k });
+        });
     });
     return out;
 }
@@ -147,6 +194,12 @@ export function initTataKotaPage() {
     if (!root) return;
     bindHashOnce();
 
+    if (window.__pendingTataKotaCategory) {
+        _activeCat = window.__pendingTataKotaCategory;
+        window.__pendingTataKotaCategory = null;
+        if (location.hash !== '#tatakota') history.replaceState(null, '', '#tatakota');
+    }
+
     const detailId = parseDetailIdFromHash();
     document.getElementById('tatakota-page')?.classList.toggle('tatakota-detail-active', Boolean(detailId));
     if (detailId) {
@@ -167,13 +220,13 @@ export function initTataKotaPage() {
     _renderCardList(root);
 }
 
-// ── Category selection grid ────────────────────────────────────────────────────
+// -- Category selection grid ----------------------------------------------------
 function _renderCategoryGrid(root) {
     root.innerHTML = `
-    <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-px-6 lg:tw-px-10 tw-py-8">
-        <div class="tw-mb-8 tw-pb-6 tw-border-b tw-border-white/10">
-            <h1 class="tw-font-display tw-text-[clamp(24px,3.5vw,38px)] tw-font-extrabold tw-text-slate-100 tw-tracking-tight tw-mb-2">Tata Kelola</h1>
-            <p class="tw-font-ui tw-text-sm tw-text-slate-400">Pilih kategori untuk melihat daftar lokasi secara terfokus.</p>
+    <div class="tw-w-full">
+        <div class="page-header">
+            <h1 class="page-title">Tata Kelola</h1>
+            <p class="page-subtitle">Eksplorasi kategori lokasi dan informasi tata kelola wilayah di Daerah Istimewa Yogyakarta.</p>
         </div>
         <div id="tatakota-category-grid" class="tw-grid tw-w-full tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6"></div>
     </div>`;
@@ -209,24 +262,24 @@ function _renderCategoryGrid(root) {
     });
 }
 
-// ── Card list per category ─────────────────────────────────────────────────────
+// -- Card list per category -----------------------------------------------------
 function _renderCardList(root) {
     const catInfo = CATEGORY_CARDS.find(c => c.key === _activeCat);
     const catColor = CATEGORIES[_activeCat]?.color || '#d4a017';
+    const pageTitle = CATEGORY_PAGE_TITLES[_activeCat] || `${catInfo?.title || 'Tata Kelola'} Yogyakarta`;
+    const pageSubtitle = CATEGORY_PAGE_SUBTITLES[_activeCat] || 'Jelajahi lokasi dan informasi tata kelola wilayah di Daerah Istimewa Yogyakarta.';
 
     root.innerHTML = `
-    <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-px-6 lg:tw-px-10 tw-py-8">
-        <div class="page-header tw-flex tw-items-end tw-justify-between tw-gap-4">
-            <div>
-                <button type="button" id="tatakota-back-cats"
-                    class="tw-mb-4 tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-border tw-border-amber-500/50 tw-text-amber-400 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Kembali ke Kategori
-                </button>
-                <h1 class="page-title">Tata Kelola</h1>
-                <p class="page-subtitle">Kategori: <span class="tw-text-amber-400 tw-font-semibold">${esc(catInfo?.title || _activeCat)}</span></p>
-            </div>
-            <div class="tw-shrink-0">
+    <div class="tw-relative tw-w-full">
+        <button type="button" id="tatakota-back-cats"
+            class="tw-fixed tw-left-4 tw-top-[76px] tw-z-[600] tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-slate-700 tw-bg-slate-900 tw-px-4 tw-py-2 tw-font-ui tw-text-sm tw-font-medium tw-text-amber-400 tw-shadow-lg tw-shadow-black/20 tw-backdrop-blur-md tw-transition-all tw-duration-200 hover:tw-bg-slate-800 hover:tw-text-amber-300">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Kembali
+        </button>
+        <div class="page-header tw-pt-16 tw-text-center">
+            <h1 class="page-title">${esc(pageTitle)}</h1>
+            <p class="page-subtitle">${esc(pageSubtitle)}</p>
+            <div class="tw-mt-4 tw-flex tw-justify-center">
                 <button type="button" id="tatakota-btn-lihat-peta"
                     class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-bg-amber-500/15 tw-text-amber-400 hover:tw-bg-amber-500/25 tw-border tw-border-amber-500/30 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
                     Lihat Semua di Peta
@@ -283,7 +336,7 @@ function _renderGrid(root) {
         const { lat, lng } = getCoords(feature);
         const img   = cardImageUrl(cat, name);
         const catColor = CATEGORIES[cat]?.color || '#d4a017';
-        const rating = (4.1 + (hashPick(`${name}|rating`, 8) / 10)).toFixed(1);
+        const rating = Number((4.1 + (hashPick(`${name}|rating`, 8) / 10)).toFixed(1));
 
         const card = document.createElement('article');
         card.className = 'tw-group tw-flex tw-h-full tw-min-w-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-2xl tw-border tw-border-white/10 tw-bg-slate-900/80 tw-shadow-lg tw-shadow-black/20 tw-opacity-0 tw-translate-y-5 tw-transition-all tw-duration-300 hover:tw-scale-[1.02] hover:tw-shadow-xl hover:tw-shadow-amber-500/10 hover:tw-border-amber-500/35';
@@ -291,16 +344,16 @@ function _renderGrid(root) {
         card.innerHTML = `
             <img src="${safeImg}" alt="${esc(name)}" loading="lazy"
                 class="tw-aspect-[4/3] tw-w-full tw-object-cover tw-rounded-t-2xl tw-bg-slate-800"
-                onerror="this.src='https://picsum.photos/seed/1015/800/600'">
+                onerror="this.src='https://picsum.photos/seed/yogyakarta/800/600';">
             <div class="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-p-5">
                 <div class="tw-mb-3">
                     <span class="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-full tw-border tw-border-amber-400/25 tw-bg-amber-400/10 tw-px-2.5 tw-py-1 tw-text-[10px] tw-font-semibold tw-text-amber-300 tw-font-ui">${esc(sub)}</span>
                 </div>
                 <h3 class="tw-mb-2 tw-font-display tw-text-lg tw-font-bold tw-leading-snug tw-text-slate-100">${esc(name)}</h3>
                 <p class="tw-line-clamp-2 tw-min-h-[40px] tw-text-sm tw-leading-relaxed tw-text-slate-400 tw-font-ui">${esc(addr)}</p>
-                <div class="tw-mt-3 tw-flex tw-items-center tw-gap-2" aria-label="Rating ${rating} dari 5">
-                    <span class="tw-text-sm tw-tracking-[0.12em] tw-text-amber-400">★★★★★</span>
-                    <span class="tw-font-mono tw-text-xs tw-text-slate-500">${rating}</span>
+                <div class="tw-mt-3 tw-flex tw-items-center tw-gap-2" aria-label="Rating ${rating.toFixed(1)} dari 5">
+                    ${renderRatingStars(rating)}
+                    <span class="tw-font-mono tw-text-xs tw-text-slate-500">${rating.toFixed(1)}</span>
                 </div>
                 <div class="tw-mt-auto tw-flex tw-items-center tw-gap-3 tw-pt-5">
                     <button type="button" class="js-detail tw-inline-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-white/15 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-xs tw-font-bold tw-text-slate-200 tw-transition-colors hover:tw-border-amber-400/45 hover:tw-text-amber-300 tw-font-ui">Detail</button>
@@ -351,8 +404,25 @@ function _renderGrid(root) {
 
 function esc(s) {
     return String(s)
+        .replace(new RegExp('\\u00e2\\u02dc\\u2026', 'g'), '★')
+        .replace(new RegExp('\\u00e2\\u02dc\\u2020', 'g'), '☆')
+        .replace(new RegExp('\\u00c2\\u00b7', 'g'), '·')
+        .replace(new RegExp('\\u00e2\\u20ac"', 'g'), '—')
+        .replace(/â€™/g, "'")
+        .replace(/â€œ|â€/g, '"')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+function renderRatingStars(rating) {
+    const value = Math.max(0, Math.min(5, Number(rating) || 0));
+    const full = Math.round(value);
+    return `<span class="tw-inline-flex tw-items-center tw-gap-0.5" aria-hidden="true">${
+        Array.from({ length: 5 }, (_, idx) => {
+            const filled = idx < full;
+            return `<span class="${filled ? 'tw-text-amber-400' : 'tw-text-slate-600'} tw-text-sm tw-leading-none">${filled ? '&#9733;' : '&#9734;'}</span>`;
+        }).join('')
+    }</span>`;
 }

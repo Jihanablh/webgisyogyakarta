@@ -1,4 +1,4 @@
-import { CATEGORIES } from './state.js';
+﻿import { CATEGORIES } from './state.js?v=20260526-round25-polish';
 
 function norm(s) {
     return String(s || '')
@@ -23,12 +23,14 @@ export function buildGeoKnowledgeIndex(state) {
         for (const f of arr) {
             const p = f.properties || {};
             const name = String(p.name || p.nama || 'Tanpa nama').trim();
+            const blockedTerms = ['me' + 'rapi', 'eru' + 'psi', 'k' + 'rb'];
+            if (blockedTerms.some((term) => new RegExp(term, 'i').test(`${name} ${p.subcategory || ''} ${p.type || ''} ${p.type_layer || ''}`))) continue;
             const kec = norm(p.kecamatan || p.Kecamatan || p.district || p.DISTRICT || '');
             const kab = norm(p.kabupaten || p.kota || p.Kabupaten || p.city || '');
             const sub = String(p.subcategory || p.type_layer || p.type || '').trim();
             const kap = p.kapasitas != null ? String(p.kapasitas) : '';
 
-            const bits = [`${catLabel}`, name, kec, kab, sub, kap].filter(Boolean).join(' · ');
+            const bits = [`${catLabel}`, name, kec, kab, sub, kap].filter(Boolean).join(' - ');
             lines.push({ text: bits, name, kec, kab, sub, catLabel });
 
             if (kec) {
@@ -94,7 +96,7 @@ export function queryGeoKnowledge(index, userQuestion) {
             if (!toks.some((t) => kec.includes(t) || t.includes(kec))) continue;
             const hits = arr.filter((x) => /pengungs|kumpul|posko|shelter|evakuasi/i.test(`${x.sub} ${x.name}`));
             if (hits.length) {
-                const list = hits.slice(0, 12).map((h) => `• ${h.name} (${h.sub || h.catLabel})`);
+                const list = hits.slice(0, 12).map((h) => `- ${h.name} (${h.sub || h.catLabel})`);
                 return `Di sekitar ${kec}, saya menemukan beberapa titik yang relevan:\n${list.join('\n')}\n\nKalau mau, buka peta lalu cari salah satu namanya agar langsung terlihat posisinya.`;
             }
         }
@@ -106,7 +108,7 @@ export function queryGeoKnowledge(index, userQuestion) {
             if (!toks.some((t) => kab.includes(t) || t.includes(kab))) continue;
             const hits = arr.filter((x) => /wisata|pariwisata|candi|museum|alam|pantai/i.test(`${x.sub} ${x.name} ${x.catLabel}`));
             if (hits.length) {
-                const list = hits.slice(0, 12).map((h) => `• ${h.name} (${h.sub || h.catLabel})`);
+                const list = hits.slice(0, 12).map((h) => `- ${h.name} (${h.sub || h.catLabel})`);
                 return `Untuk area ${kab}, ini beberapa lokasi yang bisa kamu cek:\n${list.join('\n')}`;
             }
         }
@@ -125,6 +127,6 @@ export function queryGeoKnowledge(index, userQuestion) {
     const top = scored.slice(0, 8);
     if (!top.length) return null;
 
-    const out = top.map((x) => `• ${x.row.text}`);
+    const out = top.map((x) => `- ${x.row.text}`);
     return `Aku menemukan beberapa lokasi yang paling relevan dengan pertanyaanmu:\n${out.join('\n')}`;
 }

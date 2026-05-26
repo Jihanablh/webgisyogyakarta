@@ -1,4 +1,5 @@
-const CACHE_NAME = 'jogjamap-v5-cache';
+const CACHE_NAME = 'jogjamap-v36-cache';
+const DATA_CACHE_NAME = 'jogjamap-data-v36';
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,11 +9,14 @@ const ASSETS = [
   '/css/pages.css',
   '/css/welcome.css',
   '/css/components.css',
+  '/pict/dashboard-webgis.jpg',
+  '/pict/welcome-webgis.jpg',
   '/js/main.js',
   '/js/state.js',
   '/js/map.js',
   '/js/markers.js',
   '/js/layers.js',
+  '/js/pages/dashboard.js',
   '/js/utils/helpers.js',
   '/js/utils/loader.js',
   '/js/utils/router.js',
@@ -47,6 +51,18 @@ self.addEventListener('fetch', event => {
   // Only cache GET requests
   if (event.request.method !== 'GET') return;
 
+  const requestUrl = new URL(event.request.url);
+  const isFreshAsset =
+    requestUrl.pathname.endsWith('.html') ||
+    requestUrl.pathname.endsWith('.js') ||
+    requestUrl.pathname.endsWith('.css') ||
+    requestUrl.search.includes('20260526-round25-polish');
+
+  if (isFreshAsset) {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request)));
+    return;
+  }
+
   // Cache GeoJSON heavily
   if (event.request.url.includes('.geojson') || event.request.url.includes('.json')) {
     event.respondWith(
@@ -54,7 +70,7 @@ self.addEventListener('fetch', event => {
         if (response) return response;
         return fetch(event.request).then(netRes => {
           const resClone = netRes.clone();
-          caches.open('jogjamap-data').then(cache => {
+          caches.open(DATA_CACHE_NAME).then(cache => {
             cache.put(event.request, resClone);
           });
           return netRes;

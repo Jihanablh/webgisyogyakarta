@@ -1,4 +1,4 @@
-export function haversineDistance(lat1, lon1, lat2, lon2) {
+﻿export function haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
@@ -16,10 +16,48 @@ export function formatDistance(km) {
     return km.toFixed(1) + ' km';
 }
 
+export function sanitizeText(str) {
+    return String(str ?? '')
+        .replace(new RegExp('\\u00c2\\u00b7', 'g'), '\u00b7')
+        .replace(new RegExp('\\u00c2\\u00b0', 'g'), '\u00b0')
+        .replace(new RegExp('\\u00c2\\u00b1', 'g'), '\u00b1')
+        .replace(new RegExp('\\u00e2\\u20ac\\u201d|\\u00e2\\u20ac"', 'g'), '\u2014')
+        .replace(new RegExp('\\u00e2\\u20ac\\u201c', 'g'), '\u2013')
+        .replace(new RegExp('\\u00e2\\u20ac\\u2122', 'g'), "'")
+        .replace(new RegExp('\\u00e2\\u20ac\\u0153|\\u00e2\\u20ac\\u009d|\\u00e2\\u20ac', 'g'), '"')
+        .replace(new RegExp('\\u00e2\\u20ac\\u00a6', 'g'), '\u2026')
+        .replace(new RegExp('\\u00e2\\u2020\\u2019', 'g'), '\u2192')
+        .replace(new RegExp('\\u00e2\\u20ac\\u00a2', 'g'), '\u2022')
+        .replace(new RegExp('\\u00e2\\u02dc\\u2026', 'g'), '\u2605')
+        .replace(new RegExp('\\u00e2\\u02dc\\u2020', 'g'), '\u2606')
+        .replace(new RegExp('\\u00e2\\u02dc\\u00be', 'g'), '\u263e')
+        .replace(new RegExp('\\u00e2\\u02dc\\u20ac', 'g'), '\u2600')
+        .replace(new RegExp('\\u00c3\\u0097', 'g'), '\u00d7')
+        .replace(/\u00C3\u0082\u00C2\u00B7|\u00C2\u00B7/g, '\u00b7')
+        .replace(/\u00C3\u0082\u00C2\u00B0|\u00C2\u00B0/g, '\u00b0')
+        .replace(/\u00C3\u0082\u00C2\u00B1|\u00C2\u00B1/g, '\u00b1')
+        .replace(/\u00C3\u0097/g, '\u00d7')
+        .replace(/\u00E2\u20AC\u201D/g, '\u2014')
+        .replace(/\u00E2\u20AC\u201C/g, '\u2013')
+        .replace(/\u00E2\u20AC\u2122/g, "'")
+        .replace(/\u00E2\u20AC\u0153|\u00E2\u20AC\u009D/g, '"')
+        .replace(/\u00E2\u20AC\u00A6/g, '\u2026')
+        .replace(/\u00E2\u2020\u2019/g, '\u2192')
+        .replace(/\u00E2\u20AC\u00A2/g, '\u2022')
+        .replace(/\u00E2\u02DC\u2026/g, '\u2605')
+        .replace(/\u00E2\u02DC\u2020/g, '\u2606')
+        .replace(/\u00E2\u02DC\u00BE/g, '\u263e')
+        .replace(/\u00E2\u02DC\u20AC/g, '\u2600')
+        .replace(/\u00E2\u2122\u00BF/g, '\u267f')
+        .replace(/\u00E2\u203A\u00B5/g, '\u26f5')
+        .replace(/\u00E2\u203A\u00BA/g, '\u26fa')
+        .replace(/\u00E2\u0161\u00A1/g, '\u26a1');
+}
+
 export function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
-    div.innerText = str;
+    div.innerText = sanitizeText(str);
     return div.innerHTML;
 }
 

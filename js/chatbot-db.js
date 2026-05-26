@@ -3,94 +3,71 @@
 // Sistem tanya-jawab lokal berbasis keyword matching
 // ============================================================
 
-import { queryGeoKnowledge } from './geo-index.js';
+import { queryGeoKnowledge } from './geo-index.js?v=20260526-round25-polish';
 
 export const CHATBOT_DB = {
-
   kebencanaan: [
-    { id:'kb_001', keywords:['bencana','jenis','apa saja','macam','tipe','ancaman','ada apa'],
-      answer:`DIY memiliki 4 ancaman bencana utama:\n- Erupsi Merapi — paling aktif, KRB III radius 0-3 km sangat berbahaya\n- Gempa Bumi — sesar Opak aktif, pernah M6.3 tahun 2006\n- Banjir — kali Code, Winongo, Gajah Wong meluap saat hujan ekstrem\n- Tanah Longsor — lereng Merapi dan perbukitan Menoreh` },
-    { id:'kb_002', keywords:['risiko','tingkat','level','zona','bahaya','kelas','warna'],
-      answer:`Tingkat risiko bencana DIY dibagi 4 level:\n- SANGAT TINGGI (merah) — KRB III Merapi, sempadan sungai\n- TINGGI (oranye) — KRB II Merapi, lereng curam\n- SEDANG (kuning) — KRB I Merapi, dataran rendah rawan banjir\n- RENDAH (hijau) — wilayah aman relatif` },
+    { id:'kb_001', keywords:['bencana','jenis','apa saja','macam','tipe','kejadian','dominan'],
+      answer:`Jenis kejadian kebencanaan DIY tahun 2025 yang dianalisis di JOGJA SIAGA:\n- Tanah Longsor: 765 kejadian\n- Cuaca Ekstrem: 296 kejadian\n- Kebakaran: 237 kejadian\n- Banjir: 33 kejadian\n- Kebakaran Hutan dan Lahan: 24 kejadian\n- Gempa Terasa: 19 kejadian\n\nTotal seluruh kejadian: 1.374 kejadian.` },
+    { id:'kb_002', keywords:['risiko','tingkat','kelas','warna','wilayah','kabupaten','kota'],
+      answer:`Kelas risiko wilayah dihitung dari total kejadian per kabupaten/kota tahun 2025:\n- Kulon Progo: 558 kejadian — Sangat Tinggi\n- Bantul: 333 kejadian — Tinggi\n- Gunungkidul: 262 kejadian — Tinggi\n- Kota Yogyakarta: 141 kejadian — Sedang\n- Sleman: 80 kejadian — Rendah\n\nData ini menunjukkan jumlah kejadian, bukan jumlah korban atau kerusakan.` },
+    { id:'kb_003', keywords:['tertinggi','paling tinggi','rawan','kulon progo','terendah','sleman'],
+      answer:`Wilayah dengan kejadian tertinggi adalah Kabupaten Kulon Progo dengan 558 kejadian dan kelas risiko Sangat Tinggi.\n\nWilayah dengan kejadian terendah adalah Kabupaten Sleman dengan 80 kejadian dan kelas risiko Rendah.` },
   ],
 
-  merapi: [
-    { id:'mp_001', keywords:['merapi','gunung','erupsi','vulkanik','lahar','awan panas','letusan'],
-      answer:`Gunung Merapi (2.930 mdpl) adalah gunung api paling aktif di Indonesia.\n- Status saat ini: Siaga (Level III)\n- KRB III: radius 3 km dari puncak — DILARANG aktivitas\n- KRB II: radius 3-7 km — waspada tinggi\n- KRB I: radius 7-10 km — waspada\n- Ancaman utama: awan panas, lahar hujan, abu vulkanik` },
-    { id:'mp_002', keywords:['lahar','hujan','aliran','sungai','kali','merapi','code','gendol'],
-      answer:`Lahar hujan Merapi mengalir melalui:\n- Kali Gendol — jalur utama lahar, Sleman timur\n- Kali Boyong / Code — melewati kota Yogyakarta\n- Kali Woro — Klaten\n- Kali Putih — Magelang\nBahaya lahar terjadi saat hujan deras di puncak meski tidak erupsi.` },
-    { id:'mp_003', keywords:['status','siaga','waspada','awas','normal','level merapi','bpptkg','aktivitas'],
-      answer:`Level aktivitas Merapi (BPPTKG):\n- Normal (I) — aktivitas biasa, aman\n- Waspada (II) — peningkatan aktivitas, radius 3 km steril\n- Siaga (III) — SAAT INI AKTIF, radius 7 km waspada\n- Awas (IV) — darurat, radius 10 km evakuasi\n\nPantau real-time: magma.esdm.go.id atau BPPTKG (0274) 514180` },
-  ],
-
-  gempa: [
-    { id:'gm_001', keywords:['gempa','bumi','earthquake','sesar','opak','getaran','seismik','subduksi'],
-      answer:`DIY terletak di zona seismik aktif:\n- Sesar Opak — memanjang dari Prambanan ke Parangtritis (N-S)\n- Subduksi Lempeng Indo-Australia — 250 km di selatan Jogja\n- Gempa besar terakhir: 27 Mei 2006, M6.3, korban 5.782 jiwa\n\nWilayah paling berisiko: Bantul selatan, Prambanan, Berbah` },
-    { id:'gm_002', keywords:['gempa','saat','terjadi','harus','lakukan','prosedur','tips','apa yang'],
-      answer:`Saat gempa berlangsung:\n1. JANGAN panik — merunduk, berlindung, pegang erat (Drop-Cover-Hold)\n2. Di dalam gedung: berlindung di bawah meja kuat, jauh dari jendela\n3. Di luar: menjauh dari gedung, pohon, tiang listrik\n4. Di jalan: berhenti, keluar mobil, jauhi jembatan\n\nSetelah gempa: waspada gempa susulan, jangan masuk bangunan retak` },
-  ],
-
-  banjir: [
-    { id:'bj_001', keywords:['banjir','genangan','meluap','kali','code','winongo','gajah wong','kanal','sungai'],
-      answer:`Wilayah paling rawan banjir di DIY:\n- Bantul — hilir Kali Code, Winongo, Opak\n- Kota Yogyakarta — sempadan Kali Code dan Winongo\n- Sleman — Kali Kuning, Kali Gendol (lahar)\n- Kulon Progo — Kali Progo bagian bawah\n\nMusim waspada: November–April (puncak Desember–Februari)` },
-    { id:'bj_002', keywords:['banjir','evakuasi','mengungsi','lari','melarikan','saat banjir','prosedur banjir'],
-      answer:`Saat banjir datang:\n1. Pindahkan barang berharga ke lantai atas\n2. Matikan listrik di panel utama\n3. Evakuasi ke titik kumpul terdekat\n4. Bawa: dokumen penting, obat-obatan, baju ganti, air minum\n5. Hubungi BPBD: (0274) 586111` },
-  ],
-
-  longsor: [
-    { id:'ls_001', keywords:['longsor','tanah','gerakan','lereng','bukit','kulon progo','kokap','menoreh'],
-      answer:`Zona rawan longsor tinggi di DIY:\n- Lereng Merapi (Sleman utara) — terutama pasca erupsi\n- Perbukitan Menoreh (Kulon Progo) — Kokap, Girimulyo\n- Perbukitan Gunung Kidul — Pathuk, Gedangsari, Nglipar\n\nWaspada saat hujan >100mm/hari atau berlangsung >3 jam terus-menerus` },
+  wilayah: [
+    { id:'rg_001', keywords:['kulon','progo','kulon progo'],
+      answer:`Kabupaten Kulon Progo mencatat 558 kejadian pada periode 1 Januari–31 Desember 2025.\nRinciannya: Cuaca Ekstrem 63, Tanah Longsor 448, Kebakaran Hutan dan Lahan 12, Gempa Terasa 2, Banjir 8, Kebakaran 25.\nKelas risiko: Sangat Tinggi.` },
+    { id:'rg_002', keywords:['bantul'],
+      answer:`Kabupaten Bantul mencatat 333 kejadian pada 2025.\nRinciannya: Cuaca Ekstrem 53, Tanah Longsor 141, Kebakaran Hutan dan Lahan 1, Gempa Terasa 6, Banjir 9, Kebakaran 123.\nKelas risiko: Tinggi.` },
+    { id:'rg_003', keywords:['gunungkidul','gunung kidul'],
+      answer:`Kabupaten Gunungkidul mencatat 262 kejadian pada 2025.\nRinciannya: Cuaca Ekstrem 50, Tanah Longsor 127, Kebakaran Hutan dan Lahan 6, Gempa Terasa 11, Banjir 8, Kebakaran 60.\nKelas risiko: Tinggi.` },
+    { id:'rg_004', keywords:['kota yogyakarta','yogyakarta','jogja kota'],
+      answer:`Kota Yogyakarta mencatat 141 kejadian pada 2025.\nRinciannya: Cuaca Ekstrem 96, Tanah Longsor 27, Kebakaran Hutan dan Lahan 1, Gempa Terasa 0, Banjir 3, Kebakaran 14.\nKelas risiko: Sedang.` },
+    { id:'rg_005', keywords:['sleman'],
+      answer:`Kabupaten Sleman mencatat 80 kejadian pada 2025.\nRinciannya: Cuaca Ekstrem 34, Tanah Longsor 22, Kebakaran Hutan dan Lahan 4, Gempa Terasa 0, Banjir 5, Kebakaran 15.\nKelas risiko: Rendah.` },
   ],
 
   pengungsian: [
-    { id:'pu_001', keywords:['pengungsian','tempat','lokasi','shelter','kamp','evakuasi','mengungsi','barak','posko'],
-      answer:`Titik pengungsian utama di DIY:\n- Sleman: GOR Tridadi, Stadion Maguwoharjo, Barak Cangkringan\n- Kota Yogya: GOR Among Raga, Stadion Mandala Krida\n- Bantul: GOR Rahmatan Lil Alamin, Lapangan Sultan Agung\n- Kulon Progo: GOR Binangun, Stadion Cangkring\n- Gunung Kidul: GOR Siyono, Lapangan Pemda\n\nCek di peta: klik marker pengungsian untuk detail kapasitas` },
-    { id:'pu_002', keywords:['kapasitas','pengungsi','jumlah','penuh','tersedia','slot','berapa'],
-      answer:`Total kapasitas pengungsian DIY: ±45.000 jiwa\n\nBreakdown per kabupaten:\n- Sleman: ±18.000 jiwa (terbesar, dekat Merapi)\n- Bantul: ±12.000 jiwa\n- Kota Yogyakarta: ±5.000 jiwa\n- Kulon Progo: ±6.000 jiwa\n- Gunung Kidul: ±4.000 jiwa\n\nStatus real-time: BPBD (0274) 586111` },
-    { id:'pu_003', keywords:['fasilitas','pengungsian','ada apa','tersedia','mck','toilet','makanan','medis','air'],
-      answer:`Fasilitas standar tempat pengungsian DIY:\n- MCK (toilet & kamar mandi)\n- Dapur umum & distribusi makanan\n- Listrik darurat (genset)\n- Air bersih (PDAM atau tandon)\n- Pos kesehatan & pertolongan pertama\n- Area tidur (matras/kasur lipat)\n- Posko informasi keluarga` },
+    { id:'pu_001', keywords:['pengungsian','posko','logistik','shelter','evakuasi','mengungsi','barak'],
+      answer:`Data pengungsian yang digunakan JOGJA SIAGA berasal dari file posko_pengungsian_logistik_diy_2025.geojson.\n\nMarker pengungsian di peta menampilkan nama posko, jenis posko, fungsi, kabupaten/kota, kapanewon, kalurahan, alamat, dan koordinat. Klik marker pengungsian di Peta Kebencanaan untuk membuka panel detail posko.` },
+    { id:'pu_002', keywords:['fasilitas','dapur','bantuan','makanan','air','medis','fungsi'],
+      answer:`Posko pengungsian di JOGJA SIAGA mencakup fungsi seperti perlindungan sementara, dapur umum, distribusi bantuan, dan dukungan logistik. Detail setiap posko mengikuti atribut asli dari GeoJSON pengungsian 2025.` },
   ],
 
-  evakuasi: [
-    { id:'ev_001', keywords:['jalur','evakuasi','rute','jalan','keluar','arah','escape','route'],
-      answer:`Jalur evakuasi utama DIY:\n\nMerapi ke selatan:\n- Jalur Barat: Turi → Sleman → Ring Road Barat\n- Jalur Tengah: Cangkringan → Kalasan → Kota\n- Jalur Timur: Kemalang → Prambanan → Klaten\n\nBanjir kota Jogja:\n- Evakuasi ke timur: jauhi sempadan Code/Winongo\n- Titik kumpul: Alun-alun Utara, Alun-alun Selatan\n\nRambu evakuasi: tanda panah biru di jalan utama` },
-    { id:'ev_002', keywords:['early warning','peringatan','sirine','alarm','tanda','sinyal','isyarat','bunyi'],
-      answer:`Sistem peringatan dini DIY:\n\nMerapi: Sirine di 28 titik lereng\n- 1 kali panjang: tes rutin setiap Jumat 00.00\n- 3 kali pendek berulang: BAHAYA, evakuasi segera\n\nBPBD DIY: SMS blast ke warga zona merah\nBMKG: Notifikasi gempa & cuaca ekstrem\nRadio: RRI Pro 1 Yogyakarta (91.1 FM)\nMedia sosial: @BPBDJogja, @MerapiMagma` },
+  laporan: [
+    { id:'lp_001', keywords:['laporan','riwayat','narasi','cuaca ekstrem','maret'],
+      answer:`Halaman Laporan Bencana memuat riwayat tematik 2025, termasuk Cuaca Ekstrem Maret 2025 dan Longsor serta Tanah Ambles November 2025. Narasi disusun untuk menjelaskan konteks kejadian, wilayah terdampak, dan respons lapangan.` },
+    { id:'lp_002', keywords:['statistika','grafik','chart','dashboard statistik','rekap'],
+      answer:`Halaman Statistika menampilkan KPI, grafik kejadian per wilayah, komposisi jenis bencana, choropleth wilayah, serta tabel rekap kabupaten/kota dan jenis bencana. Gunakan halaman itu untuk membaca pola data secara visual.` },
+  ],
+
+  tata_kelola: [
+    { id:'tk_001', keywords:['tata kelola','kategori','pariwisata','kesehatan','pendidikan','mobilitas','keuangan','pemerintahan'],
+      answer:`Menu Tata Kelola menampilkan kategori lokasi di DIY seperti Pariwisata, Mobilitas, Kesehatan, Pendidikan, Keuangan, dan Pemerintahan. Setiap lokasi memiliki card, detail atribut, gambar, aksi cepat, dan estimasi keramaian mingguan.` },
+    { id:'tk_002', keywords:['wisata','destinasi','malioboro','prambanan','parangtritis','candi'],
+      answer:`Untuk data wisata, buka Tata Kelola lalu pilih Pariwisata Yogyakarta. Kamu bisa melihat card lokasi, membuka detail, atau menampilkan semua titik lokasi di peta kategori.` },
   ],
 
   kontak: [
     { id:'kt_001', keywords:['kontak','telepon','nomor','hubungi','bpbd','darurat','call','emergency','112'],
-      answer:`Kontak darurat kebencanaan DIY:\n\n- BPBD DIY: (0274) 586111 / 562916\n- BASARNAS DIY: (0274) 486110\n- PMI DIY: (0274) 512126\n- RSUP Dr. Sardjito: (0274) 587333\n- Polda DIY: (0274) 512111\n- Damkar Kota Yogya: (0274) 382883\n- PLN (gangguan): 123\n- PDAM (darurat): (0274) 589078\n\nNomor darurat nasional: 112 (gratis dari HP)` },
-    { id:'kt_002', keywords:['bpbd','tugas','fungsi','peran','alamat','kantor'],
-      answer:`BPBD (Badan Penanggulangan Bencana Daerah) DIY:\n- Koordinasi penanggulangan bencana di DIY\n- Aktivasi posko darurat saat bencana\n- Distribusi logistik dan bantuan\n- Pengelolaan tempat pengungsian\n\nKantor: Jl. Kenari No.14A, Semaki, Umbulharjo\nLayanan: 24 jam (posko siaga)\nWebsite: bpbd.jogjaprov.go.id` },
-  ],
-
-  wisata: [
-    { id:'ws_001', keywords:['wisata','tempat','destinasi','tujuan','kunjungi','objek','tourism','liburan'],
-      answer:`Destinasi wisata populer Yogyakarta:\n\nBudaya & Sejarah:\n- Kraton Yogyakarta — pusat budaya Jawa, buka 08.00-14.00\n- Candi Prambanan — candi Hindu terbesar di Indonesia\n- Kotagede — pusat kerajinan perak historis\n\nAlam:\n- Kaliurang — resort pegunungan lereng Merapi\n- Pantai Parangtritis — pantai ikonik selatan Jogja\n- Goa Pindul — wisata susur goa (Gunung Kidul)` },
-    { id:'ws_002', keywords:['kuliner','makanan','makan','khas','food','restoran','gudeg','bakpia','angkringan'],
-      answer:`Kuliner wajib coba di Yogyakarta:\n- Gudeg — nangka muda dimasak santan, ikon Jogja\n- Bakpia Pathuk — oleh-oleh legendaris sejak 1948\n- Angkringan — warung kaki lima ikonik, nasi kucing Rp2.000\n- Wedang Ronde — minuman hangat khas malam hari\n- Mie Lethek Bantul — mie tradisional dari tepung aren\n- Pecel Senggol — sayuran dengan bumbu kacang khas` },
-  ],
-
-  transportasi: [
-    { id:'tr_001', keywords:['trans jogja','bus','angkutan','transportasi','halte','rute bus','umum','tarif'],
-      answer:`Transportasi umum di Yogyakarta:\n\nTrans Jogja (BRT):\n- 17 koridor meliputi seluruh kota\n- Tarif: Rp3.600 (flat)\n- Jam operasi: 05.30–21.30\n- Info rute: transjogja.jogjaprov.go.id\n\nLainnya:\n- Becak: moda tradisional, nego harga\n- Andong: wisata sekitar Malioboro/Kraton\n- GoJek/Grab: tersedia di seluruh DIY\n- Kereta: Stasiun Tugu & Lempuyangan` },
+      answer:`Kontak darurat rujukan:\n- BPBD DIY: (0274) 555584\n- BNPB: 117\n- Basarnas: 115\n- Pemadam Kebakaran: 113\n- Darurat Nasional: 112\n\nGunakan nomor darurat bila membutuhkan bantuan cepat di lapangan.` },
   ],
 
   aplikasi: [
     { id:'ap_001', keywords:['aplikasi','jogja siaga','fitur','gunakan','cara','ini','tentang','webgis'],
-      answer:`JOGJA SIAGA adalah WebGIS kebencanaan DIY.\n\nFitur utama:\n- Peta Kebencanaan — zona risiko bencana interaktif\n- Tata Kelola — fasilitas kota: ATM, RS, transportasi, wisata\n- Statistika — dashboard data kebencanaan DIY\n- Laporan Bencana — riwayat dan analisis kejadian\n- SIGAJOG — asisten informasi lokal ini\n\nData: OpenStreetMap, BPBD DIY, BNPB, BMKG, BPPTKG` },
+      answer:`JOGJA SIAGA adalah WebGIS kebencanaan dan informasi wilayah DIY.\n\nFitur utama:\n- Dashboard overview\n- Peta Kebencanaan 2025\n- Tata Kelola lokasi dan fasilitas\n- Laporan Bencana\n- Statistika kebencanaan\n- SIGAJOG sebagai asisten tanya-jawab lokal` },
     { id:'ap_002', keywords:['data','sumber','akurasi','valid','update','diperbarui','kapan'],
-      answer:`Sumber data JOGJA SIAGA:\n- OpenStreetMap via HOTOSM — POI dan jalan\n- BPBD DIY — zona bencana dan pengungsian\n- BNPB — risiko bencana nasional\n- BMKG — data cuaca dan gempa\n- BPPTKG — aktivitas Gunung Merapi\n- GADM v4.1 — batas wilayah administrasi\n\nData diperbarui: Januari 2025` },
+      answer:`Sumber data utama di aplikasi ini mencakup BPBD DIY Infografis Kebencanaan Tahunan 2025, OpenStreetMap via HOTOSM, GeoJSON posko pengungsian logistik DIY 2025, serta batas wilayah administrasi. Periode data kebencanaan: 1 Januari–31 Desember 2025.` },
   ],
 
   fallback: [
     { id:'fb_001', keywords:[],
-      answer:`Maaf, saya belum punya informasi spesifik tentang itu.\n\nSaya bisa bantu tentang:\n- Bencana di Yogyakarta (Merapi, gempa, banjir, longsor)\n- Lokasi dan fasilitas pengungsian\n- Jalur dan prosedur evakuasi\n- Kontak darurat BPBD dan instansi terkait\n- Wisata dan fasilitas kota Yogyakarta\n\nAtau hubungi BPBD DIY langsung: (0274) 586111` }
+      answer:`Maaf, aku belum menemukan jawaban spesifik untuk itu.\n\nAku paling siap membantu tentang:\n- Data kejadian bencana DIY 2025\n- Risiko per kabupaten/kota\n- Posko pengungsian dan logistik\n- Laporan dan statistika kebencanaan\n- Kategori Tata Kelola lokasi di DIY\n\nCoba tanyakan nama wilayah, jenis bencana, atau posko yang ingin kamu lihat.` }
   ]
 };
 
-// ── ENGINE: Keyword Matching ──────────────────────────────────
+// -- ENGINE: Keyword Matching ----------------------------------
 export class ChatbotEngine {
   constructor(db) {
     this.db = db;
@@ -106,9 +83,7 @@ export class ChatbotEngine {
     const entries = [];
     for (const category of Object.keys(db)) {
       if (category === 'fallback') continue;
-      for (const entry of db[category]) {
-        entries.push({ ...entry, category });
-      }
+      for (const entry of db[category]) entries.push({ ...entry, category });
     }
     return entries;
   }
@@ -163,12 +138,12 @@ export class ChatbotEngine {
 
   getSuggestions() {
     return [
-      'Status Gunung Merapi sekarang?',
-      'Di mana tempat pengungsian?',
+      'Wilayah risiko tertinggi 2025?',
+      'Berapa kejadian tanah longsor?',
+      'Data Kulon Progo tahun 2025',
+      'Di mana data pengungsian?',
+      'Apa saja jenis bencana?',
       'Nomor darurat BPBD DIY',
-      'Jalur evakuasi Merapi',
-      'Apa yang dilakukan saat gempa?',
-      'Wilayah rawan banjir Yogyakarta',
     ];
   }
 }

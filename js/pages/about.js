@@ -1,4 +1,4 @@
-function wireMethodology(container, reducedMotion) {
+﻿function wireMethodology(container, reducedMotion) {
     const method = container.querySelector('.about-method');
     const steps = method ? [...method.querySelectorAll('.about-method-step')] : [];
     if (!method || !steps.length) return;
@@ -38,7 +38,7 @@ export function initAboutPage() {
         },
         {
             title: 'Keselamatan',
-            desc: 'Zona risiko bencana, jalur evakuasi, dan kontak darurat terverifikasi dari BPBD DIY dan BNPB.',
+            desc: 'Zona risiko bencana, titik pengungsian, dan kontak darurat terverifikasi dari BPBD DIY dan BNPB.',
             accent: '#ef4444',
             border: 'rgba(239,68,68,0.4)'
         },
@@ -55,7 +55,7 @@ export function initAboutPage() {
         { name: 'BPBD DIY', desc: 'Data kebencanaan lokal', accent: '#f87171' },
         { name: 'BMKG', desc: 'Cuaca & seismologi', accent: '#34d399' },
         { name: 'BNPB', desc: 'Risiko bencana nasional', accent: '#fb923c' },
-        { name: 'BPPTKG', desc: 'Aktivitas Gunung Merapi', accent: '#a78bfa' },
+        { name: 'BPBD DIY', desc: 'Koordinasi data kebencanaan wilayah', accent: '#a78bfa' },
         { name: 'GADM v4.1', desc: 'Batas wilayah administrasi', accent: '#d4af37' }
     ];
 
@@ -127,7 +127,7 @@ export function initAboutPage() {
         <div class="tw-mb-6 tw-text-center tw-font-ui tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.12em] tw-text-[var(--text-muted)]">Metodologi pengembangan</div>
         <div class="about-method-step">
             <h3 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Kebutuhan &amp; persona pengguna</h3>
-            <p class="tw-m-0 tw-font-body tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">Wawancara singkat dan observasi tugas: eksplorasi peta, cek zona risiko, dan akses laporan cepat pada perangkat mobile.</p>
+            <p class="tw-m-0 tw-font-body tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">Observasi tugas: eksplorasi peta, cek zona risiko, dan akses laporan melalui internet.</p>
         </div>
         <div class="about-method-step">
             <h3 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Perancangan informasi spasial</h3>

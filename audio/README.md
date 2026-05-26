@@ -1,13 +1,11 @@
 # Musik latar Jogja Siaga
 
 ## Hak cipta & sumber
-
 - **YouTube (embed resmi):** jika `CONFIG.bgmYoutubeVideoId` di `js/state.js` diisi dengan ID video resmi (11 karakter), pemutaran memakai **IFrame API** YouTube setelah **gestur klik** pengguna. Ini **bukan** distribusi ulang file audio; aliran dari YouTube tunduk pada syarat layanan YouTube dan pemegang hak.
 - **Tanpa ID YouTube:** urutan fallback di bawah ini dipakai.
 - **Jangan** memasukkan rekaman berkarya ciptaan pihak ketiga ke repositori tanpa izin tertulis.
 
 ## Urutan sumber pemutaran
-
 1. **YouTube embed** — hanya jika `CONFIG.bgmYoutubeVideoId` valid dan host `#bgm-youtube-host` ada; pemutaran setelah klik tombol.
 2. **File lokal** — `jogja-ambient.mp3` di folder ini (unduh sendiri dengan lisensi yang mengizinkan proyek Anda).
 3. **Wikimedia Commons (OGG)** — fallback jika MP3 tidak ada atau gagal dimuat (demo singkat; Safari kadang tidak memutar OGG).

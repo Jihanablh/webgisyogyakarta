@@ -1,4 +1,4 @@
-import { State, CATEGORIES } from './state.js';
+import { State, CATEGORIES } from './state.js?v=20260526-round25-polish';
 
 function categoryMarkerColor(category, typeLayer = '') {
     if (category === 'kebencanaan') {

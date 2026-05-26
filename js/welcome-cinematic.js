@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cinematic welcome: curtain, dawn, layered silhouettes, ash/star particles,
  * gold lines, typewriter + shimmer title, parallax, CTA phases.
  */

@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    JOGJA SIAGA — sidebar.css
    Sidebar — Layer Control & Stats
    ============================================================ */
@@ -91,7 +91,7 @@
   text-transform: uppercase;
   margin-top: 2px;
 }
-/* ── Scroll area ─────────────────────────────────────────── */
+/* -- Scroll area ------------------------------------------- */
 .sidebar-scroll {
   flex: 1;
   min-height: 0;
@@ -216,7 +216,7 @@
   margin-top: 8px;
 }
 
-/* ── Search ───────────────────────────────────────────────── */
+/* -- Search ------------------------------------------------- */
 .sidebar-search-wrap {
   position: relative;
   margin-bottom: 16px;
@@ -243,7 +243,7 @@
   pointer-events: none;
 }
 
-/* ── Section Label ────────────────────────────────────────── */
+/* -- Section Label ------------------------------------------ */
 .sb-section-label {
   font-family: var(--font-ui);
   font-size: 9px;
@@ -254,7 +254,7 @@
   padding: 12px 4px 6px;
 }
 
-/* ── Layer Toggle Items ───────────────────────────────────── */
+/* -- Layer Toggle Items ------------------------------------- */
 .layer-item {
   display: flex;
   align-items: center;
@@ -414,7 +414,7 @@
   color: var(--text-muted);
 }
 
-/* ── Stats Cards ──────────────────────────────────────────── */
+/* -- Stats Cards -------------------------------------------- */
 .sb-stat-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border-card);
@@ -449,7 +449,7 @@
 
 /* Close button is inside sidebar corner */
 
-/* ── Filter Exclusive Buttons ─────────────────────────────── */
+/* -- Filter Exclusive Buttons ------------------------------- */
 .sb-filter-group {
   display: flex;
   flex-direction: column;
@@ -531,7 +531,7 @@
   background: rgba(212,160,23,0.12);
 }
 
-/* ── Tab Drawer (Zona Bencana / Tempat Pengungsian) ──────────── */
+/* -- Tab Drawer (Zona Bencana / Tempat Pengungsian) ------------ */
 /* Positioned at left edge of map (right of sidebar) — vertical drawer tabs */
 #map-top-left-chrome {
   position: absolute;
@@ -597,7 +597,7 @@
 
 
 
-/* ── Layer toggle switch ─────────────────────────────────────── */
+/* -- Layer toggle switch --------------------------------------- */
 .layer-toggle {
   position: relative;
   display: inline-block;
@@ -651,7 +651,7 @@
   outline-offset: 2px;
 }
 
-/* ── Search icon SVG ─────────────────────────────────────────── */
+/* -- Search icon SVG ------------------------------------------- */
 .search-icon-svg {
   width: 15px;
   height: 15px;
@@ -672,7 +672,7 @@
   padding-left: 34px;
 }
 
-/* ── sb-stat-value variants ──────────────────────────────────── */
+/* -- sb-stat-value variants ------------------------------------ */
 .sb-stat-value {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -683,7 +683,7 @@
 .sb-stat-value--red   { color: var(--accent-batik-red); }
 .sb-stat-row--spaced  { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.07); }
 
-/* ── SPA Map Page ────────────────────────────────────────────── */
+/* -- SPA Map Page ---------------------------------------------- */
 #spa-map-page {
   position: absolute;
   inset: 0;
@@ -756,7 +756,7 @@
 .rich-map-popup .leaflet-popup-content {
   margin: 0;
 }
-/* ── Search Results Dropdown ─────────────────────────────────── */
+/* -- Search Results Dropdown ----------------------------------- */
 #search-results {
   position: absolute;
   top: calc(100% + 4px);

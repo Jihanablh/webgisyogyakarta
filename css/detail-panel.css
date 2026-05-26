@@ -475,7 +475,7 @@
   margin-bottom: 4px;
 }
 .dp-kpi-num.red { color: var(--accent-batik-red); }
-.dp-kpi-num.orange { color: var(--accent-merapi); }
+.dp-kpi-num.orange { color: var(--accent-orange); }
 .dp-kpi-num.green { color: var(--accent-green); }
 .dp-kpi-label {
   font-size: 9px;
@@ -520,4 +520,3 @@
     transform: translateY(0);
   }
 }
-

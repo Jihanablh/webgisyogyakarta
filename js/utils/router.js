@@ -1,4 +1,4 @@
-export class Router {
+﻿export class Router {
     constructor() {
         this.routes = {};
         this.current = null;
@@ -12,6 +12,7 @@ export class Router {
         const mapOnlyIds = [
             'map-top-left-chrome',
             'map-right-stack',
+            'kab-risk-info-panel',
             'coord-display',
             'disaster-sub-tabs'
         ];
@@ -37,6 +38,7 @@ export class Router {
             document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
             document.getElementById('map-right-stack')?.classList.remove('hidden');
             document.getElementById('risk-legend')?.classList.remove('hidden');
+            document.getElementById('kab-risk-info-panel')?.classList.remove('hidden');
             const sidebar = document.getElementById('sidebar');
             if (sidebar) sidebar.style.display = '';
         } else {
@@ -47,6 +49,7 @@ export class Router {
             document.getElementById('chatbot-panel')?.classList.remove('chatbot-panel--open');
             document.getElementById('chatbot-backdrop')?.classList.remove('is-on');
             document.getElementById('risk-legend')?.classList.add('hidden');
+            document.getElementById('kab-risk-info-panel')?.classList.add('hidden');
             const dp = document.getElementById('detail-panel');
             if (dp) dp.classList.remove('open');
             const sidebar = document.getElementById('sidebar');

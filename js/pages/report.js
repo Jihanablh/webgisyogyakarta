@@ -1,540 +1,348 @@
-/** Data kejadian contoh (satu sumber kebenaran untuk KPI, chart, dan timeline) */
-const REPORT_EVENTS = [
-    {
-        id: 'e1',
-        year: 2024,
-        jenis: 'Erupsi',
-        kecamatan: 'Cangkringan',
-        risk: 'Siaga',
-        lossMilyar: 2.5,
-        korban: 0,
-        luka: 12,
-        pengungsi: 450,
-        dateLabel: '12 Mar 2024 â€¢ 14:30 WIB',
-        title: 'Erupsi Freatik Gunung Merapi',
-        locLabel: 'Kecamatan Cangkringan, Kabupaten Sleman',
-        desc: 'Telah terjadi erupsi freatik dengan tinggi kolom abu mencapai 2.500 meter di atas puncak. Angin bertiup ke arah barat daya. Hujan abu vulkanik melanda beberapa desa di kawasan KRB III.',
-        statusClass: 'report-pulse-badge tw-rounded tw-border tw-border-red-500/25 tw-bg-red-500/10 tw-px-2.5 tw-py-1 tw-font-ui tw-text-[11px] tw-font-semibold tw-text-red-400',
-        statusText: 'Siaga Aktif',
-        surfaceClass: 'report-tl-surface--merapi',
-        tlAnim: 'report-tl-slide-from-left',
-        dotClass: 'tw-bg-red-500',
-        barPct: 56,
-        barLabel: 'Kapasitas barak (Balai Desa Glagaharjo)',
-        barFill: 'tw-bg-amber-500',
-        capText: '450 / 800',
-        contactLabel: 'BPBD Sleman',
-        contactTel: '+62274869902'
-    },
-    {
-        id: 'e2',
-        year: 2024,
-        jenis: 'Banjir',
-        kecamatan: 'Gamping',
-        risk: 'Selesai',
-        lossMilyar: 0.12,
-        korban: 0,
-        luka: 0,
-        pengungsi: 85,
-        dateLabel: '05 Jan 2024 â€¢ 02:15 WIB',
-        title: 'Banjir Genangan Hujan Ekstrem',
-        locLabel: 'Kecamatan Gamping, Kabupaten Sleman',
-        desc: 'Curah hujan tinggi menyebabkan meluapnya Sungai Bedog. Genangan 50â€“80 cm merendam empat pedukuhan di wilayah Gamping.',
-        statusClass: 'tw-rounded tw-border tw-border-emerald-500/25 tw-bg-emerald-500/10 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-text-emerald-400',
-        statusText: 'Selesai',
-        surfaceClass: 'report-tl-surface--flood',
-        tlAnim: 'report-tl-slide-from-right',
-        dotClass: 'tw-bg-emerald-500',
-        barPct: 0,
-        barLabel: 'Kapasitas pengungsian (Masjid Patukan)',
-        barFill: 'tw-bg-emerald-500',
-        capText: '0 / 150',
-        contactLabel: 'Polsek Gamping',
-        contactTel: '+62274798221'
-    },
-    {
-        id: 'e3',
-        year: 2023,
-        jenis: 'Gempa',
-        kecamatan: 'Bantul',
-        risk: 'Waspada',
-        lossMilyar: 4.1,
-        korban: 0,
-        luka: 3,
-        pengungsi: 42,
-        dateLabel: '18 Nov 2023 â€¢ 08:42 WIB',
-        title: 'Gempa M4.8 Lokal DIY',
-        locLabel: 'Kabupaten Bantul & Kota Yogyakarta',
-        desc: 'Gempa dangkal dirasakan MM IVâ€“V di pusat kota. Sejumlah struktur retak ringan; tidak ada laporan korban jiwa. Tim cepat BPBD melakukan asesmen fasilitas vital.',
-        statusClass: 'tw-rounded tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-text-amber-400',
-        statusText: 'Dalam pemantauan',
-        surfaceClass: 'report-tl-surface--quake',
-        tlAnim: 'report-tl-slide-from-left',
-        dotClass: 'tw-bg-orange-500',
-        barPct: 0,
-        barLabel: '',
-        barFill: '',
-        capText: '',
-        contactLabel: 'BMKG DIY',
-        contactTel: '+62274511064'
-    }
-];
+import {
+    DISASTER_2025_BY_REGION,
+    DISASTER_2025_PERIOD,
+    DISASTER_2025_TOTAL,
+    DISASTER_2025_SOURCE,
+    DISASTER_TYPE_KEYS,
+    DISASTER_TYPE_LABELS,
+    disasterTypeTotals,
+    dominantDisasterType,
+    highestRegion,
+    lowestRegion,
+    riskColor,
+    shortRegionName
+} from '../disaster-2025.js?v=20260526-round25-polish';
 
-let _reportCharts = [];
-
-function destroyReportCharts() {
-    _reportCharts.forEach((c) => {
-        try {
-            c.destroy();
-        } catch (_) {}
-    });
-    _reportCharts = [];
+function fmt(n) {
+    return Number(n || 0).toLocaleString('id-ID');
 }
 
-function telHref(tel) {
-    const raw = String(tel).trim();
-    if (/^\d{2,4}$/.test(raw)) return `tel:${raw}`;
-    const d = raw.replace(/\D/g, '');
-    if (!d) return '#';
-    if (d.startsWith('62')) return `tel:+${d}`;
-    return `tel:+62${d.replace(/^0/, '')}`;
-}
-
-function filterEvents(state) {
-    return REPORT_EVENTS.filter((ev) => {
-        if (state.year !== 'all' && ev.year !== state.year) return false;
-        if (state.jenis !== 'all' && ev.jenis !== state.jenis) return false;
-        if (state.kecamatan !== 'all' && !String(ev.kecamatan).toLowerCase().includes(String(state.kecamatan).toLowerCase()))
-            return false;
-        if (state.risk !== 'all' && ev.risk !== state.risk) return false;
-        return true;
-    });
-}
-
-function aggByYear(events, years) {
-    const by = Object.fromEntries(years.map((y) => [y, { n: 0, loss: 0, korban: 0 }]));
-    events.forEach((ev) => {
-        if (!by[ev.year]) return;
-        by[ev.year].n += 1;
-        by[ev.year].loss += ev.lossMilyar;
-        by[ev.year].korban += ev.korban;
-    });
-    return years.map((y) => by[y]);
-}
-
-function renderTimeline(container, events) {
-    const rail = container.querySelector('.report-tl-rail');
-    if (!rail) return;
-    rail.innerHTML = events
-        .map(
-            (ev) => `
-        <div class="report-tl-item ${ev.tlAnim || ''} tw-relative tw-mb-8" data-ev-id="${ev.id}">
-            <div class="tw-absolute tw-left-[-29px] tw-top-1 tw-z-[1] tw-h-3 tw-w-3 tw-rounded-full tw-border-2 tw-border-[var(--bg-primary)] ${ev.dotClass} md:tw-left-[-33px]"></div>
-            <div class="report-tl-surface ${ev.surfaceClass} tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5 tw-shadow-lg">
-                <div class="tw-mb-3 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
-                    <div>
-                        <div class="tw-mb-1 report-font-mono tw-text-[13px] tw-text-amber-500">${ev.dateLabel}</div>
-                        <h4 class="tw-mb-1 report-font-display tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">${ev.title}</h4>
-                        <div class="tw-text-[13px] tw-text-[var(--text-muted)]">${ev.locLabel}</div>
-                    </div>
-                    <span class="${ev.statusClass}">${ev.statusText}</span>
-                </div>
-                <p class="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">${ev.desc}</p>
-                <div class="tw-mb-4 tw-flex tw-flex-wrap tw-gap-6">
-                    <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Korban Jiwa</span><strong class="report-font-mono tw-text-[15px]">${ev.korban}</strong></div>
-                    <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Luka-luka</span><strong class="report-font-mono tw-text-[15px]">${ev.luka}</strong></div>
-                    <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Pengungsi</span><strong class="report-font-mono tw-text-[15px]">${ev.pengungsi}</strong></div>
-                    <div><span class="tw-block tw-text-xs tw-text-[var(--text-muted)]">Kerugian</span><strong class="report-font-mono tw-text-[15px]">${ev.lossMilyar < 0.01 ? `Rp ${(ev.lossMilyar * 1000).toFixed(0)} Jt` : `Rp ${ev.lossMilyar.toFixed(1)} M`}</strong></div>
-                </div>
-                ${ev.barLabel ? `<div class="tw-mb-4">
-                    <div class="tw-mb-1 tw-flex tw-justify-between tw-text-xs">
-                        <span class="tw-text-[var(--text-muted)]">${ev.barLabel}</span>
-                        <span class="tw-text-[var(--text-secondary)]">${ev.capText}</span>
-                    </div>
-                    <div class="tw-h-1.5 tw-overflow-hidden tw-rounded-full tw-bg-white/10">
-                        <div class="tw-h-full tw-rounded-full ${ev.barFill}" style="width:${ev.barPct}%"></div>
-                    </div>
-                </div>` : ''}
-                <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-t tw-border-[var(--border-card)] tw-pt-4">
-                    <div class="tw-text-[13px] tw-text-[var(--text-muted)]">Kontak: <a class="tw-font-semibold tw-text-[var(--text-secondary)] hover:tw-text-amber-400" href="${telHref(ev.contactTel)}">${ev.contactLabel}</a></div>
-                    <button type="button" class="btn-primary tw-rounded tw-border tw-border-sky-500 tw-bg-transparent tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-sky-400 hover:tw-bg-sky-500/10">Lihat di Peta</button>
-                </div>
-            </div>
-        </div>`
-        )
+function renderRegionRows() {
+    return DISASTER_2025_BY_REGION
+        .map((r) => `
+            <tr>
+                <td>${r.kab_kota}</td>
+                <td>${fmt(r.cuaca_ekstrem)}</td>
+                <td>${fmt(r.tanah_longsor)}</td>
+                <td>${fmt(r.kebakaran_hutan_lahan)}</td>
+                <td>${fmt(r.gempa_terasa)}</td>
+                <td>${fmt(r.banjir)}</td>
+                <td>${fmt(r.kebakaran)}</td>
+                <td><strong>${fmt(r.jumlah_kejadian)}</strong></td>
+                <td><span class="report-risk-chip" style="--risk:${riskColor(r.kelas_risiko)}">${r.kelas_risiko}</span></td>
+            </tr>`)
         .join('');
-    if (!events.length) {
-        rail.innerHTML = `<p class="tw-p-6 tw-font-body tw-text-[var(--text-muted)]">Tidak ada kejadian untuk filter ini.</p>`;
-    }
 }
 
-function applyFilters(container, state) {
-    const list = filterEvents(state);
-    const years = [2018, 2019, 2020, 2021, 2022, 2023, 2024];
-    const agg = aggByYear(list, years);
+function renderTypeRows() {
+    const totals = disasterTypeTotals();
+    return DISASTER_TYPE_KEYS
+        .map((key) => `
+            <tr>
+                <td>${DISASTER_TYPE_LABELS[key]}</td>
+                <td><strong>${fmt(totals[key])}</strong></td>
+                <td>${((totals[key] / DISASTER_2025_TOTAL) * 100).toFixed(1).replace('.', ',')}%</td>
+            </tr>`)
+        .join('');
+}
 
-    const totalN = list.length;
-    const totalDead = list.reduce((s, e) => s + e.korban, 0);
-    const totalRef = list.reduce((s, e) => s + e.pengungsi, 0);
-    const totalLossTrilyun = list.reduce((s, e) => s + e.lossMilyar, 0) / 1000;
+function renderHistoryTimeline() {
+    const events = [
+        {
+            title: 'Bencana Cuaca Ekstrem - Maret 2025',
+            image: 'https://picsum.photos/seed/extreme-weather-yogyakarta-indonesia/1200/560',
+            time: 'Maret 2025 - Rekap kejadian',
+            status: 'Selesai',
+            statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
+            borderClass: 'tw-border-l-amber-400',
+            location: 'Lima kabupaten/kota - Daerah Istimewa Yogyakarta',
+            desc: 'Hujan lebat disertai angin kencang dan fenomena hujan es melanda seluruh lima kabupaten/kota DIY secara bersamaan, dengan dampak yang bervariasi di setiap wilayah.',
+            impactCards: [
+                { area: 'Sleman', items: ['13 rumah rusak', '36 titik pohon tumbang', '10 akses jalan terhambat', '8 titik listrik terputus'] },
+                { area: 'Kota Yogyakarta', items: ['4 rumah rusak', '1 fasilitas pendidikan terdampak', '5 titik jalan terganggu'] },
+                { area: 'Gunungkidul', items: ['69 rumah terendam banjir', '5 unit rusak', '18 titik luapan air', '2 fasilitas pemerintahan terdampak'] },
+                { area: 'Kulon Progo', items: ['7 titik longsor di Girimulyo dan Kokap', '5 rumah rusak', '2 akses jalan terputus'] },
+                { area: 'Bantul', items: ['25 unit rumah rusak', '39 lokasi jalan rusak', '25 titik listrik', '4 kandang ternak', '1 kantor koperasi terdampak'] }
+            ],
+            progress: 67,
+            contact: 'BPBD DIY'
+        },
+        {
+            title: 'Bencana Longsor dan Tanah Ambles - November 2025',
+            image: 'https://picsum.photos/seed/landslide-hillside-java/1200/560',
+            time: '21 Nov 2025 - Bantul',
+            status: 'Pemulihan',
+            statusClass: 'tw-border-amber-700/50 tw-bg-amber-900/50 tw-text-amber-400',
+            borderClass: 'tw-border-l-red-500',
+            location: 'Sriharjo, Imogiri; Sedayu; Pajangan - Kabupaten Bantul',
+            desc: 'Pada 21 November 2025 hujan intensitas tinggi memicu pergerakan tanah di Bantul. Jalan utama penghubung Padukuhan Wunut dan Sompok di Kalurahan Sriharjo, Imogiri ambles total; 150 warga Sompok dan 300 warga Kedungmiri terisolasi sehingga dibangun jembatan darurat. Di Sedayu dan Pajangan, pergerakan tanah merusak struktur bangunan warga dan pemerintah merekomendasikan relokasi untuk rumah dengan kerusakan berat di zona kerentanan tinggi.',
+            impactCards: [
+                { area: 'Sriharjo, Imogiri', items: ['Jalan utama Padukuhan Wunut - Sompok ambles total', '150 warga Sompok terisolasi', '300 warga Kedungmiri terisolasi', 'Jembatan darurat dibangun untuk akses sementara'] },
+                { area: 'Sedayu dan Pajangan', items: ['Pergerakan tanah merusak struktur bangunan warga', 'Kerusakan turut menyasar bangunan fasilitas pemerintahan', 'Relokasi direkomendasikan untuk rumah rusak berat', 'Prioritas pemantauan pada zona kerentanan tanah tinggi'] }
+            ],
+            progress: 72,
+            contact: 'BPBD Kabupaten Bantul'
+        },
+        {
+            title: 'Tanah Longsor Kulon Progo',
+            image: 'https://picsum.photos/seed/landslide-hills-indonesia/1200/560',
+            time: '31 Des 2025 · 23.59 WIB',
+            status: 'Siaga Aktif',
+            statusClass: 'tw-border-red-700/50 tw-bg-red-900/50 tw-text-red-400',
+            borderClass: 'tw-border-l-red-500',
+            location: 'Kapanewon se-Kulon Progo · Kabupaten Kulon Progo',
+            desc: 'Kulon Progo menjadi wilayah dengan jumlah kejadian tertinggi sepanjang 2025. Tanah longsor mendominasi laporan wilayah ini dengan 448 kejadian dari total 558 kejadian, terutama pada area perbukitan dan akses permukiman.',
+            impactCards: [
+                { area: 'Girimulyo', items: ['Lereng perbukitan menjadi fokus pemantauan', 'Akses permukiman rawan tertutup material', 'Koordinasi kesiapsiagaan dilakukan bersama kapanewon'] },
+                { area: 'Kokap', items: ['Wilayah bukit Menoreh memiliki paparan longsor tinggi', 'Drainase dan tebing jalan menjadi titik prioritas', 'Respons cepat diarahkan untuk jalur penghubung warga'] },
+                { area: 'Kalibawang', items: ['Pemantauan gerakan tanah saat hujan intensitas tinggi', 'Sosialisasi jalur aman untuk warga lereng', 'Pendataan titik rawan dilakukan lintas desa'] },
+                { area: 'Pengasih', items: ['Pusat koordinasi logistik kabupaten', 'Distribusi informasi kejadian ke pos lapangan', 'Dukungan laporan warga untuk validasi cepat'] }
+            ],
+            progress: 80,
+            contact: 'BPBD Kabupaten Kulon Progo'
+        },
+        {
+            title: 'Kebakaran dan Longsor Bantul',
+            image: 'https://picsum.photos/seed/fire-disaster-settlement-indonesia/1200/560',
+            time: '31 Des 2025 · 21.30 WIB',
+            status: 'Selesai',
+            statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
+            borderClass: 'tw-border-l-orange-500',
+            location: 'Kapanewon terdampak · Kabupaten Bantul',
+            desc: 'Bantul masuk kelas risiko tinggi dengan 333 kejadian. Komponen terbesar berasal dari tanah longsor dan kebakaran, sehingga pemantauan wilayah padat permukiman dan lereng rawan tetap menjadi prioritas.',
+            impactCards: [
+                { area: 'Imogiri', items: ['Longsor dan tanah ambles menjadi perhatian utama', 'Akses padukuhan rawan terputus saat hujan ekstrem', 'Jalur darurat disiapkan untuk mobilitas warga'] },
+                { area: 'Sedayu', items: ['Kerentanan gerakan tanah pada bangunan warga', 'Pendataan rumah rusak menjadi prioritas lapangan', 'Koordinasi relokasi untuk zona berisiko tinggi'] },
+                { area: 'Bantul Perkotaan', items: ['Kebakaran permukiman dipantau pada area padat', 'Kesiapan armada pemadam diperkuat', 'Edukasi pencegahan korsleting listrik dilakukan berkala'] },
+                { area: 'Pajangan', items: ['Tebing dan tanah miring dimonitor intensif', 'Warga diminta waspada retakan baru', 'Akses evakuasi disiapkan saat hujan panjang'] }
+            ],
+            progress: 61,
+            contact: 'BPBD Kabupaten Bantul'
+        },
+        {
+            title: 'Longsor dan Kebakaran Gunungkidul',
+            image: 'https://picsum.photos/seed/gunungkidul-cave-landslide/1200/560',
+            time: '31 Des 2025 · 18.10 WIB',
+            status: 'Selesai',
+            statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
+            borderClass: 'tw-border-l-rose-500',
+            location: 'Kapanewon terdampak · Kabupaten Gunungkidul',
+            desc: 'Gunungkidul mencatat 262 kejadian selama periode analisis. Tanah longsor dan kebakaran menjadi dua jenis kejadian paling menonjol pada rekap kabupaten ini, dengan karakter wilayah karst dan perbukitan yang perlu dipantau.',
+            impactCards: [
+                { area: 'Gedangsari', items: ['Perbukitan rawan longsor saat curah hujan naik', 'Akses jalan desa dipantau untuk potensi material jatuh', 'Warga lereng diminta melapor jika muncul retakan'] },
+                { area: 'Patuk', items: ['Koridor perbukitan menjadi area pemantauan', 'Drainase dan tebing jalan menjadi prioritas', 'Koordinasi desa tangguh bencana diperkuat'] },
+                { area: 'Wonosari', items: ['Kebakaran bangunan dan lahan menjadi perhatian', 'Kesiapsiagaan armada pemadam dipertahankan', 'Pendataan kejadian dilakukan melalui pos kabupaten'] },
+                { area: 'Nglipar', items: ['Kerentanan lereng dan akses desa dipantau', 'Informasi cuaca ekstrem disebarkan ke warga', 'Jalur alternatif disiapkan saat jalan terganggu'] }
+            ],
+            progress: 48,
+            contact: 'BPBD Kabupaten Gunungkidul'
+        },
+        {
+            title: 'Cuaca Ekstrem Kota Yogyakarta',
+            image: 'https://picsum.photos/seed/storm-city-yogyakarta/1200/560',
+            time: '31 Des 2025 · 16.45 WIB',
+            status: 'Pemantauan',
+            statusClass: 'tw-border-amber-700/50 tw-bg-amber-900/50 tw-text-amber-400',
+            borderClass: 'tw-border-l-yellow-400',
+            location: 'Kemantren se-Kota Yogyakarta · Kota Yogyakarta',
+            desc: 'Kota Yogyakarta berada pada kelas risiko sedang. Cuaca ekstrem menjadi jenis kejadian dominan dengan 96 kejadian dari total 141 kejadian sepanjang tahun, terutama berdampak pada pohon tumbang, akses jalan, dan fasilitas perkotaan.',
+            impactCards: [
+                { area: 'Gondokusuman', items: ['Pohon tumbang menjadi risiko utama saat angin kencang', 'Akses jalan perkotaan membutuhkan respons cepat', 'Koordinasi lintas dinas dilakukan untuk pembersihan'] },
+                { area: 'Umbulharjo', items: ['Kepadatan permukiman meningkatkan kebutuhan respons cepat', 'Drainase dan genangan dipantau saat hujan lebat', 'Informasi peringatan dini diteruskan ke kelurahan'] },
+                { area: 'Gedongtengen', items: ['Aktivitas wisata dan transportasi perlu mitigasi gangguan', 'Pohon peneduh jalan dipantau berkala', 'Petugas lapangan disiagakan saat prakiraan hujan ekstrem'] },
+                { area: 'Kraton', items: ['Kawasan heritage dipantau dari dampak angin dan hujan', 'Koordinasi pembersihan akses wisata dilakukan', 'Laporan warga menjadi kanal validasi kejadian'] }
+            ],
+            progress: 39,
+            contact: 'BPBD Kota Yogyakarta'
+        },
+        {
+            title: 'Rekap Risiko Terendah Sleman',
+            image: 'https://picsum.photos/seed/sleman-northern-yogyakarta-report/1200/560',
+            time: '31 Des 2025 · 15.20 WIB',
+            status: 'Selesai',
+            statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
+            borderClass: 'tw-border-l-cyan-400',
+            location: 'Kapanewon se-Sleman · Kabupaten Sleman',
+            desc: 'Sleman menjadi wilayah dengan jumlah kejadian paling rendah, yaitu 80 kejadian. Rekap ini tetap perlu dibaca sebagai jumlah kejadian, bukan ukuran korban maupun kerusakan, sehingga pemantauan cuaca ekstrem dan kerentanan wilayah tetap menjadi konteks penting.',
+            impactCards: [
+                { area: 'Cangkringan', items: ['Kesiapsiagaan cuaca ekstrem tetap menjadi pemantauan utama', 'Jalur evakuasi dan titik kumpul dipantau berkala', 'Informasi resmi kebencanaan menjadi rujukan lapangan'] },
+                { area: 'Pakem', items: ['Cuaca ekstrem dan lereng perbukitan menjadi perhatian', 'Kesiapan relawan dan barak dipertahankan', 'Peringatan dini diteruskan ke komunitas lereng'] },
+                { area: 'Depok', items: ['Kepadatan aktivitas perkotaan membutuhkan respons cepat', 'Kejadian cuaca ekstrem dipantau pada koridor jalan utama', 'Koordinasi kampus dan fasilitas umum diperkuat'] },
+                { area: 'Prambanan', items: ['Area timur Sleman dipantau untuk hujan dan angin', 'Koordinasi dengan wilayah perbatasan dilakukan', 'Akses wisata perlu kesiapsiagaan saat cuaca buruk'] }
+            ],
+            progress: 22,
+            contact: 'BPBD Kabupaten Sleman'
+        },
+        {
+            title: 'Karhutla dan Gempa Terasa DIY',
+            image: 'https://picsum.photos/seed/forest-fire-smoke-indonesia/1200/560',
+            time: '31 Des 2025 · 12.00 WIB',
+            status: 'Pemantauan',
+            statusClass: 'tw-border-amber-700/50 tw-bg-amber-900/50 tw-text-amber-400',
+            borderClass: 'tw-border-l-violet-400',
+            location: 'Daerah Istimewa Yogyakarta',
+            desc: 'Karhutla tercatat 24 kejadian dan gempa terasa 19 kejadian pada rekap tahunan. Keduanya menjadi bagian dari pemantauan lintas kabupaten/kota DIY karena dampaknya bisa menyebar cepat dan membutuhkan koordinasi lintas sektor.',
+            impactCards: [
+                { area: 'Karhutla Kulon Progo', items: ['Area perbukitan dan lahan kering menjadi prioritas', 'Asap dan penjalaran api dipantau saat kemarau', 'Koordinasi pemadaman dilakukan dengan relawan lokal'] },
+                { area: 'Karhutla Gunungkidul', items: ['Vegetasi kering meningkatkan risiko penjalaran api', 'Akses pemadaman pada wilayah berbukit perlu disiapkan', 'Edukasi pembakaran lahan menjadi fokus pencegahan'] },
+                { area: 'Gempa Terasa Bantul', items: ['Wilayah selatan tetap perlu kesiapsiagaan gempa', 'Edukasi drop-cover-hold diperkuat pada fasilitas umum', 'Pelaporan kerusakan cepat menjadi prioritas pascagempa'] },
+                { area: 'Gempa Terasa DIY', items: ['Koordinasi BMKG menjadi rujukan informasi resmi', 'Pemeriksaan bangunan dilakukan bila ada getaran signifikan', 'Informasi publik perlu bebas dari rumor dan kepanikan'] }
+            ],
+            progress: 18,
+            contact: 'BPBD DIY'
+        }
+    ];
+    const statLabels = ['Korban Jiwa', 'Luka-luka', 'Pengungsi', 'Kerugian'];
+    return `
+        <div class="tw-space-y-4">
+            ${events.map((ev, idx) => {
+                return `
+                    <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.01] hover:-tw-translate-y-1">
+                        <div class="tw-relative tw-h-48 tw-overflow-hidden">
+                            <img src="${ev.image}" alt="${ev.title}" class="tw-h-full tw-w-full tw-object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://picsum.photos/seed/disaster-indonesia-nature/1200/560';">
+                            <div class="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-slate-950 tw-via-slate-950/45 tw-to-transparent"></div>
+                            <div class="tw-absolute tw-left-5 tw-right-5 tw-top-5 tw-flex tw-items-start tw-justify-between tw-gap-3">
+                                <div class="tw-rounded-full tw-bg-orange-500/20 tw-px-3 tw-py-1 tw-font-mono tw-text-xs tw-font-bold tw-text-orange-300">${ev.time}</div>
+                                <span class="tw-rounded-full tw-border tw-px-3 tw-py-1 tw-text-xs tw-font-bold ${ev.statusClass}">${ev.status}</span>
+                            </div>
+                            <div class="tw-absolute tw-bottom-5 tw-left-5 tw-right-5">
+                                <h4 class="tw-m-0 tw-font-display tw-text-3xl tw-font-bold tw-text-white">${ev.title}</h4>
+                                <div class="tw-mt-1 tw-text-sm tw-font-medium tw-text-slate-200">${ev.location}</div>
+                            </div>
+                        </div>
+                        <div class="tw-p-6">
+                        <p class="tw-text-sm tw-leading-relaxed tw-text-slate-300">${ev.desc}</p>
+                        ${ev.impactCards ? `
+                            <div class="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+                                ${ev.impactCards.map((item, areaIdx) => `
+                                    <div class="tw-rounded-xl tw-border-l-4 ${['tw-border-l-blue-400','tw-border-l-amber-400','tw-border-l-emerald-400','tw-border-l-orange-400','tw-border-l-red-400'][areaIdx % 5]} tw-bg-slate-800/60 tw-p-4">
+                                        <h5 class="tw-mb-2 tw-font-ui tw-text-sm tw-font-bold tw-text-amber-400">${item.area}</h5>
+                                        <ul class="tw-space-y-1.5">
+                                            ${item.items.map((impact) => `<li class="tw-flex tw-items-start tw-gap-2 tw-text-xs tw-leading-relaxed tw-text-slate-300"><span class="tw-mt-1.5 tw-h-1.5 tw-w-1.5 tw-flex-none tw-rounded-full tw-bg-amber-500"></span><span>${impact}</span></li>`).join('')}
+                                        </ul>
+                                    </div>`).join('')}
+                            </div>` : `
+                            <div class="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-3 md:tw-grid-cols-4">
+                                ${ev.stats.map((value, statIdx) => `
+                                    <div class="tw-rounded-xl tw-border tw-border-slate-700/70 tw-bg-slate-900/70 tw-p-3">
+                                        <span class="tw-block tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-slate-500">${statLabels[statIdx]}</span>
+                                        <strong class="tw-mt-1 tw-block tw-font-mono tw-text-lg tw-text-amber-300">${value}</strong>
+                                    </div>`).join('')}
+                            </div>`}
+                        <div class="tw-mt-6">
+                            <div class="tw-mb-1 tw-flex tw-justify-between tw-text-xs">
+                                <span class="tw-text-slate-400">Kapasitas barak / kesiapan posko</span>
+                                <span class="tw-text-slate-200">${ev.progress}%</span>
+                            </div>
+                            <div class="tw-h-2 tw-overflow-hidden tw-rounded-full tw-bg-white/10">
+                                <div class="tw-h-full tw-rounded-full tw-bg-amber-400 tw-shadow-[0_0_14px_rgba(251,191,36,0.35)]" style="width:${ev.progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-t tw-border-white/10 tw-pt-4">
+                            <div class="tw-text-xs tw-text-slate-400">
+                                Kontak BPBD: <span class="tw-font-semibold tw-text-slate-200">${ev.contact}</span>
+                            </div>
+                            <button type="button" class="tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-4 tw-py-2 tw-text-xs tw-font-bold tw-text-amber-300 hover:tw-bg-amber-500/20 hover:tw-brightness-110 active:tw-scale-95 tw-transition-all tw-duration-150">Lihat Detail</button>
+                        </div>
+                        </div>
+                    </article>`;
+            }).join('')}
+        </div>`;
+}
 
-    const kpi = container.querySelectorAll('.report-kpi-num[data-kpi]');
-    kpi.forEach((el) => {
-        const k = el.dataset.kpi;
-        let v = 0;
-        let dec = 0;
-        if (k === 'n') {
-            v = totalN || 0;
-            dec = 0;
-        }
-        if (k === 'dead') {
-            v = totalDead;
-            dec = 0;
-        }
-        if (k === 'ref') {
-            v = totalRef;
-            dec = 0;
-        }
-        if (k === 'lossT') {
-            v = totalLossTrilyun;
-            dec = 2;
-        }
-        el.textContent = formatReportKpi(v, dec);
+function renderContactCards() {
+    const contacts = [
+        { name: 'BPBD DIY', detail: 'Pusat informasi dan koordinasi kebencanaan DIY', phone: '(0274) 555584' },
+        { name: 'BNPB', detail: 'Pusat Data, Informasi dan Komunikasi Kebencanaan', phone: '117' },
+        { name: 'BMKG', detail: 'Informasi cuaca, iklim, dan gempa bumi', phone: '(021) 196' },
+        { name: 'Basarnas Yogyakarta', detail: 'Pencarian dan pertolongan darurat', phone: '115' },
+        { name: 'Pemadam Kebakaran', detail: 'Respons kebakaran dan penyelamatan kota/kabupaten', phone: '113' },
+        { name: 'Panggilan Darurat Nasional', detail: 'Nomor tunggal kegawatdaruratan', phone: '112' }
+    ];
+    return contacts.map((c) => `
+        <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-flex tw-gap-3 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-5 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.01] hover:-tw-translate-y-1">
+            <div class="tw-grid tw-h-10 tw-w-10 tw-flex-none tw-place-items-center tw-rounded-xl tw-border tw-border-cyan-400/20 tw-bg-cyan-400/10 tw-font-mono tw-text-xs tw-font-black tw-text-cyan-200">${c.name.slice(0, 2).toUpperCase()}</div>
+            <div>
+                <h4 class="tw-m-0 tw-font-display tw-text-base tw-font-bold tw-text-slate-100">${c.name}</h4>
+                <p class="tw-mt-2 tw-text-sm tw-leading-relaxed tw-text-slate-400">${c.detail}</p>
+                <a class="tw-mt-3 tw-inline-flex tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-xs tw-font-bold tw-text-amber-300 hover:tw-bg-amber-500/20" href="tel:${String(c.phone).replace(/[^\d+]/g, '')}">${c.phone}</a>
+            </div>
+        </article>`).join('');
+}
+
+function animateReportSections(container) {
+    container.querySelectorAll('.stat-animate').forEach((el, idx) => {
+        setTimeout(() => {
+            el.classList.remove('tw-opacity-0', 'tw-translate-y-4');
+            el.classList.add('tw-opacity-100', 'tw-translate-y-0');
+        }, 80 + idx * 100);
     });
-
-    renderTimeline(container, list);
-
-    destroyReportCharts();
-    initReportCharts(years, agg);
-
-    const rail = container.querySelector('.report-tl-rail');
-    if (rail && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        rail.classList.remove('report-tl-rail--drawn');
-        requestAnimationFrame(() => {
-            const ioRail = new IntersectionObserver(
-                (entries) => {
-                    if (entries.some((e) => e.isIntersecting)) {
-                        rail.classList.add('report-tl-rail--drawn');
-                        ioRail.disconnect();
-                    }
-                },
-                { threshold: 0.08 }
-            );
-            ioRail.observe(rail);
-        });
-    } else if (rail) rail.classList.add('report-tl-rail--drawn');
-
-    const tl = container.querySelectorAll('.report-tl-item');
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        tl.forEach((el) => el.classList.add('report-tl-visible'));
-    } else {
-        const io = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((e) => {
-                    if (e.isIntersecting) {
-                        e.target.classList.add('report-tl-visible');
-                        io.unobserve(e.target);
-                    }
-                });
-            },
-            { threshold: 0.12, rootMargin: '0px 0px -20px 0px' }
-        );
-        tl.forEach((el) => io.observe(el));
-    }
 }
 
 export function initReportPage() {
     const container = document.getElementById('laporan-content');
     if (!container) return;
-    destroyReportCharts();
 
-    const filterState = { year: 'all', jenis: 'all', kecamatan: 'all', risk: 'all' };
-
-    const pillLabel = () => ({
-        year: `Tahun: ${filterState.year === 'all' ? 'Semua' : filterState.year}`,
-        jenis: `Jenis: ${filterState.jenis === 'all' ? 'Semua' : filterState.jenis}`,
-        kecamatan: `Kecamatan: ${filterState.kecamatan === 'all' ? 'Semua' : filterState.kecamatan}`,
-        risk: `Status: ${filterState.risk === 'all' ? 'Semua' : filterState.risk}`
-    });
+    const high = highestRegion();
+    const low = lowestRegion();
+    const dominant = dominantDisasterType();
 
     container.innerHTML = `
-        <div class="report-dashboard tw-relative tw-mx-auto tw-max-w-6xl tw-bg-[var(--bg-primary)] tw-px-4 tw-py-6 tw-text-[var(--text-primary)] md:tw-px-6">
-            <p class="tw-mb-6 tw-max-w-3xl tw-font-body tw-text-sm tw-leading-relaxed tw-text-[var(--text-secondary)]">
-                Ringkasan kejadian bencana di DIY (data contoh). Filter memperbarui angka KPI, grafik, dan timeline di bawah ini.
-            </p>
+        <section class="tw-mb-8 tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-4">
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-5 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.02] hover:-tw-translate-y-1">
+                <div class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-slate-400">Total Kejadian</div>
+                <div class="tw-mt-3 tw-font-mono tw-text-3xl tw-font-bold tw-text-amber-300">${fmt(DISASTER_2025_TOTAL)}</div>
+                <p class="tw-mt-2 tw-text-sm tw-text-slate-400">Daerah Istimewa Yogyakarta</p>
+            </article>
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-5 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.02] hover:-tw-translate-y-1">
+                <div class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-slate-400">Tertinggi</div>
+                <div class="tw-mt-3 tw-font-mono tw-text-3xl tw-font-bold tw-text-amber-300">${shortRegionName(high.kab_kota)}</div>
+                <p class="tw-mt-2 tw-text-sm tw-text-slate-400">${fmt(high.jumlah_kejadian)} kejadian</p>
+            </article>
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-5 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.02] hover:-tw-translate-y-1">
+                <div class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-slate-400">Terendah</div>
+                <div class="tw-mt-3 tw-font-mono tw-text-3xl tw-font-bold tw-text-amber-300">${shortRegionName(low.kab_kota)}</div>
+                <p class="tw-mt-2 tw-text-sm tw-text-slate-400">${fmt(low.jumlah_kejadian)} kejadian</p>
+            </article>
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-5 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.02] hover:-tw-translate-y-1">
+                <div class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-slate-400">Dominan</div>
+                <div class="tw-mt-3 tw-font-mono tw-text-3xl tw-font-bold tw-text-amber-300">${DISASTER_TYPE_LABELS[dominant.key]}</div>
+                <p class="tw-mt-2 tw-text-sm tw-text-slate-400">${fmt(dominant.value)} kejadian</p>
+            </article>
+        </section>
 
-            <div class="report-kpi-grid tw-mb-8 tw-grid tw-grid-cols-2 tw-gap-4 md:tw-grid-cols-4">
-                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-amber-500 tw-pl-4">
-                    <div class="tw-mb-1 tw-font-ui tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Kejadian</div>
-                    <div class="report-font-mono report-kpi-num tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl" data-kpi="n" data-target="0" data-decimals="0">0</div>
+        <section class="tw-mb-8 tw-grid tw-grid-cols-1 tw-gap-5 xl:tw-grid-cols-2">
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-6 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.01] hover:-tw-translate-y-1">
+                <h3 class="tw-m-0 tw-font-ui tw-text-base tw-font-bold tw-text-amber-400">Catatan Analisis</h3>
+                <p class="tw-mt-3 tw-font-body tw-text-sm tw-leading-relaxed tw-text-slate-300">Data menampilkan jumlah kejadian bencana yang tercatat oleh BPBD DIY, bukan jumlah korban jiwa maupun estimasi kerugian material.</p>
+                <p class="tw-mt-2 tw-font-body tw-text-sm tw-leading-relaxed tw-text-slate-300">Tingkat risiko setiap wilayah ditentukan berdasarkan akumulasi total kejadian seluruh jenis bencana per kabupaten/kota selama periode Januari-Desember 2025.</p>
+            </article>
+            <article class="stat-animate tw-opacity-0 tw-translate-y-4 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-800/60 tw-p-6 tw-shadow-xl tw-shadow-black/20 tw-transition-all tw-duration-500 hover:tw-scale-[1.01] hover:-tw-translate-y-1">
+                <h3 class="tw-m-0 tw-font-ui tw-text-base tw-font-bold tw-text-amber-400">Jenis Kejadian Dianalisis</h3>
+                <div class="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2">
+                    ${DISASTER_TYPE_KEYS.map((key) => `<span class="tw-rounded-full tw-border tw-border-amber-500/20 tw-bg-slate-900/60 tw-px-3 tw-py-1.5 tw-font-ui tw-text-xs tw-font-semibold tw-text-slate-100">${DISASTER_TYPE_LABELS[key]}</span>`).join('')}
                 </div>
-                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-red-500 tw-pl-4">
-                    <div class="tw-mb-1 tw-font-ui tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Korban Jiwa</div>
-                    <div class="report-font-mono report-kpi-num tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl" data-kpi="dead" data-target="0" data-decimals="0">0</div>
-                </div>
-                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-sky-500 tw-pl-4">
-                    <div class="tw-mb-1 tw-font-ui tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Pengungsi</div>
-                    <div class="report-font-mono report-kpi-num tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl" data-kpi="ref" data-target="0" data-decimals="0">0</div>
-                </div>
-                <div class="report-kpi-stagger tw-border-l-[3px] tw-border-emerald-500 tw-pl-4">
-                    <div class="tw-mb-1 tw-font-ui tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-[var(--text-muted)]">Total Kerugian (T Rp)</div>
-                    <div class="report-font-mono report-kpi-num tw-text-3xl tw-font-bold tw-leading-none md:tw-text-4xl" data-kpi="lossT" data-target="0" data-decimals="2">0</div>
-                </div>
+            </article>
+        </section>
+
+        <section class="tw-mb-8">
+            <div class="report-table-head tw-mb-3">
+                <h3>Riwayat Bencana</h3>
+                <p>Riwayat tematik mengikuti jenis kejadian dan wilayah paling menonjol pada rekap 2025.</p>
             </div>
+            ${renderHistoryTimeline()}
+        </section>
 
-            <div class="report-filter-bar tw-mb-8 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-4 md:tw-p-5">
-                <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                    <span class="tw-mr-1 tw-font-ui tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">Filter</span>
-                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60" data-filter="year">${pillLabel().year}</button>
-                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60" data-filter="jenis">${pillLabel().jenis}</button>
-                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60" data-filter="kecamatan">${pillLabel().kecamatan}</button>
-                    <button type="button" class="filter-pill tw-rounded-full tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-elevated)] tw-px-4 tw-py-1.5 tw-text-[13px] tw-text-[var(--text-primary)] tw-transition-colors hover:tw-border-amber-500/60" data-filter="risk">${pillLabel().risk}</button>
-                </div>
-                <button type="button" id="report-filter-reset" class="tw-text-sm tw-font-ui tw-text-amber-500 tw-underline tw-underline-offset-2 hover:tw-text-amber-400">Reset Filter</button>
+        <section class="tw-mb-4">
+            <div class="report-table-head tw-mb-3">
+                <h3>Pusat Kontak Darurat</h3>
+                <p>Kontak rujukan untuk informasi dan respons kedaruratan kebencanaan.</p>
             </div>
+            <div class="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">${renderContactCards()}</div>
+        </section>
+        <button type="button" id="laporan-chatbot-btn" class="tw-fixed tw-bottom-6 tw-right-6 tw-z-[850] tw-rounded-full tw-bg-amber-500 tw-px-5 tw-py-3 tw-font-ui tw-text-xs tw-font-bold tw-text-slate-950 tw-shadow-2xl tw-shadow-black/30 tw-transition-all hover:tw-bg-amber-400 active:tw-scale-95">Tanya SIGAJOG</button>
+    `;
 
-            <div class="tw-mb-10 tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
-                <div class="tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
-                    <h3 class="report-font-display tw-mb-4 tw-text-[15px] tw-font-semibold tw-text-[var(--text-primary)]">Tren Kejadian & Korban per Tahun</h3>
-                    <div class="tw-relative tw-h-[300px]"><canvas id="reportChartTrend"></canvas></div>
-                </div>
-                <div class="tw-rounded-xl tw-border tw-border-[var(--border-card)] tw-bg-[var(--bg-card)] tw-p-5">
-                    <h3 class="report-font-display tw-mb-4 tw-text-[15px] tw-font-semibold tw-text-[var(--text-primary)]">Total Kerugian Material (Rp Miliar)</h3>
-                    <div class="tw-relative tw-h-[300px]"><canvas id="reportChartLoss"></canvas></div>
-                </div>
-            </div>
-
-            <div class="tw-mb-12">
-                <h3 class="report-font-display tw-mb-6 tw-border-b tw-border-[var(--border-card)] tw-pb-3 tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Riwayat Bencana</h3>
-                <div class="report-tl-rail tw-relative tw-pl-6 md:tw-pl-8"></div>
-            </div>
-
-            <div>
-                <h3 class="report-font-display tw-mb-5 tw-border-b tw-border-[var(--border-card)] tw-pb-3 tw-text-lg tw-font-semibold tw-text-[var(--text-primary)]">Pusat Kontak Darurat</h3>
-                <div class="report-contact-grid tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
-                    <article class="report-contact-card report-contact-card--med">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">BPBD DIY</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">24 jam</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:+62274555584">0274-555584</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Pusdalops PB DIY<br>Jl. Kenari No.14, Semaki</p>
-                    </article>
-                    <article class="report-contact-card report-contact-card--police">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Polres DIY</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">Darurat</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:110">110</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Koordinasi keamanan wilayah<br>Hotline terpusat</p>
-                    </article>
-                    <article class="report-contact-card report-contact-card--sar">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Basarnas (SAR)</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">24 jam</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:115">115</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Pencarian &amp; pertolongan<br>Jl. Wates Km 11, Sedayu</p>
-                    </article>
-                    <article class="report-contact-card report-contact-card--pmi">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">PMI DIY</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">24 jam</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:+62274372474">0274-372474</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Markas PMI Daerah<br>Jl. Siliwangi No.3, Gamping</p>
-                    </article>
-                    <article class="report-contact-card report-contact-card--fire">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">Pemadam Kebakaran</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">24 jam</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:113">113</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Mako Damkar<br>Jl. Mayor Suryotomo</p>
-                    </article>
-                    <article class="report-contact-card report-contact-card--hospital">
-                        <h4 class="tw-mb-1 tw-font-display tw-text-base tw-font-semibold tw-text-[var(--text-primary)]">IGD RS Sardjito</h4>
-                        <p class="tw-mb-3 tw-font-ui tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-[var(--text-muted)]">IGD</p>
-                        <a class="report-contact-num tw-mb-3 tw-block tw-font-mono tw-text-2xl tw-font-semibold tw-text-[var(--accent-gold)] hover:tw-text-amber-300" href="tel:+62274587400">0274-587400</a>
-                        <p class="tw-text-[13px] tw-leading-snug tw-text-[var(--text-muted)]">Rujukan medis regional<br>Fakultas Kedokteran UGM</p>
-                    </article>
-                </div>
-            </div>
-        </div>`;
-
-    const cycles = {
-        year: ['all', 2024, 2023, 2022],
-        jenis: ['all', 'Erupsi', 'Banjir', 'Gempa'],
-        kecamatan: ['all', 'Cangkringan', 'Gamping', 'Bantul'],
-        risk: ['all', 'Siaga', 'Selesai', 'Waspada']
-    };
-
-    const bump = (key) => {
-        const arr = cycles[key];
-        const i = arr.indexOf(filterState[key]);
-        filterState[key] = arr[(i < 0 ? 0 : i + 1) % arr.length];
-        container.querySelectorAll('.filter-pill[data-filter]').forEach((p) => p.classList.remove('active'));
-        const L = pillLabel();
-        const btn = container.querySelector(`[data-filter="${key}"]`);
-        if (btn) {
-            btn.textContent = L[key];
-            btn.classList.add('active');
-        }
-        applyFilters(container, filterState);
-    };
-
-    container.querySelectorAll('.filter-pill[data-filter]').forEach((btn) => {
-        btn.addEventListener('click', (e) => bump(e.currentTarget.dataset.filter));
-    });
-    container.querySelector('#report-filter-reset')?.addEventListener('click', () => {
-        filterState.year = 'all';
-        filterState.jenis = 'all';
-        filterState.kecamatan = 'all';
-        filterState.risk = 'all';
-        const L = pillLabel();
-        ['year', 'jenis', 'kecamatan', 'risk'].forEach((k) => {
-            const b = container.querySelector(`[data-filter="${k}"]`);
-            if (b) {
-                b.textContent = L[k];
-                b.classList.add('active');
-            }
-        });
-        applyFilters(container, filterState);
-    });
-
-    wireReportPageAnimations(container);
-    applyFilters(container, filterState);
-}
-
-function formatReportKpi(value, decimals) {
-    const v = decimals > 0 ? Number(value.toFixed(decimals)) : Math.round(value);
-    if (decimals > 0) return v.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-    return v.toLocaleString('id-ID');
-}
-
-function wireReportPageAnimations(container) {
-    requestAnimationFrame(() => {
-        container.querySelectorAll('.report-kpi-stagger').forEach((el, i) => {
-            el.style.transitionDelay = `${i * 70}ms`;
-            requestAnimationFrame(() => el.classList.add('report-kpi-visible'));
-        });
-    });
-}
-
-function initReportCharts(years, agg) {
-    if (typeof Chart === 'undefined') return;
-
-    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-elevated').trim() || 'rgba(15, 23, 41, 0.96)';
-    const gold = '#d4a017';
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily || 'system-ui, sans-serif';
-    Chart.defaults.plugins.tooltip.backgroundColor = bg;
-    Chart.defaults.plugins.tooltip.borderColor = 'rgba(212,160,23,0.35)';
-    Chart.defaults.plugins.tooltip.borderWidth = 1;
-    Chart.defaults.plugins.tooltip.titleColor = gold;
-    Chart.defaults.plugins.tooltip.bodyColor = '#f0ede4';
-    Chart.defaults.plugins.tooltip.padding = 12;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
-    Chart.defaults.plugins.tooltip.displayColors = true;
-
-    const ys = years.map(String);
-    const counts = agg.map((a) => a.n);
-    const losses = agg.map((a) => Math.round(a.loss * 1000) / 1000);
-    const korbans = agg.map((a) => a.korban);
-    const sumCount = counts.reduce((a, b) => a + b, 0) || 1;
-
-    const c1 = new Chart(document.getElementById('reportChartTrend'), {
-        type: 'line',
-        data: {
-            labels: ys,
-            datasets: [
-                {
-                    label: 'Kejadian (jumlah)',
-                    data: counts,
-                    borderColor: '#f59e0b',
-                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                    yAxisID: 'y',
-                    tension: 0.4
-                },
-                {
-                    label: 'Korban jiwa',
-                    data: korbans,
-                    borderColor: '#ef4444',
-                    backgroundColor: '#ef4444',
-                    yAxisID: 'y1',
-                    type: 'bar',
-                    borderRadius: 4,
-                    barPercentage: 0.5
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 1100, easing: 'easeOutQuart' },
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { position: 'top', align: 'end', labels: { boxWidth: 10 } },
-                tooltip: {
-                    callbacks: {
-                        label(ctx) {
-                            const v = ctx.parsed?.y ?? ctx.parsed;
-                            const n = typeof v === 'number' ? v.toLocaleString('id-ID') : String(v);
-                            return ` ${ctx.dataset.label}: ${n}`;
-                        },
-                        footer(items) {
-                            if (!items.length) return [];
-                            const raw = items[0].parsed;
-                            const val = typeof raw === 'number' ? raw : raw?.y ?? raw?.r;
-                            if (val == null || !sumCount) return [];
-                            const pct = ((val / sumCount) * 100).toFixed(1);
-                            return [`Bagian dari total: ${pct}%`, `Total (kejadian): ${sumCount.toLocaleString('id-ID')}`];
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } },
-                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
-            }
-        }
-    });
-
-    const sumLoss = losses.reduce((a, b) => a + b, 0) || 1;
-
-    const c2 = new Chart(document.getElementById('reportChartLoss'), {
-        type: 'bar',
-        data: {
-            labels: ys,
-            datasets: [
-                {
-                    label: 'Kerugian (Miliar Rp)',
-                    data: losses,
-                    backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 1000, easing: 'easeOutCubic' },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label(ctx) {
-                            const v = ctx.parsed?.y ?? ctx.parsed;
-                            const n = typeof v === 'number' ? v.toLocaleString('id-ID', { maximumFractionDigits: 3 }) : String(v);
-                            return ` ${ctx.dataset.label}: ${n}`;
-                        },
-                        footer(items) {
-                            if (!items.length) return [];
-                            const raw = items[0].parsed;
-                            const val = typeof raw === 'number' ? raw : raw?.y ?? raw?.r;
-                            if (val == null || !sumLoss) return [];
-                            const pct = ((val / sumLoss) * 100).toFixed(1);
-                            return [`Bagian dari total: ${pct}%`, `Total kerugian (M): ${sumLoss.toLocaleString('id-ID', { maximumFractionDigits: 3 })}`];
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' } }
-            }
-        }
-    });
-    _reportCharts.push(c1, c2);
+    container.querySelector('#laporan-chatbot-btn')?.addEventListener('click', () => document.getElementById('chatbot-toggle')?.click());
+    animateReportSections(container);
 }

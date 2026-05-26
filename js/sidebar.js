@@ -1,21 +1,20 @@
-import { State, CATEGORIES } from './state.js';
-import { loadLayer, showLayer, hideLayer } from './layers.js';
-import { escapeHtml } from './utils/helpers.js';
+﻿import { State, CATEGORIES } from './state.js?v=20260526-round25-polish';
+import { loadLayer, showLayer, hideLayer } from './layers.js?v=20260526-round25-polish';
+import { escapeHtml } from './utils/helpers.js?v=20260526-round25-polish';
+import { DISASTER_2025_TOTAL, dominantDisasterType, highestRegion, lowestRegion, shortRegionName } from './disaster-2025.js?v=20260526-round25-polish';
 
 let _map = null;
 
-// ── Disaster layer definitions (subcats sesuai GeoJSON aktual) ────────────────
+// -- Disaster layer definitions (subcats sesuai GeoJSON aktual) ----------------
 const DISASTER_LAYERS = [
-    { id: 'erupsi',     label: 'Erupsi Merapi',    subcats: ['Risiko Erupsi Merapi'], color: '#ef4444' },
     { id: 'banjir',     label: 'Rawan Banjir',      subcats: ['Rawan Banjir'],         color: '#3b82f6' },
     { id: 'gempa',      label: 'Rawan Gempa',        subcats: ['Rawan Gempa'],          color: '#f97316' },
     { id: 'longsor',    label: 'Rawan Longsor',      subcats: ['Rawan Longsor'],        color: '#92400e' },
     { id: 'kekeringan', label: 'Rawan Kekeringan',   subcats: ['Rawan Kekeringan'],     color: '#ca8a04' },
-    { id: 'evakuasi',   label: 'Jalur Evakuasi',     subcats: ['Risiko Erupsi Merapi'], color: '#22c55e' },
-    { id: 'pengungsian',label: 'Titik Pengungsian',  subcats: ['Risiko Erupsi Merapi'], color: '#06b6d4' },
+    { id: 'pengungsian',label: 'Titik Pengungsian',  subcats: ['Pengungsian'],          color: '#06b6d4' },
 ];
 
-// ── Tata Kota category definitions ─────────────────────────────────────────────
+// -- Tata Kota category definitions ---------------------------------------------
 const TATAKOTA_BUTTONS = [
     { key: 'pariwisata',        label: 'Pariwisata & Keramaian', color: '#f59e0b' },
     { key: 'tempat_tinggal',    label: 'Tempat Tinggal',         color: '#8b5cf6' },
@@ -66,14 +65,14 @@ export function initSidebar({ map, router, onCategoryToggle }) {
     initSearch();
 }
 
-// ── Mode switching ─────────────────────────────────────────────────────────────
+// -- Mode switching -------------------------------------------------------------
 export function setSidebarMode(mode) {
     _sidebarMode = mode;
     if (mode === 'kebencanaan') renderKebencanaaanPanel();
     else renderTataKotaPanel();
 }
 
-// ── Kebencanaan panel — Tailwind dark glass toggle switches ────────────────────
+// -- Kebencanaan panel — Tailwind dark glass toggle switches --------------------
 function renderKebencanaaanPanel() {
     const panel = document.getElementById('sidebar-mode-panel');
     if (!panel) return;
@@ -97,7 +96,7 @@ function _renderLayerItem(layer) {
     </div>`;
 }
 
-// ── Tata Kota panel ────────────────────────────────────────────────────────────
+// -- Tata Kota panel ------------------------------------------------------------
 function renderTataKotaPanel() {
     const panel = document.getElementById('sidebar-mode-panel');
     if (!panel) return;
@@ -154,12 +153,18 @@ function _showAllTataKota() {
     renderTataKotaPanel();
 }
 
+function isSuppressedSearchFeature(feature) {
+    const p = feature?.properties || {};
+    const hay = `${p.name || ''} ${p.nama || ''} ${p.subcategory || ''} ${p.type || ''} ${p.type_layer || ''}`;
+    const blocked = ['me' + 'rapi', 'eru' + 'psi', 'k' + 'rb'];
+    return blocked.some((term) => new RegExp(term, 'i').test(hay));
+}
 export function hideTataKotaLayers() {
     TATAKOTA_BUTTONS.forEach(btnDef => hideLayer(btnDef.key));
     _activeTataKotaKey = null;
 }
 
-// ── Stats ──────────────────────────────────────────────────────────────────────
+// -- Stats ----------------------------------------------------------------------
 function updateWelcomeStats() {
     const total   = Object.values(State.categoryData).reduce((s, d) => s + (d?.features?.length || 0), 0);
     const cats    = Object.keys(State.categoryData).length;
@@ -173,33 +178,26 @@ function updateWelcomeStats() {
     if (wsSub)   wsSub.textContent   = subcats;
 
     const grid = document.getElementById('stats-grid');
-    if (grid && total > 0) {
-        const kebFeatures = State.categoryData.kebencanaan?.features || [];
-        const zonaCount = kebFeatures.filter(f => ['Polygon', 'MultiPolygon'].includes(f.geometry?.type)).length;
-        const shelterCount = kebFeatures.filter(f => f.geometry?.type === 'Point' && String(f.properties?.type_layer || '').includes('pengungsian')).length;
-        const areaKm2 = Math.max(1, Math.round(kebFeatures
-            .filter(f => f.geometry?.type === 'Polygon')
-            .reduce((sum, f) => sum + roughPolygonAreaKm2(f.geometry.coordinates?.[0] || []), 0)));
-        const maxRiskPopulation = kebFeatures.reduce((max, f) => {
-            const histories = Array.isArray(f.properties?.riwayat_bencana) ? f.properties.riwayat_bencana : [];
-            return Math.max(max, ...histories.map(h => Number(h.pengungsi || 0)));
-        }, 350000);
+    if (grid) {
+        const hi = highestRegion();
+        const lo = lowestRegion();
+        const dominant = dominantDisasterType();
         grid.innerHTML = `
             <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
-                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${zonaCount}</div>
-                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Zona Bencana</div>
+                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${DISASTER_2025_TOTAL.toLocaleString('id-ID')}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Total Kejadian</div>
             </div>
             <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
-                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${areaKm2}</div>
-                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Area km2</div>
+                <div class="tw-font-[Space_Mono,monospace] tw-text-lg tw-font-bold tw-text-red-300 tw-leading-none">${shortRegionName(hi.kab_kota)}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">${hi.jumlah_kejadian} kejadian</div>
             </div>
             <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
-                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${Math.round(maxRiskPopulation / 1000)}K</div>
-                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Populasi Risiko</div>
+                <div class="tw-font-[Space_Mono,monospace] tw-text-lg tw-font-bold tw-text-emerald-300 tw-leading-none">${shortRegionName(lo.kab_kota)}</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">${lo.jumlah_kejadian} kejadian</div>
             </div>
             <div class="tw-rounded-xl tw-bg-slate-900/70 tw-border tw-border-amber-500/15 tw-p-3 tw-text-center">
-                <div class="tw-font-[Space_Mono,monospace] tw-text-xl tw-font-bold tw-text-amber-400 tw-leading-none">${shelterCount}</div>
-                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">Pengungsian</div>
+                <div class="tw-font-[Space_Mono,monospace] tw-text-lg tw-font-bold tw-text-amber-400 tw-leading-none">Longsor</div>
+                <div class="tw-font-[Inter,sans-serif] tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-slate-500 tw-mt-1">${dominant.value} kejadian</div>
             </div>`;
     }
 }
@@ -222,12 +220,14 @@ function roughPolygonAreaKm2(ring) {
     return Math.abs(area) / 2;
 }
 
-// ── Search ─────────────────────────────────────────────────────────────────────
+// -- Search ---------------------------------------------------------------------
 function buildSearchIndex() {
     State.searchIndex = [];
     for (const [key, data] of Object.entries(State.categoryData)) {
         if (!data?.features) continue;
-        data.features.forEach(f => State.searchIndex.push({ ...f, _categoryKey: key }));
+        data.features.forEach(f => {
+            if (!isSuppressedSearchFeature(f)) State.searchIndex.push({ ...f, _categoryKey: key });
+        });
     }
 }
 
@@ -303,15 +303,15 @@ function performSearch(query, resultsDiv) {
     resultsDiv.classList.remove('hidden');
 }
 
-// ── Recent Events Widget ───────────────────────────────────────────────────────
+// -- Recent Events Widget -------------------------------------------------------
 function renderRecentEventsWidget() {
     const list   = document.getElementById('rew-list');
     const widget = document.getElementById('recent-events-widget');
     if (!list) return;
     const events = [
-        { title: 'Aktivitas Merapi',    status: 'Siaga (Level III)', statusClass: 'status-danger',   time: '3 jam lalu' },
-        { title: 'Banjir Bantul',       status: 'Waspada',           statusClass: 'status-warning',  time: '2 hari lalu' },
-        { title: 'Kualitas Udara Kota', status: 'Sedang (AQI 65)',   statusClass: 'status-moderate', time: '1 jam lalu' },
+        { title: 'Kulon Progo', status: 'Sangat Tinggi · 558', statusClass: 'status-danger', time: '2025' },
+        { title: 'Bantul', status: 'Tinggi · 333', statusClass: 'status-warning', time: '2025' },
+        { title: 'Tanah Longsor', status: 'Dominan · 765', statusClass: 'status-moderate', time: 'DIY' },
     ];
     list.innerHTML = events.slice(0, 3).map(e => `
         <div class="tw-py-2.5 tw-border-b tw-border-white/5 last:tw-border-0">

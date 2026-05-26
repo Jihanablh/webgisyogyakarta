@@ -1,4 +1,4 @@
-import { CONFIG, CATEGORIES } from '../state.js';
+import { CONFIG, CATEGORIES } from '../state.js?v=20260526-round25-polish';
 
 function esc(s) {
     return String(s)
@@ -73,8 +73,8 @@ export function renderTataKotaDetailInto(container, id, opts) {
     const catColor = CATEGORIES[cat]?.color || '#d4a017';
     const sub      = props.subcategory || props.type || catLabel;
 
-    // Hero image: pakai foto dari props atau Picsum
-    const hero = props.foto || `https://picsum.photos/seed/${encodeURIComponent(cat + name.slice(0, 8))}/1200/480`;
+    const heroSeed = encodeURIComponent(`${catLabel}-${name}-yogyakarta`.toLowerCase().replace(/\s+/g, '-'));
+    const hero = props.foto || `https://picsum.photos/seed/${heroSeed}/1200/480`;
 
     // Fasilitas
     const fasilitas = Array.isArray(props.facilities) ? props.facilities : [];
@@ -89,25 +89,19 @@ export function renderTataKotaDetailInto(container, id, opts) {
             <td class="tw-py-3 tw-font-body tw-text-sm tw-leading-relaxed tw-text-slate-300">${esc(String(v).slice(0, 140))}</td>
         </tr>`).join('');
 
-    // Keramaian bar chart data (ilustratif konsisten per lokasi hash)
-    function h(s) { let n = 0; for (let i = 0; i < s.length; i++) n = (n * 31 + s.charCodeAt(i)) >>> 0; return n; }
-    const seed = h(name + cat);
-    const crowd = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map((d, i) => ({
-        day: d,
-        pct: 20 + ((seed >> (i * 4)) & 0x3f)
-    }));
+    const crowd = getWeeklyCrowd(cat, name, sub);
 
     container.innerHTML = `
     <div class="tatakota-detail-spa tw-opacity-0 tw-translate-y-3 detail-page-entrance">
         <!-- Hero -->
         <div class="tw-relative tw-h-[58vh] tw-min-h-[420px] tw-w-full tw-overflow-hidden">
-            <button type="button" class="js-tk-back tw-absolute tw-left-6 tw-top-6 tw-z-30 tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-full tw-border tw-border-amber-500/50 tw-bg-slate-950/75 tw-backdrop-blur-md tw-text-amber-300 hover:tw-bg-amber-500/10 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui" aria-label="Kembali ke daftar">
+            <button type="button" class="js-tk-back tw-absolute tw-left-4 tw-top-4 tw-z-30 tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-bg-slate-800/90 tw-px-5 tw-py-2 tw-font-ui tw-text-sm tw-font-medium tw-text-amber-400 tw-shadow-lg tw-shadow-black/20 tw-backdrop-blur-md tw-transition-all tw-duration-200 hover:tw-bg-slate-700/90 hover:tw-text-amber-300" aria-label="Kembali ke daftar">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Kembali
             </button>
             <img src="${esc(hero)}" alt="${esc(name)}"
                 class="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover"
-                loading="lazy" onerror="this.src='https://picsum.photos/seed/1015/1200/480'">
+                loading="lazy" onerror="this.src='https://picsum.photos/seed/yogyakarta/1200/480';">
             <div class="tw-absolute tw-inset-0" style="background:linear-gradient(to top, #0a0f1e 0%, rgba(10,15,30,0.55) 55%, transparent 100%)"></div>
             <div class="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-px-6 tw-pb-6 md:tw-px-10">
                 <div class="tw-flex tw-items-center tw-gap-2 tw-mb-3 tw-opacity-0 tw-translate-y-3 detail-entrance" style="--delay:0ms">
@@ -151,17 +145,13 @@ export function renderTataKotaDetailInto(container, id, opts) {
                     <!-- Aksi -->
                     <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:280ms">
                         <h2 class="tw-font-display tw-text-xl tw-font-bold tw-text-slate-100 tw-mb-4">Aksi Cepat</h2>
-                        <div class="tw-flex tw-flex-wrap tw-gap-3">
+                        <div class="tw-grid tw-grid-cols-2 tw-gap-3">
                             <button type="button" id="tk-btn-arahkan"
-                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-bg-amber-400/90 hover:tw-bg-amber-300 tw-text-slate-950 tw-text-sm tw-font-bold tw-transition-all tw-duration-200 tw-font-ui">
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-bg-amber-500 tw-py-3 tw-text-sm tw-font-bold tw-text-slate-900 tw-transition-all tw-duration-200 active:tw-scale-95 hover:tw-bg-amber-400 tw-font-ui">
                                 Arahkan ke Sini
                             </button>
-                            <button type="button" id="tk-btn-peta-kategori"
-                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-border tw-border-amber-500/40 tw-text-amber-300 hover:tw-bg-amber-500/10 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
-                                Lihat di Peta
-                            </button>
                             <a href="https://maps.google.com?q=${lat},${lng}" target="_blank" rel="noopener noreferrer"
-                                class="tw-inline-flex tw-items-center tw-justify-center tw-py-2.5 tw-px-5 tw-rounded-xl tw-border tw-border-white/15 tw-text-slate-400 hover:tw-bg-white/5 tw-text-sm tw-font-semibold tw-transition-all tw-duration-200 tw-font-ui">
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-slate-600 tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-text-slate-300 tw-transition-all tw-duration-200 hover:tw-border-amber-500/50 hover:tw-text-amber-400 tw-font-ui">
                                 Buka di Google Maps
                             </a>
                         </div>
@@ -172,15 +162,10 @@ export function renderTataKotaDetailInto(container, id, opts) {
             <!-- Grafik keramaian -->
             <section class="tw-opacity-0 tw-translate-y-4 detail-entrance" style="--delay:340ms">
                 <h2 class="tw-font-display tw-text-2xl tw-font-bold tw-text-slate-100 tw-mb-5">Estimasi Keramaian Mingguan</h2>
-                <div class="tw-flex tw-items-end tw-gap-1.5 tw-h-20">
-                    ${crowd.map(c => `
-                    <div class="tw-flex-1 tw-flex tw-flex-col tw-items-center tw-gap-1">
-                        <div class="tw-w-full tw-rounded-sm tw-transition-all tw-duration-700"
-                             style="height:${c.pct}%;background:${catColor};opacity:0.8;min-height:4px"></div>
-                        <span class="tw-text-[9px] tw-font-mono tw-text-slate-500">${c.day}</span>
-                    </div>`).join('')}
+                <div class="tw-h-48 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-900/60 tw-p-4">
+                    <canvas id="tk-crowd-chart" height="120" aria-label="Estimasi keramaian mingguan"></canvas>
                 </div>
-                <p class="tw-mt-2 tw-text-[10px] tw-text-slate-600 tw-font-ui">Estimasi ilustratif â€” bukan data real-time</p>
+                <p class="tw-mt-2 tw-text-[10px] tw-text-slate-600 tw-font-ui">Estimasi ilustratif — bukan data real-time</p>
             </section>
         </div>
     </div>`;
@@ -188,7 +173,7 @@ export function renderTataKotaDetailInto(container, id, opts) {
     // Wire back button
     container.querySelector('.js-tk-back')?.addEventListener('click', onBack);
 
-    // Arahkan ke Sini â€” SPA single marker map
+    // Arahkan ke Sini — SPA single marker map
     container.querySelector('#tk-btn-arahkan')?.addEventListener('click', () => {
         const tatakoPage = document.getElementById('tatakota-page');
         if (tatakoPage) tatakoPage.classList.add('hidden');
@@ -197,15 +182,8 @@ export function renderTataKotaDetailInto(container, id, opts) {
         });
     });
 
-    // Lihat di Peta â€” SPA category map
-    container.querySelector('#tk-btn-peta-kategori')?.addEventListener('click', () => {
-        const features = (window.State?.rawGeojsonCache?.[cat]) || [];
-        const tatakoPage = document.getElementById('tatakota-page');
-        if (tatakoPage) tatakoPage.classList.add('hidden');
-        import('./spa-map.js').then(({ showCategoryMap }) => {
-            showCategoryMap(catLabel, features, catColor, 'tatakota-page');
-        });
-    });
+    // Lihat di Peta — SPA category map
+    renderCrowdChart(container.querySelector('#tk-crowd-chart'), crowd);
 
     // Entrance animations
     requestAnimationFrame(() => {
@@ -219,6 +197,54 @@ export function renderTataKotaDetailInto(container, id, opts) {
                 el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
             }, delay);
         });
+    });
+}
+
+function getWeeklyCrowd(cat, name, sub) {
+    const lower = `${cat} ${name} ${sub}`.toLowerCase();
+    if (cat === 'kesehatan_darurat' || lower.includes('rumah sakit') || lower.includes('klinik')) {
+        return [58, 62, 60, 48, 44, 32, 24];
+    }
+    if (lower.includes('pasar')) return [44, 46, 50, 52, 58, 72, 86];
+    if (lower.includes('candi') || lower.includes('prambanan') || lower.includes('borobudur')) {
+        return [34, 38, 42, 46, 58, 82, 88];
+    }
+    if (cat === 'pariwisata') return [42, 46, 48, 52, 66, 90, 86];
+    if (cat === 'mobilitas') return [62, 66, 65, 64, 78, 72, 58];
+    if (cat === 'akademik') return [74, 78, 76, 72, 60, 30, 24];
+    return [46, 50, 52, 54, 60, 68, 62];
+}
+
+function renderCrowdChart(canvas, values) {
+    if (!canvas || typeof Chart === 'undefined') return;
+    const ctx = canvas.getContext('2d');
+    const colors = values.map((v) => {
+        if (v >= 76) return '#ef4444';
+        if (v >= 58) return '#f59e0b';
+        return '#22c55e';
+    });
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+            datasets: [{ data: values, borderRadius: 10, backgroundColor: colors, borderSkipped: false }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (c) => `±${(Number(c.raw || 0) * 100).toLocaleString('id-ID')} orang`
+                    }
+                }
+            },
+            scales: {
+                y: { display: false, min: 0, max: 100 },
+                x: { grid: { display: false }, ticks: { color: '#a8a49b', font: { family: 'Inter', size: 11 } } }
+            }
+        }
     });
 }
 

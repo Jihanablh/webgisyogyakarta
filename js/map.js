@@ -1,4 +1,4 @@
-import { CONFIG, State } from './state.js';
+import { CONFIG, State } from './state.js?v=20260526-round25-polish';
 
 export function initMap() {
     State.map = L.map('map', {
@@ -6,6 +6,8 @@ export function initMap() {
         zoom: CONFIG.zoom,
         minZoom: CONFIG.minZoom,
         maxZoom: CONFIG.maxZoom,
+        maxBounds: CONFIG.maxBounds,
+        maxBoundsViscosity: CONFIG.maxBoundsViscosity,
         zoomControl: false,
         preferCanvas: true,
         renderer: L.canvas()
@@ -59,7 +61,7 @@ export function initMap() {
     State.map.on('mousemove', (e) => {
         const coordEl = document.getElementById('coord-text');
         if (coordEl) {
-            coordEl.textContent = `${Math.abs(e.latlng.lat).toFixed(4)}Â°${e.latlng.lat < 0 ? 'S' : 'N'}, ${Math.abs(e.latlng.lng).toFixed(4)}Â°${e.latlng.lng > 0 ? 'E' : 'W'}`;
+            coordEl.textContent = `${Math.abs(e.latlng.lat).toFixed(4)}°${e.latlng.lat < 0 ? 'S' : 'N'}, ${Math.abs(e.latlng.lng).toFixed(4)}°${e.latlng.lng > 0 ? 'E' : 'W'}`;
         }
     });
 

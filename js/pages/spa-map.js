@@ -1,9 +1,10 @@
-import { CONFIG } from '../state.js';
-import { createMarker } from '../markers.js';
+import { CONFIG } from '../state.js?v=20260526-round25-polish';
+import { createMarker } from '../markers.js?v=20260526-round25-polish';
 
 let _spaMap = null;
 let _prevPageId = null;
 let _activeBasemap = null;
+let _activeMapContext = null;
 
 const TILESETS = {
     dark: {
@@ -24,6 +25,8 @@ export function showSingleMarkerMap(name, lat, lng, fromPageId = null) {
     _prevPageId = fromPageId;
     _setupSpaMapPage(name);
     _initSpaMap((map) => {
+        clearSpaMapLayers();
+        _activeMapContext = 'single-marker';
         const feature = {
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [lng, lat] },
@@ -46,6 +49,8 @@ export function showCategoryMap(catLabel, features, catColor = '#d4a017', fromPa
     const validFeatures = (features || []).filter(f => f.geometry?.type === 'Point');
     _setupSpaMapPage(`Peta — ${catLabel}`);
     _initSpaMap((map) => {
+        clearSpaMapLayers();
+        _activeMapContext = 'category-map';
         _renderCategoryInfoPanel(catLabel, validFeatures.length, catColor);
         const group = L.featureGroup();
 
@@ -102,6 +107,7 @@ export function hideSpaMap() {
         try { _spaMap.remove(); } catch (_) {}
         _spaMap = null;
         _activeBasemap = null;
+        _activeMapContext = null;
     }
     const container = document.getElementById('spa-map-container');
     if (container) container.innerHTML = '';
@@ -123,6 +129,8 @@ function _setupSpaMapPage(title) {
     document.getElementById('sidebar')?.classList.add('hidden');
     document.getElementById('map-top-left-chrome')?.classList.add('hidden');
     document.getElementById('map-right-stack')?.classList.add('hidden');
+    document.getElementById('kab-risk-info-panel')?.classList.add('hidden');
+    document.getElementById('risk-legend')?.classList.add('hidden');
 
     const titleEl = document.getElementById('spa-map-title');
     if (titleEl) titleEl.textContent = title;
@@ -140,6 +148,8 @@ function _setupSpaMapPage(title) {
                 document.getElementById('sidebar')?.classList.remove('hidden');
                 document.getElementById('map-top-left-chrome')?.classList.remove('hidden');
                 document.getElementById('map-right-stack')?.classList.remove('hidden');
+                document.getElementById('kab-risk-info-panel')?.classList.remove('hidden');
+                document.getElementById('risk-legend')?.classList.remove('hidden');
             }
         });
     }
@@ -168,12 +178,22 @@ function _initSpaMap(callback) {
     }).setView(CONFIG.center, CONFIG.zoom);
 
     _switchSpaBasemap('dark');
+    clearSpaMapLayers();
 
     requestAnimationFrame(() => {
         setTimeout(() => {
             try { _spaMap?.invalidateSize(); } catch (_) {}
             callback(_spaMap);
         }, 150);
+    });
+}
+
+function clearSpaMapLayers() {
+    if (!_spaMap) return;
+    _spaMap.eachLayer((layer) => {
+        if (layer !== _activeBasemap) {
+            try { _spaMap.removeLayer(layer); } catch (_) {}
+        }
     });
 }
 
@@ -187,7 +207,7 @@ function _renderBasemapControl(container) {
         <button type="button" class="spa-bm-btn" data-bm="terrain">Terrain</button>
         <span class="tw-h-5 tw-w-px tw-bg-amber-500/25 tw-mx-0.5" aria-hidden="true"></span>
         <button type="button" class="spa-zoom-btn" data-zoom="in" title="Perbesar">+</button>
-        <button type="button" class="spa-zoom-btn" data-zoom="out" title="Perkecil">−</button>
+        <button type="button" class="spa-zoom-btn" data-zoom="out" title="Perkecil">-</button>
     `;
     controls.querySelectorAll('[data-bm]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -264,15 +284,16 @@ function _richPopupHtml(feature, catKey, catLabel, catColor, popupId) {
     const name = props.name || props.nama || 'Lokasi';
     const sub = props.subcategory || props.type || catLabel;
     const rating = _ratingFor(name);
-    const img = props.foto || props.image || `https://picsum.photos/seed/${encodeURIComponent(name).replace(/%/g, '')}/360/220`;
+    const imgSeed = encodeURIComponent(`${name}-yogyakarta-indonesia`.toLowerCase().replace(/\s+/g, '-'));
+    const img = props.foto || props.image || `https://picsum.photos/seed/${imgSeed}/360/220`;
     return `
         <div class="tw-w-[250px] tw-overflow-hidden tw-rounded-2xl tw-border tw-border-amber-500/25 tw-bg-slate-950 tw-text-slate-100 tw-shadow-2xl tw-shadow-black/40">
-            <img src="${_escAttr(img)}" alt="${_escAttr(name)}" class="tw-h-28 tw-w-full tw-object-cover" onerror="this.src='https://picsum.photos/seed/jogja/360/220'">
+            <img src="${_escAttr(img)}" alt="${_escAttr(name)}" class="tw-h-28 tw-w-full tw-object-cover" loading="lazy" onerror="this.src='https://picsum.photos/seed/yogyakarta/360/220';">
             <div class="tw-p-3">
                 <span class="tw-inline-flex tw-rounded-full tw-border tw-border-amber-400/30 tw-bg-amber-400/10 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-bold tw-text-amber-300">${_esc(sub)}</span>
                 <div class="tw-mt-2 tw-font-display tw-text-lg tw-font-extrabold tw-leading-tight">${_esc(name)}</div>
                 <div class="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-                    <span class="tw-text-xs tw-tracking-[0.12em] tw-text-amber-400">★★★★★</span>
+                    <span class="tw-text-xs tw-tracking-[0.12em] tw-text-amber-400">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                     <span class="tw-font-mono tw-text-[11px] tw-text-slate-500">${rating}</span>
                 </div>
                 <button type="button" id="${popupId}" class="tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-px-3 tw-py-2 tw-text-xs tw-font-bold tw-transition-colors hover:tw-bg-amber-500/10" style="border-color:${catColor}66;color:${catColor}">

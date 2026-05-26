@@ -1,4 +1,4 @@
-self.onmessage = function(e) {
+﻿self.onmessage = function(e) {
   const { url } = e.data;
   fetch(url)
     .then(r => r.json())
