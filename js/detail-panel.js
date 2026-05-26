@@ -290,9 +290,9 @@ function showDisasterPanel(feature, categoryKey) {
         capRow.style.display = 'flex';
         const capEl = document.getElementById('dp-capacity');
         const statEl = document.getElementById('dp-status');
-        if (capEl) capEl.textContent = props.kapasitas ? `${props.kapasitas.toLocaleString()} jiwa` : 'Ã¢â‚¬â€';
+        if (capEl) capEl.textContent = props.kapasitas ? `${props.kapasitas.toLocaleString()} jiwa` : '—';
         if (statEl) {
-            const st = props.status_terisi || 'Ã¢â‚¬â€';
+            const st = props.status_terisi || '—';
             statEl.textContent = st;
             statEl.style.color = st.toLowerCase().includes('penuh') ? '#ef4444'
                                 : st.toLowerCase().includes('sebagian') ? '#f97316' : '#22c55e';
@@ -365,7 +365,7 @@ function showDisasterPanel(feature, categoryKey) {
     const updEl    = document.getElementById('dp-updated');
     if (sourceEl) {
         sourceEl.style.display = 'block';
-        if (updEl) updEl.textContent = props.last_updated || props.tanggal_update || 'Ã¢â‚¬â€';
+        if (updEl) updEl.textContent = props.last_updated || props.tanggal_update || '—';
     }
 
     // -- Tombol aksi -----------------------------------------------------------
@@ -456,7 +456,7 @@ function openUnifiedPanel(feature, categoryKey) {
     if (metaEl) {
         metaEl.classList.remove('hidden');
         if (isDisaster) {
-            const risk = isPengungsian ? (props.jenis_posko || 'Pengungsian') : (props.kelas_risiko || props.risiko || props.level_risiko || props.tingkat_risiko || 'Ã¢â‚¬â€');
+            const risk = isPengungsian ? (props.jenis_posko || 'Pengungsian') : (props.kelas_risiko || props.risiko || props.level_risiko || props.tingkat_risiko || '—');
             const kec = props.kabupaten_kota || props.kab_kota || nz(props.kecamatan, 'Wilayah DIY');
             const zona = props.zona ? String(props.zona) : (props.kapanewon || '');
             metaEl.innerHTML = `
@@ -468,7 +468,7 @@ function openUnifiedPanel(feature, categoryKey) {
             const rating = Number(props.rating) || 4.2;
             const reviews = props.reviews_count ?? 286;
             const pengunjung = props.pengunjung ?? 2400;
-            const jam = props.opening_hours || props.jam_buka || '08.00Ã¢â‚¬â€œ18.00';
+            const jam = props.opening_hours || props.jam_buka || '08.00–18.00';
             const htm = props.htm || props.ticket_price || 'Rp 25.000';
             metaEl.innerHTML = `
                 <div class="detail-meta-row detail-meta-row--tourism">
@@ -523,7 +523,7 @@ function openUnifiedPanel(feature, categoryKey) {
     badge.className = 'detail-category-badge ' + (riskBadgeMap[riskKey] || (categoryKey === 'kebencanaan' ? 'badge-risiko-sedang' : 'badge-wisata'));
     badge.textContent = sanitizeText(riskKey || subcatText || cat.label || categoryKey);
 
-    document.getElementById('detail-name').textContent = sanitizeText(props.kab_kota || props.nama_lokasi || props.name || props.nama || 'Ã¢â‚¬â€');
+    document.getElementById('detail-name').textContent = sanitizeText(props.kab_kota || props.nama_lokasi || props.name || props.nama || '—');
 
     const hist = Array.isArray(props.riwayat_bencana) ? props.riwayat_bencana : [];
     const lastH = hist.length ? hist[0] : null;
@@ -535,7 +535,7 @@ function openUnifiedPanel(feature, categoryKey) {
     if (isDisaster) {
         let html = '';
         if (isKabupatenRisk) {
-            const risk = props.kelas_risiko || 'Ã¢â‚¬â€';
+            const risk = props.kelas_risiko || '—';
             const color = riskColor(risk);
             html += `<div class="dp-section">Ringkasan kabupaten/kota 2025</div>`;
             html += row('Wilayah', props.kab_kota);
@@ -619,7 +619,7 @@ function openUnifiedPanel(feature, categoryKey) {
             (props.alamat || props.address) ? ['Alamat', props.alamat || props.address] : null,
             props.kecamatan ? ['Kecamatan', props.kecamatan] : null,
             props.operator ? ['Pengelola', props.operator] : null,
-            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00Ã¢â‚¬â€œ18.00'],
+            ['Jam Operasional', props.opening_hours || props.jam_buka || '08.00–18.00'],
             ['Tiket / HTM', props.htm || props.ticket_price || 'Gratis'],
         ].filter(Boolean);
         let html = infoRows.map(([l, v]) => row(l, v)).join('');
@@ -631,7 +631,7 @@ function openUnifiedPanel(feature, categoryKey) {
         html += `<div class="dp-section">Fasilitas</div><div class="dp-chip-row">` +
             chips.map((c) => `<span class="dp-chip">${escapeHtml(c)}</span>`).join('') + `</div>`;
         const crowd = props.hourly_crowd || defaultHourlyCrowd(String(props.name || props.nama || categoryKey));
-        html += `<div class="dp-section">Keramaian per jam (00Ã¢â‚¬â€œ23)</div>
+        html += `<div class="dp-section">Keramaian per jam (00–23)</div>
             <p class="dp-desc" style="font-size:11px;margin-bottom:8px;color:var(--text-muted)">Hijau rendah &middot; Kuning sedang &middot; Oranye ramai &middot; Merah sangat ramai</p>
             <div class="dp-chart-wrap dp-chart-wrap--tall"><canvas id="detail-chart"></canvas></div>`;
         vertical.innerHTML = html;

@@ -404,12 +404,12 @@ function _renderGrid(root) {
 
 function esc(s) {
     return String(s)
-        .replace(new RegExp('\\u00e2\\u02dc\\u2026', 'g'), '★')
-        .replace(new RegExp('\\u00e2\\u02dc\\u2020', 'g'), '☆')
-        .replace(new RegExp('\\u00c2\\u00b7', 'g'), '·')
-        .replace(new RegExp('\\u00e2\\u20ac"', 'g'), '—')
-        .replace(/â€™/g, "'")
-        .replace(/â€œ|â€/g, '"')
+        .replace(new RegExp('\\u00e2\\u02dc\\u2026', 'g'), '&#9733;')
+        .replace(new RegExp('\\u00e2\\u02dc\\u2020', 'g'), '&#9734;')
+        .replace(new RegExp('\\u00c2\\u00b7', 'g'), '&middot;')
+        .replace(new RegExp('\\u00e2\\u20ac"', 'g'), '&mdash;')
+        .replace(new RegExp('\\u00c3\\u00a2\\u00e2\\u201a\\u00ac\\u00e2\\u201e\\u00a2', 'g'), "'")
+        .replace(new RegExp('\\u00c3\\u00a2\\u00e2\\u201a\\u00ac\\u00c5\\u201c|\\u00c3\\u00a2\\u00e2\\u201a\\u00ac', 'g'), '"')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')

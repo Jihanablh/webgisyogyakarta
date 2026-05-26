@@ -364,7 +364,7 @@ async function init() {
             const html = String(text)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/\n/g,'<br>')
-                .replace(/â€¢/g,'<span class="bullet">â€¢</span>');
+                .replace(new RegExp('\\u00c3\\u00a2\\u00e2\\u201a\\u00ac\\u00c2\\u00a2', 'g'),'<span class="bullet">&bull;</span>');
             div.innerHTML = `<div class="msg-bubble">${html}</div>`;
         }
         chatMsgs?.appendChild(div);
@@ -378,7 +378,7 @@ async function init() {
         const html = String(text)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/\n/g,'<br>')
-            .replace(/â€¢/g,'<span class="bullet">â€¢</span>');
+            .replace(new RegExp('\\u00c3\\u00a2\\u00e2\\u201a\\u00ac\\u00c2\\u00a2', 'g'),'<span class="bullet">&bull;</span>');
         el.innerHTML = `<div class="msg-bubble">${html}</div>`;
         chatMsgs?.scrollTo({ top: chatMsgs.scrollHeight, behavior:'smooth' });
     }

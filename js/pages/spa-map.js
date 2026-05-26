@@ -47,7 +47,7 @@ export function showSingleMarkerMap(name, lat, lng, fromPageId = null) {
 export function showCategoryMap(catLabel, features, catColor = '#d4a017', fromPageId = null) {
     _prevPageId = fromPageId;
     const validFeatures = (features || []).filter(f => f.geometry?.type === 'Point');
-    _setupSpaMapPage(`Peta â€” ${catLabel}`);
+    _setupSpaMapPage(`Peta — ${catLabel}`);
     _initSpaMap((map) => {
         clearSpaMapLayers();
         _activeMapContext = 'category-map';
