@@ -1,6 +1,6 @@
-﻿import { State, CATEGORIES } from '../state.js?v=20260526-round25-polish';
-import { renderTataKotaDetailInto } from './tatakota-detail.js?v=20260526-round25-polish';
-import { showCategoryMap } from './spa-map.js?v=20260526-round25-polish';
+import { State, CATEGORIES } from '../state.js?v=20260526-round26-welcome-encoding';
+import { renderTataKotaDetailInto } from './tatakota-detail.js?v=20260526-round26-welcome-encoding';
+import { showCategoryMap } from './spa-map.js?v=20260526-round26-welcome-encoding';
 
 const TATA_KEYS = ['pariwisata', 'mobilitas', 'kesehatan_darurat', 'akademik', 'atm_bank', 'sosial_tugas'];
 

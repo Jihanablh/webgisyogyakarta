@@ -1,7 +1,7 @@
-﻿import { State, CATEGORIES } from './state.js?v=20260526-round25-polish';
-import { loadLayer, showLayer, hideLayer } from './layers.js?v=20260526-round25-polish';
-import { escapeHtml } from './utils/helpers.js?v=20260526-round25-polish';
-import { DISASTER_2025_TOTAL, dominantDisasterType, highestRegion, lowestRegion, shortRegionName } from './disaster-2025.js?v=20260526-round25-polish';
+import { State, CATEGORIES } from './state.js?v=20260526-round26-welcome-encoding';
+import { loadLayer, showLayer, hideLayer } from './layers.js?v=20260526-round26-welcome-encoding';
+import { escapeHtml } from './utils/helpers.js?v=20260526-round26-welcome-encoding';
+import { DISASTER_2025_TOTAL, dominantDisasterType, highestRegion, lowestRegion, shortRegionName } from './disaster-2025.js?v=20260526-round26-welcome-encoding';
 
 let _map = null;
 

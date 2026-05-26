@@ -1,23 +1,23 @@
 // ============================================================
-// SIGAJOG — Chatbot Database Engine
+// SIGAJOG â€” Chatbot Database Engine
 // Sistem tanya-jawab lokal berbasis keyword matching
 // ============================================================
 
-import { queryGeoKnowledge } from './geo-index.js?v=20260526-round25-polish';
+import { queryGeoKnowledge } from './geo-index.js?v=20260526-round26-welcome-encoding';
 
 export const CHATBOT_DB = {
   kebencanaan: [
     { id:'kb_001', keywords:['bencana','jenis','apa saja','macam','tipe','kejadian','dominan'],
       answer:`Jenis kejadian kebencanaan DIY tahun 2025 yang dianalisis di JOGJA SIAGA:\n- Tanah Longsor: 765 kejadian\n- Cuaca Ekstrem: 296 kejadian\n- Kebakaran: 237 kejadian\n- Banjir: 33 kejadian\n- Kebakaran Hutan dan Lahan: 24 kejadian\n- Gempa Terasa: 19 kejadian\n\nTotal seluruh kejadian: 1.374 kejadian.` },
     { id:'kb_002', keywords:['risiko','tingkat','kelas','warna','wilayah','kabupaten','kota'],
-      answer:`Kelas risiko wilayah dihitung dari total kejadian per kabupaten/kota tahun 2025:\n- Kulon Progo: 558 kejadian — Sangat Tinggi\n- Bantul: 333 kejadian — Tinggi\n- Gunungkidul: 262 kejadian — Tinggi\n- Kota Yogyakarta: 141 kejadian — Sedang\n- Sleman: 80 kejadian — Rendah\n\nData ini menunjukkan jumlah kejadian, bukan jumlah korban atau kerusakan.` },
+      answer:`Kelas risiko wilayah dihitung dari total kejadian per kabupaten/kota tahun 2025:\n- Kulon Progo: 558 kejadian â€” Sangat Tinggi\n- Bantul: 333 kejadian â€” Tinggi\n- Gunungkidul: 262 kejadian â€” Tinggi\n- Kota Yogyakarta: 141 kejadian â€” Sedang\n- Sleman: 80 kejadian â€” Rendah\n\nData ini menunjukkan jumlah kejadian, bukan jumlah korban atau kerusakan.` },
     { id:'kb_003', keywords:['tertinggi','paling tinggi','rawan','kulon progo','terendah','sleman'],
       answer:`Wilayah dengan kejadian tertinggi adalah Kabupaten Kulon Progo dengan 558 kejadian dan kelas risiko Sangat Tinggi.\n\nWilayah dengan kejadian terendah adalah Kabupaten Sleman dengan 80 kejadian dan kelas risiko Rendah.` },
   ],
 
   wilayah: [
     { id:'rg_001', keywords:['kulon','progo','kulon progo'],
-      answer:`Kabupaten Kulon Progo mencatat 558 kejadian pada periode 1 Januari–31 Desember 2025.\nRinciannya: Cuaca Ekstrem 63, Tanah Longsor 448, Kebakaran Hutan dan Lahan 12, Gempa Terasa 2, Banjir 8, Kebakaran 25.\nKelas risiko: Sangat Tinggi.` },
+      answer:`Kabupaten Kulon Progo mencatat 558 kejadian pada periode 1 Januariâ€“31 Desember 2025.\nRinciannya: Cuaca Ekstrem 63, Tanah Longsor 448, Kebakaran Hutan dan Lahan 12, Gempa Terasa 2, Banjir 8, Kebakaran 25.\nKelas risiko: Sangat Tinggi.` },
     { id:'rg_002', keywords:['bantul'],
       answer:`Kabupaten Bantul mencatat 333 kejadian pada 2025.\nRinciannya: Cuaca Ekstrem 53, Tanah Longsor 141, Kebakaran Hutan dan Lahan 1, Gempa Terasa 6, Banjir 9, Kebakaran 123.\nKelas risiko: Tinggi.` },
     { id:'rg_003', keywords:['gunungkidul','gunung kidul'],
@@ -58,7 +58,7 @@ export const CHATBOT_DB = {
     { id:'ap_001', keywords:['aplikasi','jogja siaga','fitur','gunakan','cara','ini','tentang','webgis'],
       answer:`JOGJA SIAGA adalah WebGIS kebencanaan dan informasi wilayah DIY.\n\nFitur utama:\n- Dashboard overview\n- Peta Kebencanaan 2025\n- Tata Kelola lokasi dan fasilitas\n- Laporan Bencana\n- Statistika kebencanaan\n- SIGAJOG sebagai asisten tanya-jawab lokal` },
     { id:'ap_002', keywords:['data','sumber','akurasi','valid','update','diperbarui','kapan'],
-      answer:`Sumber data utama di aplikasi ini mencakup BPBD DIY Infografis Kebencanaan Tahunan 2025, OpenStreetMap via HOTOSM, GeoJSON posko pengungsian logistik DIY 2025, serta batas wilayah administrasi. Periode data kebencanaan: 1 Januari–31 Desember 2025.` },
+      answer:`Sumber data utama di aplikasi ini mencakup BPBD DIY Infografis Kebencanaan Tahunan 2025, OpenStreetMap via HOTOSM, GeoJSON posko pengungsian logistik DIY 2025, serta batas wilayah administrasi. Periode data kebencanaan: 1 Januariâ€“31 Desember 2025.` },
   ],
 
   fallback: [

@@ -1,9 +1,9 @@
-import { CONFIG } from './state.js?v=20260526-round25-polish';
-import { startAmbientSynth, stopAmbientSynth } from './bgm-synth.js?v=20260526-round25-polish';
+import { CONFIG } from './state.js?v=20260526-round26-welcome-encoding';
+import { startAmbientSynth, stopAmbientSynth } from './bgm-synth.js?v=20260526-round26-welcome-encoding';
 
 const BGM_PREF_KEY = 'jogja-siaga-bgm-on';
 
-const TITLE_SHORT = 'Sesuatu di Jogja — Adhitia Sofyan';
+const TITLE_SHORT = 'Sesuatu di Jogja â€” Adhitia Sofyan';
 
 let _usingSynth = false;
 let _ytPlayer = null;
@@ -61,7 +61,7 @@ function ensureYtPlayer(hostId, videoId, onState) {
                             const btn = document.getElementById('bgm-toggle');
                             if (btn) {
                                 btn.disabled = false;
-                                btn.title = `Putar — ${TITLE_SHORT}`;
+                                btn.title = `Putar â€” ${TITLE_SHORT}`;
                             }
                             resolve(_ytPlayer);
                         },
@@ -103,17 +103,17 @@ export function initBgm() {
         const lab = getLabelEl(btn);
         // Always show song title; play/pause communicated via icon/class
         if (lab) lab.textContent = TITLE_SHORT;
-        btn.title = playing ? `Sedang diputar — ${TITLE_SHORT}` : `Putar — ${TITLE_SHORT}`;
+        btn.title = playing ? `Sedang diputar â€” ${TITLE_SHORT}` : `Putar â€” ${TITLE_SHORT}`;
     };
 
     setUi(false);
     btn.disabled = true;
-    btn.title = 'Memuat pemutar musik…';
+    btn.title = 'Memuat pemutar musikâ€¦';
 
     if (audio) {
         audio.addEventListener('error', () => {
             btn.classList.add('bgm-error');
-            btn.title = 'File audio gagal — atur CONFIG.bgmYoutubeVideoId atau letakkan audio/jogja-ambient.mp3';
+            btn.title = 'File audio gagal â€” atur CONFIG.bgmYoutubeVideoId atau letakkan audio/jogja-ambient.mp3';
         });
         audio.addEventListener('playing', () => {
             btn.classList.remove('bgm-error');
@@ -131,11 +131,11 @@ export function initBgm() {
             console.warn('YouTube BGM init gagal, tombol fallback diaktifkan', e);
             destroyYtPlayer();
             btn.disabled = false;
-            btn.title = `Putar — ${TITLE_SHORT}`;
+            btn.title = `Putar â€” ${TITLE_SHORT}`;
         });
     } else {
         btn.disabled = false;
-        btn.title = `Putar — ${TITLE_SHORT}`;
+        btn.title = `Putar â€” ${TITLE_SHORT}`;
     }
 
     btn.addEventListener('click', async () => {

@@ -1,4 +1,4 @@
-﻿import { CATEGORIES } from './state.js?v=20260526-round25-polish';
+import { CATEGORIES } from './state.js?v=20260526-round26-welcome-encoding';
 
 function norm(s) {
     return String(s || '')

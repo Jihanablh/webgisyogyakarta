@@ -1,5 +1,5 @@
-const CACHE_NAME = 'jogjamap-v36-cache';
-const DATA_CACHE_NAME = 'jogjamap-data-v36';
+const CACHE_NAME = 'jogjamap-v37-cache';
+const DATA_CACHE_NAME = 'jogjamap-data-v37';
 const ASSETS = [
   '/',
   '/index.html',
@@ -56,7 +56,7 @@ self.addEventListener('fetch', event => {
     requestUrl.pathname.endsWith('.html') ||
     requestUrl.pathname.endsWith('.js') ||
     requestUrl.pathname.endsWith('.css') ||
-    requestUrl.search.includes('20260526-round25-polish');
+    requestUrl.search.includes('20260526-round26-welcome-encoding');
 
   if (isFreshAsset) {
     event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request)));

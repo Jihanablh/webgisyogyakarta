@@ -4,7 +4,7 @@ import {
     dominantDisasterType,
     highestRegion,
     lowestRegion
-} from '../disaster-2025.js?v=20260526-round25-polish';
+} from '../disaster-2025.js?v=20260526-round26-welcome-encoding';
 
 let _dashboardMap = null;
 

@@ -1,4 +1,4 @@
-import { CONFIG, CATEGORIES } from '../state.js?v=20260526-round25-polish';
+import { CONFIG, CATEGORIES } from '../state.js?v=20260526-round26-welcome-encoding';
 
 function esc(s) {
     return String(s)
@@ -165,7 +165,7 @@ export function renderTataKotaDetailInto(container, id, opts) {
                 <div class="tw-h-48 tw-rounded-2xl tw-border tw-border-slate-700/50 tw-bg-slate-900/60 tw-p-4">
                     <canvas id="tk-crowd-chart" height="120" aria-label="Estimasi keramaian mingguan"></canvas>
                 </div>
-                <p class="tw-mt-2 tw-text-[10px] tw-text-slate-600 tw-font-ui">Estimasi ilustratif — bukan data real-time</p>
+                <p class="tw-mt-2 tw-text-[10px] tw-text-slate-600 tw-font-ui">Estimasi ilustratif â€” bukan data real-time</p>
             </section>
         </div>
     </div>`;
@@ -173,7 +173,7 @@ export function renderTataKotaDetailInto(container, id, opts) {
     // Wire back button
     container.querySelector('.js-tk-back')?.addEventListener('click', onBack);
 
-    // Arahkan ke Sini — SPA single marker map
+    // Arahkan ke Sini â€” SPA single marker map
     container.querySelector('#tk-btn-arahkan')?.addEventListener('click', () => {
         const tatakoPage = document.getElementById('tatakota-page');
         if (tatakoPage) tatakoPage.classList.add('hidden');
@@ -182,7 +182,7 @@ export function renderTataKotaDetailInto(container, id, opts) {
         });
     });
 
-    // Lihat di Peta — SPA category map
+    // Lihat di Peta â€” SPA category map
     renderCrowdChart(container.querySelector('#tk-crowd-chart'), crowd);
 
     // Entrance animations
@@ -236,7 +236,7 @@ function renderCrowdChart(canvas, values) {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (c) => `±${(Number(c.raw || 0) * 100).toLocaleString('id-ID')} orang`
+                        label: (c) => `Â±${(Number(c.raw || 0) * 100).toLocaleString('id-ID')} orang`
                     }
                 }
             },

@@ -1,5 +1,5 @@
-import { CONFIG } from '../state.js?v=20260526-round25-polish';
-import { createMarker } from '../markers.js?v=20260526-round25-polish';
+import { CONFIG } from '../state.js?v=20260526-round26-welcome-encoding';
+import { createMarker } from '../markers.js?v=20260526-round26-welcome-encoding';
 
 let _spaMap = null;
 let _prevPageId = null;
@@ -47,7 +47,7 @@ export function showSingleMarkerMap(name, lat, lng, fromPageId = null) {
 export function showCategoryMap(catLabel, features, catColor = '#d4a017', fromPageId = null) {
     _prevPageId = fromPageId;
     const validFeatures = (features || []).filter(f => f.geometry?.type === 'Point');
-    _setupSpaMapPage(`Peta — ${catLabel}`);
+    _setupSpaMapPage(`Peta â€” ${catLabel}`);
     _initSpaMap((map) => {
         clearSpaMapLayers();
         _activeMapContext = 'category-map';

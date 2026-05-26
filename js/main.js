@@ -1,20 +1,20 @@
-import { initMap } from './map.js?v=20260526-round25-polish';
-import { loadLayer, showOnlyKebencanaan, loadDIYBoundary, toggleKebencanaanZona, toggleKebencanaanJalur, toggleKebencanaanPengungsian } from './layers.js?v=20260526-round25-polish';
-import { initSidebar } from './sidebar.js?v=20260526-round25-polish';
-import { initDetailPanel } from './detail-panel.js?v=20260526-round25-polish';
-import { Router } from './utils/router.js?v=20260526-round25-polish';
-import { LoadingManager } from './utils/loader.js?v=20260526-round25-polish';
-import { initReportPage }     from './pages/report.js?v=20260526-round25-polish';
-import { initStatisticsPage } from './pages/statistics.js?v=20260526-round25-polish';
-import { initAboutPage }      from './pages/about.js?v=20260526-round25-polish';
-import { initTataKotaPage }   from './pages/tatakota.js?v=20260526-round25-polish';
-import { initDashboardPage }  from './pages/dashboard.js?v=20260526-round25-polish';
-import { State, CATEGORIES, CONFIG }  from './state.js?v=20260526-round25-polish';
-import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js?v=20260526-round25-polish';
-import { buildGeoKnowledgeIndex } from './geo-index.js?v=20260526-round25-polish';
-import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js?v=20260526-round25-polish';
-import { initWelcomeCinematic } from './welcome-cinematic.js?v=20260526-round25-polish';
-import { createMarker } from './markers.js?v=20260526-round25-polish';
+import { initMap } from './map.js?v=20260526-round26-welcome-encoding';
+import { loadLayer, showOnlyKebencanaan, loadDIYBoundary, toggleKebencanaanZona, toggleKebencanaanJalur, toggleKebencanaanPengungsian } from './layers.js?v=20260526-round26-welcome-encoding';
+import { initSidebar } from './sidebar.js?v=20260526-round26-welcome-encoding';
+import { initDetailPanel } from './detail-panel.js?v=20260526-round26-welcome-encoding';
+import { Router } from './utils/router.js?v=20260526-round26-welcome-encoding';
+import { LoadingManager } from './utils/loader.js?v=20260526-round26-welcome-encoding';
+import { initReportPage }     from './pages/report.js?v=20260526-round26-welcome-encoding';
+import { initStatisticsPage } from './pages/statistics.js?v=20260526-round26-welcome-encoding';
+import { initAboutPage }      from './pages/about.js?v=20260526-round26-welcome-encoding';
+import { initTataKotaPage }   from './pages/tatakota.js?v=20260526-round26-welcome-encoding';
+import { initDashboardPage }  from './pages/dashboard.js?v=20260526-round26-welcome-encoding';
+import { State, CATEGORIES, CONFIG }  from './state.js?v=20260526-round26-welcome-encoding';
+import { CHATBOT_DB, ChatbotEngine } from './chatbot-db.js?v=20260526-round26-welcome-encoding';
+import { buildGeoKnowledgeIndex } from './geo-index.js?v=20260526-round26-welcome-encoding';
+import { initBgm, tryResumeBgmFromWelcomeGesture } from './bgm.js?v=20260526-round26-welcome-encoding';
+import { initWelcomeCinematic } from './welcome-cinematic.js?v=20260526-round26-welcome-encoding';
+import { createMarker } from './markers.js?v=20260526-round26-welcome-encoding';
 
 window.State = State;
 window.CATEGORIES = CATEGORIES;
@@ -364,7 +364,7 @@ async function init() {
             const html = String(text)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/\n/g,'<br>')
-                .replace(/•/g,'<span class="bullet">•</span>');
+                .replace(/â€¢/g,'<span class="bullet">â€¢</span>');
             div.innerHTML = `<div class="msg-bubble">${html}</div>`;
         }
         chatMsgs?.appendChild(div);
@@ -378,7 +378,7 @@ async function init() {
         const html = String(text)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/\n/g,'<br>')
-            .replace(/•/g,'<span class="bullet">•</span>');
+            .replace(/â€¢/g,'<span class="bullet">â€¢</span>');
         el.innerHTML = `<div class="msg-bubble">${html}</div>`;
         chatMsgs?.scrollTo({ top: chatMsgs.scrollHeight, behavior:'smooth' });
     }

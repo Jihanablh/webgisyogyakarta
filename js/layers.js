@@ -1,6 +1,6 @@
-﻿import { State, CATEGORIES } from './state.js?v=20260526-round25-polish';
-import { createMarker } from './markers.js?v=20260526-round25-polish';
-import { loadLargeGeoJSON } from './utils/loader.js?v=20260526-round25-polish';
+import { State, CATEGORIES } from './state.js?v=20260526-round26-welcome-encoding';
+import { createMarker } from './markers.js?v=20260526-round26-welcome-encoding';
+import { loadLargeGeoJSON } from './utils/loader.js?v=20260526-round26-welcome-encoding';
 import {
     DISASTER_2025_PERIOD,
     DISASTER_2025_TOTAL,
@@ -13,7 +13,7 @@ import {
     lowestRegion,
     riskColor,
     shortRegionName
-} from './disaster-2025.js?v=20260526-round25-polish';
+} from './disaster-2025.js?v=20260526-round26-welcome-encoding';
 
 // -- Internal kebencanaan layers ------------------------------------------------
 let _kebHeatLayer    = null;  // L.heatLayer for zona bencana

@@ -10,8 +10,8 @@ import {
     lowestRegion,
     riskColor,
     shortRegionName
-} from '../disaster-2025.js?v=20260526-round25-polish';
-import { CONFIG } from '../state.js?v=20260526-round25-polish';
+} from '../disaster-2025.js?v=20260526-round26-welcome-encoding';
+import { CONFIG } from '../state.js?v=20260526-round26-welcome-encoding';
 
 let _statCharts = [];
 let _statHeatmap = null;

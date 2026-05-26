@@ -11,7 +11,7 @@ import {
     lowestRegion,
     riskColor,
     shortRegionName
-} from '../disaster-2025.js?v=20260526-round25-polish';
+} from '../disaster-2025.js?v=20260526-round26-welcome-encoding';
 
 function fmt(n) {
     return Number(n || 0).toLocaleString('id-ID');
@@ -86,11 +86,11 @@ function renderHistoryTimeline() {
         {
             title: 'Tanah Longsor Kulon Progo',
             image: 'https://picsum.photos/seed/landslide-hills-indonesia/1200/560',
-            time: '31 Des 2025 · 23.59 WIB',
+            time: '31 Des 2025 Â· 23.59 WIB',
             status: 'Siaga Aktif',
             statusClass: 'tw-border-red-700/50 tw-bg-red-900/50 tw-text-red-400',
             borderClass: 'tw-border-l-red-500',
-            location: 'Kapanewon se-Kulon Progo · Kabupaten Kulon Progo',
+            location: 'Kapanewon se-Kulon Progo Â· Kabupaten Kulon Progo',
             desc: 'Kulon Progo menjadi wilayah dengan jumlah kejadian tertinggi sepanjang 2025. Tanah longsor mendominasi laporan wilayah ini dengan 448 kejadian dari total 558 kejadian, terutama pada area perbukitan dan akses permukiman.',
             impactCards: [
                 { area: 'Girimulyo', items: ['Lereng perbukitan menjadi fokus pemantauan', 'Akses permukiman rawan tertutup material', 'Koordinasi kesiapsiagaan dilakukan bersama kapanewon'] },
@@ -104,11 +104,11 @@ function renderHistoryTimeline() {
         {
             title: 'Kebakaran dan Longsor Bantul',
             image: 'https://picsum.photos/seed/fire-disaster-settlement-indonesia/1200/560',
-            time: '31 Des 2025 · 21.30 WIB',
+            time: '31 Des 2025 Â· 21.30 WIB',
             status: 'Selesai',
             statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
             borderClass: 'tw-border-l-orange-500',
-            location: 'Kapanewon terdampak · Kabupaten Bantul',
+            location: 'Kapanewon terdampak Â· Kabupaten Bantul',
             desc: 'Bantul masuk kelas risiko tinggi dengan 333 kejadian. Komponen terbesar berasal dari tanah longsor dan kebakaran, sehingga pemantauan wilayah padat permukiman dan lereng rawan tetap menjadi prioritas.',
             impactCards: [
                 { area: 'Imogiri', items: ['Longsor dan tanah ambles menjadi perhatian utama', 'Akses padukuhan rawan terputus saat hujan ekstrem', 'Jalur darurat disiapkan untuk mobilitas warga'] },
@@ -122,11 +122,11 @@ function renderHistoryTimeline() {
         {
             title: 'Longsor dan Kebakaran Gunungkidul',
             image: 'https://picsum.photos/seed/gunungkidul-cave-landslide/1200/560',
-            time: '31 Des 2025 · 18.10 WIB',
+            time: '31 Des 2025 Â· 18.10 WIB',
             status: 'Selesai',
             statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
             borderClass: 'tw-border-l-rose-500',
-            location: 'Kapanewon terdampak · Kabupaten Gunungkidul',
+            location: 'Kapanewon terdampak Â· Kabupaten Gunungkidul',
             desc: 'Gunungkidul mencatat 262 kejadian selama periode analisis. Tanah longsor dan kebakaran menjadi dua jenis kejadian paling menonjol pada rekap kabupaten ini, dengan karakter wilayah karst dan perbukitan yang perlu dipantau.',
             impactCards: [
                 { area: 'Gedangsari', items: ['Perbukitan rawan longsor saat curah hujan naik', 'Akses jalan desa dipantau untuk potensi material jatuh', 'Warga lereng diminta melapor jika muncul retakan'] },
@@ -140,11 +140,11 @@ function renderHistoryTimeline() {
         {
             title: 'Cuaca Ekstrem Kota Yogyakarta',
             image: 'https://picsum.photos/seed/storm-city-yogyakarta/1200/560',
-            time: '31 Des 2025 · 16.45 WIB',
+            time: '31 Des 2025 Â· 16.45 WIB',
             status: 'Pemantauan',
             statusClass: 'tw-border-amber-700/50 tw-bg-amber-900/50 tw-text-amber-400',
             borderClass: 'tw-border-l-yellow-400',
-            location: 'Kemantren se-Kota Yogyakarta · Kota Yogyakarta',
+            location: 'Kemantren se-Kota Yogyakarta Â· Kota Yogyakarta',
             desc: 'Kota Yogyakarta berada pada kelas risiko sedang. Cuaca ekstrem menjadi jenis kejadian dominan dengan 96 kejadian dari total 141 kejadian sepanjang tahun, terutama berdampak pada pohon tumbang, akses jalan, dan fasilitas perkotaan.',
             impactCards: [
                 { area: 'Gondokusuman', items: ['Pohon tumbang menjadi risiko utama saat angin kencang', 'Akses jalan perkotaan membutuhkan respons cepat', 'Koordinasi lintas dinas dilakukan untuk pembersihan'] },
@@ -158,11 +158,11 @@ function renderHistoryTimeline() {
         {
             title: 'Rekap Risiko Terendah Sleman',
             image: 'https://picsum.photos/seed/sleman-northern-yogyakarta-report/1200/560',
-            time: '31 Des 2025 · 15.20 WIB',
+            time: '31 Des 2025 Â· 15.20 WIB',
             status: 'Selesai',
             statusClass: 'tw-border-green-700/50 tw-bg-green-900/50 tw-text-green-400',
             borderClass: 'tw-border-l-cyan-400',
-            location: 'Kapanewon se-Sleman · Kabupaten Sleman',
+            location: 'Kapanewon se-Sleman Â· Kabupaten Sleman',
             desc: 'Sleman menjadi wilayah dengan jumlah kejadian paling rendah, yaitu 80 kejadian. Rekap ini tetap perlu dibaca sebagai jumlah kejadian, bukan ukuran korban maupun kerusakan, sehingga pemantauan cuaca ekstrem dan kerentanan wilayah tetap menjadi konteks penting.',
             impactCards: [
                 { area: 'Cangkringan', items: ['Kesiapsiagaan cuaca ekstrem tetap menjadi pemantauan utama', 'Jalur evakuasi dan titik kumpul dipantau berkala', 'Informasi resmi kebencanaan menjadi rujukan lapangan'] },
@@ -176,7 +176,7 @@ function renderHistoryTimeline() {
         {
             title: 'Karhutla dan Gempa Terasa DIY',
             image: 'https://picsum.photos/seed/forest-fire-smoke-indonesia/1200/560',
-            time: '31 Des 2025 · 12.00 WIB',
+            time: '31 Des 2025 Â· 12.00 WIB',
             status: 'Pemantauan',
             statusClass: 'tw-border-amber-700/50 tw-bg-amber-900/50 tw-text-amber-400',
             borderClass: 'tw-border-l-violet-400',
